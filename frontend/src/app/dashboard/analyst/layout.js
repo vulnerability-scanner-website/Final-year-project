@@ -1,4 +1,4 @@
-import AnalystSideBar from "@/components/sidebar/AnalystSideBar/Analyst.js";
+import AnalystSideBar from "@/components/sidebar/AnalystSideBar/Analyst.jsx";
 
 export default function AnalystLayout({ children }) {
   return (
