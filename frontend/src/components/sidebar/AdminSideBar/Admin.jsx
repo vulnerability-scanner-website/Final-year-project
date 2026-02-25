@@ -36,7 +36,7 @@ export default function AdminSideBar() {
                     ? link.color
                     : isActive
                     ? "bg-orange-500 text-yellow-100 shadow-lg"
-                    : "hover:bg-orange-600 hover:text-yellow-200"
+                    : "hover:bg-orange-500 hover:text-yellow-100 shadow-sm"
                 }
               `}
             >

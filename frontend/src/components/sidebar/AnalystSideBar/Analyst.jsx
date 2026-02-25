@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { LucideHome, LucideShield, LucideFileText, LucideActivity, LucideLogOut, User2Icon } from "lucide-react";
+import { LucideHome, LucideShield, LucideFileText, LucideActivity, LucideLogOut } from "lucide-react";
 
 export default function AnalystSideBar() {
   const links = [
-    { name: "Dashboard", href: "/dashboard/developer", icon: <LucideHome size={20} /> },
-    { name: "Scan Management", href: "/dashboard/developer/scan_management", icon: <User2Icon size={20} /> },
-    { name: "Security Findings", href: "/dashboard/developer/security_findings", icon: <LucideShield size={20} /> },
-    { name: "Reports", href: "/dashboard/developer/reports", icon: <LucideFileText size={20} /> },
+    { name: "Dashboard", href: "/dashboard/analyst", icon: <LucideHome size={20} /> },
+    { name: "Scan Management", href: "/dashboard/analyst/scan_management", icon: <LucideActivity size={20} /> },
+    { name: "Security Findings", href: "/dashboard/analyst/Security_findings", icon: <LucideShield size={20} /> },
+    { name: "Reports", href: "/dashboard/analyst/Reports", icon: <LucideFileText size={20} /> },
     { name: "Logout", href: "/", icon: <LucideLogOut size={20} />, color: "text-red-400" },
   ];
 
