@@ -1,4 +1,4 @@
-import AdminSideBar from "@/components/sidebar/AdminSideBar/Admin.js";
+import AdminSideBar from "@/components/sidebar/AdminSideBar/Admin.jsx";
 
 export default function AdminLayout({ children }) {
   return (
