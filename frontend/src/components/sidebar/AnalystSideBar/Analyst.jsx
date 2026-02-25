@@ -1,20 +1,47 @@
 "use client";
 
 import Link from "next/link";
-import { LucideHome, LucideShield, LucideFileText, LucideActivity, LucideLogOut } from "lucide-react";
+import {
+  LucideHome,
+  LucideShield,
+  LucideFileText,
+  LucideActivity,
+  LucideLogOut,
+} from "lucide-react";
 
 export default function AnalystSideBar() {
   const links = [
-    { name: "Dashboard", href: "/dashboard/analyst", icon: <LucideHome size={20} /> },
-    { name: "Scan Management", href: "/dashboard/analyst/scan_management", icon: <LucideActivity size={20} /> },
-    { name: "Security Findings", href: "/dashboard/analyst/Security_findings", icon: <LucideShield size={20} /> },
-    { name: "Reports", href: "/dashboard/analyst/Reports", icon: <LucideFileText size={20} /> },
-    { name: "Logout", href: "/", icon: <LucideLogOut size={20} />, color: "text-red-400" },
+    {
+      name: "Dashboard",
+      href: "/dashboard/analyst",
+      icon: <LucideHome size={20} />,
+    },
+    {
+      name: "Scan Management",
+      href: "/dashboard/analyst/scan_management",
+      icon: <LucideActivity size={20} />,
+    },
+    {
+      name: "Security Findings",
+      href: "/dashboard/analyst/Security_findings",
+      icon: <LucideShield size={20} />,
+    },
+    {
+      name: "Reports",
+      href: "/dashboard/analyst/Reports",
+      icon: <LucideFileText size={20} />,
+    },
+    {
+      name: "Logout",
+      href: "/",
+      icon: <LucideLogOut size={20} />,
+      color: "text-red-400",
+    },
   ];
 
   return (
-    <aside className="w-64 bg-yellow-950 text-white p-6 min-h-screen shadow-lg flex flex-col">
-      <h2 className="text-3xl font-extrabold mb-10 text-center text-orange-400 tracking-wider">
+    <aside className="w-64 bg-[#003366] text-white p-6 min-h-screen shadow-lg flex flex-col">
+      <h2 className="text-3xl font-extrabold mb-10 text-center text-[#FFFFFF ] tracking-wider">
         Security Analyst
       </h2>
 
