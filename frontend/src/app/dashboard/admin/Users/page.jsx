@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Users, UserCheck, Scan, Edit, Trash2 } from "lucide-react";
 
 import AdminSideBar from "@/components/sidebar/AdminSideBar/Admin";
@@ -34,12 +35,23 @@ export default function UsersDashboard() {
     { id: 7, name: "James Martinez", role: "User", status: "Active" },
   ]);
 
-  // Filter state
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-
-  // Dialog open state
   const [open, setOpen] = useState(false);
+
+  // Toggle Active/Inactive
+  const handleToggleStatus = (userId) => {
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.id === userId
+          ? {
+              ...user,
+              status: user.status === "Active" ? "Deactive" : "Active",
+            }
+          : user,
+      ),
+    );
+  };
 
   // Filter logic
   const filteredUsers = users.filter((user) => {
@@ -50,10 +62,9 @@ export default function UsersDashboard() {
     return matchesSearch && matchesStatus;
   });
 
-  // Handlers
   const handleAddUser = (newUser) => {
     setUsers((prev) => [...prev, newUser]);
-    setOpen(false); // close dialog after adding
+    setOpen(false);
   };
 
   const handleEdit = (userId, userName) => {
@@ -71,21 +82,21 @@ export default function UsersDashboard() {
     <div className="flex min-h-screen bg-gray-100">
       <AdminSideBar />
 
-      <div className="flex-1 ml-64 cursor-pointer">
-        {/* ONLY ONE BUTTON - in the DashboardHeader */}
+      <div className="flex-1 ml-64">
         <DashboardHeader
           role="usermanagement"
-          onActionClick={() => setOpen(true)} // Opens dialog
+          onActionClick={() => setOpen(true)}
         />
 
         <AddUserDialog
-          open={open} // Controlled by Dashboard
-          setOpen={setOpen} // Allows closing
+          open={open}
+          setOpen={setOpen}
           onAddUser={handleAddUser}
         />
-        <main className="my-6">
+
+        <main className="my-6 px-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <Card className="shadow-md">
               <CardContent className="p-5 flex justify-between items-center">
                 <div>
@@ -111,7 +122,7 @@ export default function UsersDashboard() {
             <Card className="shadow-md">
               <CardContent className="p-6 flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-500">Inactive User</p>
+                  <p className="text-sm text-gray-500">Inactive Users</p>
                   <p className="text-3xl font-bold">
                     {users.filter((u) => u.status === "Inactive").length}
                   </p>
@@ -123,29 +134,25 @@ export default function UsersDashboard() {
 
           {/* Filter Section */}
           <Card className="shadow-md mb-6">
-            <CardContent className=" flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  placeholder="Search by name..."
-                  className="w-full border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 px-4 py-2 rounded-md outline-none transition"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
+            <CardContent className="flex flex-col md:flex-row gap-4">
+              <input
+                type="text"
+                placeholder="Search by name..."
+                className="w-full border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 px-4 py-2 rounded-md outline-none transition"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
 
-              <div className="w-full md:w-64">
-                <select
-                  className="w-full border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 px-4 py-2 rounded-md outline-none transition"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="">All Status</option>
-                  <option value="Active">Active</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              </div>
+              <select
+                className="w-full md:w-64 border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 px-4 py-2 rounded-md outline-none transition"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Pending">Pending</option>
+                <option value="Inactive">Inactive</option>
+              </select>
             </CardContent>
           </Card>
 
@@ -162,14 +169,18 @@ export default function UsersDashboard() {
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
+
                 <TableBody>
                   {filteredUsers.map((user, index) => (
                     <TableRow key={user.id}>
                       <TableCell>
                         {(index + 1).toString().padStart(2, "0")}
                       </TableCell>
+
                       <TableCell className="font-medium">{user.name}</TableCell>
+
                       <TableCell>{user.role}</TableCell>
+
                       <TableCell>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -183,8 +194,9 @@ export default function UsersDashboard() {
                           {user.status}
                         </span>
                       </TableCell>
+
                       <TableCell>
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-3 cursor-pointer">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -192,6 +204,7 @@ export default function UsersDashboard() {
                           >
                             <Edit className="w-4 h-4 text-[#003366]" />
                           </Button>
+
                           <Button
                             variant="ghost"
                             size="sm"
@@ -199,10 +212,22 @@ export default function UsersDashboard() {
                           >
                             <Trash2 className="w-4 h-4 text-red-600" />
                           </Button>
+
+                          <Switch
+                            checked={user.status === "Active"}
+                            onCheckedChange={() => handleToggleStatus(user.id)}
+                            disabled={user.status === "Pending"}
+                            className="
+                              cursor-pointer
+                              data-[state=checked]:bg-green-600
+                              data-[state=unchecked]:bg-yellow-950
+                            "
+                          />
                         </div>
                       </TableCell>
                     </TableRow>
                   ))}
+
                   {filteredUsers.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-6">
