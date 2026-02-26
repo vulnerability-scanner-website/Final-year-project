@@ -21,8 +21,8 @@ export default function AdminSideBar() {
       icon: <LucideHome size={20} />,
     },
     {
-      name: "Security Findings",
-      href: "/dashboard/admin/security_findings",
+      name: "Scan Management",
+      href: "/dashboard/admin/scan_management",
       icon: <LucideShield size={20} />,
     },
     {
