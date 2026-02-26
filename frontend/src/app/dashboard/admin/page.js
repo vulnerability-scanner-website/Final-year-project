@@ -11,8 +11,9 @@ import { SeverityDistribution } from "@/components/SeverityDistribution/Severity
 
 export default function Page() {
   return (
-    <div className="p-5 space-y-4">
+    <div className="ml-64 p-5 space-y-4"> {/* Added ml-64 to avoid sidebar overlap */}
       <DashboardHeader role={"admin"} />
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 p-6">
         <StatsCard
           title="Total Scans"
@@ -42,6 +43,7 @@ export default function Page() {
           icon={CheckCircle}
         />
       </div>
+
       <div className="grid gap-6 lg:grid-cols-2 p-6">
         <VulnerabilityTrend />
         <SeverityDistribution />
