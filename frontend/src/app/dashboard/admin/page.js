@@ -6,6 +6,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { DashboardHeader } from "@/components/header/header";
 import { ShieldAlert, Bug, CheckCircle, Activity } from "lucide-react";
 import { StatsCard } from "@/components/statscard/statscard";
+import { VulnerabilityTrend } from "@/components/VulnerabilityTrend/VulnerabilityTrend";
+import { SeverityDistribution } from "@/components/SeverityDistribution/SeverityDistribution";
 
 export default function Page() {
   return (
@@ -39,6 +41,10 @@ export default function Page() {
           description="Issues fixed successfully"
           icon={CheckCircle}
         />
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2 p-6">
+        <VulnerabilityTrend />
+        <SeverityDistribution />
       </div>
     </div>
   );
