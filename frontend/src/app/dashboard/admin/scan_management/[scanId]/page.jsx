@@ -44,29 +44,39 @@ export default function ScanDetailsPage() {
 
   return (
     <div className="ml-64 p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Scan Report – #{scanId}</h1>
-      <p className="text-sm text-muted-foreground">
+      {/* Page Header */}
+      <h1 className="text-3xl font-bold text-[#003366]">
+        Scan Report – #{scanId}
+      </h1>
+      <p className="text-sm text-gray-600">
         Review vulnerabilities found during this scan and assess risk.
       </p>
 
       {/* Scan Overview */}
-      <Card>
+      <Card className="hover:shadow-lg transition-all duration-300 hover:bg-blue-50 border border-transparent">
         <CardHeader>
-          <CardTitle>Scan Overview</CardTitle>
+          <CardTitle className="text-lg font-semibold text-[#003366]">
+            Scan Overview
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm">
+        <CardContent className="space-y-2 text-sm text-gray-700">
           <p>
-            Target: <span className="font-medium">https://example.com</span>
+            Target:{" "}
+            <span className="font-medium text-[#003366]">
+              https://example.com
+            </span>
           </p>
           <p>
-            Status: <span className="font-medium">Completed</span>
+            Status:{" "}
+            <span className="font-medium text-green-600">Completed</span>
           </p>
           <p>
-            Duration: <span className="font-medium">12 minutes</span>
+            Duration:{" "}
+            <span className="font-medium text-[#003366]">12 minutes</span>
           </p>
           <p>
             Findings:{" "}
-            <Badge variant="destructive">
+            <Badge variant="destructive" className="font-medium">
               {scanVulnerabilities.length} vulnerabilities
             </Badge>
           </p>
@@ -76,32 +86,40 @@ export default function ScanDetailsPage() {
       <Separator />
 
       {/* Vulnerabilities List */}
-      <div className="space-y-4">
-        {scanVulnerabilities.map((v) => (
-          <Card key={v.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex justify-between items-start">
-              <CardTitle className="text-lg font-semibold">{v.title}</CardTitle>
-              <Badge
-                variant={
-                  v.severity === "Critical"
-                    ? "destructive"
-                    : v.severity === "High"
-                      ? "warning"
-                      : "secondary"
-                }
-              >
-                {v.severity}
-              </Badge>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <p>{v.description}</p>
-              <div className="bg-muted p-2 rounded font-mono">{v.example}</div>
-            </CardContent>
-          </Card>
-        ))}
-
-        {scanVulnerabilities.length === 0 && (
-          <p className="text-sm text-muted-foreground">
+      <div className="space-y-6">
+        {scanVulnerabilities.length > 0 ? (
+          scanVulnerabilities.map((v) => (
+            <Card
+              key={v.id}
+              className="hover:shadow-lg transition-all duration-300 hover:bg-blue-50 border border-transparent"
+            >
+              <CardHeader className="flex justify-between items-start">
+                <CardTitle className="text-lg font-semibold text-[#003366]">
+                  {v.title}
+                </CardTitle>
+                <Badge
+                  variant={
+                    v.severity === "Critical"
+                      ? "destructive"
+                      : v.severity === "High"
+                        ? "warning"
+                        : "secondary"
+                  }
+                  className="font-medium"
+                >
+                  {v.severity}
+                </Badge>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm text-gray-700">
+                <p>{v.description}</p>
+                <div className="bg-muted p-2 rounded font-mono text-[#003366]">
+                  {v.example}
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <p className="text-sm text-gray-500">
             No vulnerabilities found for this scan.
           </p>
         )}

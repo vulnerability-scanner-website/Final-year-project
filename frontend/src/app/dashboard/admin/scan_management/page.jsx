@@ -119,18 +119,34 @@ export default function ScanManagement() {
         </Tabs>
 
         {/* ---------------- Active Scans ---------------- */}
-        <TabsContent value="active" className="mt-6 space-y-4">
+        <TabsContent value="active" className="mt-6 space-y-6">
           {activeScans.map((scan) => (
-            <Card key={scan.id}>
+            <Card
+              key={scan.id}
+              className="transition-all duration-300 hover:bg-blue-50 hover:border-[#003366] hover:shadow-lg border border-transparent"
+            >
               <CardHeader className="flex justify-between items-center">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <ShieldCheck className="h-5 w-5 text-blue-500" />
+                  <CardTitle className="flex items-center gap-2 text-[#003366]">
+                    <ShieldCheck className="h-5 w-5 text-[#003366]" />
                     {scan.name}
                   </CardTitle>
-                  <CardDescription>{scan.target}</CardDescription>
+                  <CardDescription className="text-gray-600">
+                    {scan.target}
+                  </CardDescription>
                 </div>
-                <Badge variant="outline">{scan.status}</Badge>
+                <Badge
+                  variant="outline"
+                  className={`${
+                    scan.status === "Running"
+                      ? "text-green-600 border-green-600"
+                      : scan.status === "Queued"
+                        ? "text-yellow-600 border-yellow-600"
+                        : "text-blue-600 border-blue-600"
+                  }`}
+                >
+                  {scan.status}
+                </Badge>
               </CardHeader>
 
               <CardContent className="space-y-4">
@@ -138,18 +154,25 @@ export default function ScanManagement() {
                   value={scan.progress}
                   className="bg-gray-300 [&>div]:bg-[#003366]"
                 />
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Progress: {scan.progress}%</span>
-                  <span>Started: {scan.started}</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#003366] font-medium">
+                    Progress: {scan.progress}%
+                  </span>
+
+                  <span className="text-gray-500">Started: {scan.started}</span>
                 </div>
 
                 <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2 text-sm">
-                  <span className="font-medium">Active Scan #{scan.id}</span>
+                  <span className="font-medium text-[#003366]">
+                    Active Scan #{scan.id}
+                  </span>
                   <span className="text-muted-foreground">→</span>
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1 text-gray-700">
                     Generated
                     <Badge variant="destructive">{getVulnCount(scan.id)}</Badge>
-                    vulnerabilities
+                    <span className="font-medium text-[#003366]">
+                      vulnerabilities
+                    </span>
                   </span>
                 </div>
 
@@ -163,6 +186,7 @@ export default function ScanManagement() {
                     onClick={() =>
                       router.push(`/dashboard/admin/scan_management/${scan.id}`)
                     }
+                    className={"hover:bg-amber-500"}
                   >
                     View Details
                   </Button>
@@ -177,27 +201,31 @@ export default function ScanManagement() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
                         onClick={() => handleManageAction("pause", scan.id)}
+                        className="data-[highlighted]:bg-yellow-600 data-[highlighted]:text-white"
                       >
                         Pause Scan
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleManageAction("resume", scan.id)}
+                        className="data-[highlighted]:bg-green-600 data-[highlighted]:text-white"
                       >
                         Resume Scan
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleManageAction("stop", scan.id)}
+                        className="data-[highlighted]:bg-red-600 data-[highlighted]:text-white"
                       >
                         Stop Scan
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleManageAction("rerun", scan.id)}
+                        className="data-[highlighted]:bg-[#003366] data-[highlighted]:text-white"
                       >
                         Re-run Scan
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        className="text-red-600"
                         onClick={() => handleManageAction("delete", scan.id)}
+                        className="text-red-600 data-[highlighted]:bg-red-600 data-[highlighted]:text-white"
                       >
                         Delete Scan
                       </DropdownMenuItem>
