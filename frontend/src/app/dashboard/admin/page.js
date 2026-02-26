@@ -15,7 +15,7 @@ export default function Page() {
       {" "}
       {/* Added ml-64 to avoid sidebar overlap */}
       <DashboardHeader role={"admin"} />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 p-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Scans"
           value="128"
@@ -44,7 +44,7 @@ export default function Page() {
           icon={CheckCircle}
         />
       </div>
-      <div className="grid gap-6 lg:grid-cols-2 p-6">
+      <div className="grid gap-6 lg:grid-cols-2 ">
         <VulnerabilityTrend />
         <SeverityDistribution />
       </div>
