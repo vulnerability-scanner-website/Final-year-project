@@ -1,13 +1,11 @@
 import React from "react";
+import { DashboardHeader } from "@/components/header/header";
 
 const page = () => {
   return (
     <div>
-      <h1>Analyst Dashboard</h1>
-      <p>
-        Welcome to the Analyst Dashboard. Here you can view and analyze data
-        related to your projects.
-      </p>
+      <DashboardHeader role={"analyst"} />
+      
     </div>
   );
 };
