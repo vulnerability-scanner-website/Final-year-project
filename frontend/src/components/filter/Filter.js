@@ -8,7 +8,7 @@ export default function Filter({
 }) {
   return (
     <div className="flex gap-4 mb-6">
-      {/* Search */}
+      
       <input
         type="text"
         placeholder="Search by name or email..."
@@ -17,9 +17,9 @@ export default function Filter({
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {/* Status Filter */}
+     
       <select
-        className="border px-4 py-2 rounded"
+        className="border px-4 py-2 rounded pr-4"
         value={statusFilter}
         onChange={(e) => setStatusFilter(e.target.value)}
       >
