@@ -15,46 +15,21 @@ export default function AdminSideBar() {
   const pathname = usePathname();
 
   const links = [
-    {
-      name: "Dashboard",
-      href: "/dashboard/admin",
-      icon: <LucideHome size={20} />,
-    },
-    {
-      name: "Security Findings",
-      href: "/dashboard/admin/security_findings",
-      icon: <LucideShield size={20} />,
-    },
-    {
-      name: "Users Management",
-      href: "/dashboard/admin/Users",
-      icon: <LucideUsers size={20} />,
-    },
-    {
-      name: "Reports",
-      href: "/dashboard/admin/Reports",
-      icon: <LucideFileText size={20} />,
-    },
-    {
-      name: "Settings",
-      href: "/dashboard/admin/settings",
-      icon: <LucideSettings size={20} />,
-    },
-    {
-      name: "Logout",
-      href: "/",
-      icon: <LucideLogOut size={20} />,
-      color: "text-red-400",
-    },
+    { name: "Dashboard", href: "/dashboard/admin", icon: <LucideHome size={20} /> },
+    { name: "Security Findings", href: "/dashboard/admin/security_findings", icon: <LucideShield size={20} /> },
+    { name: "Users Management", href: "/dashboard/admin/Users", icon: <LucideUsers size={20} /> },
+    { name: "Reports", href: "/dashboard/admin/Reports", icon: <LucideFileText size={20} /> },
+    { name: "Settings", href: "/dashboard/admin/settings", icon: <LucideSettings size={20} /> },
+    { name: "Logout", href: "/", icon: <LucideLogOut size={20} />, color: "text-red-400" },
   ];
 
   return (
-    <aside className="w-64 bg-[#003366] text-white p-6 min-h-screen shadow-xl flex flex-col">
-      <h2 className="text-3xl font-extrabold mb-10 text-center text-[#FFFFFF ] tracking-wider">
+    <aside className="w-64 bg-[#003366] text-white p-6 min-h-screen shadow-xl flex flex-col fixed top-0 left-0">
+      <h2 className="text-3xl font-extrabold mb-10 text-center text-[#FFFFFF] tracking-wider">
         Admin Panel
       </h2>
 
-      <nav className="flex-1 flex flex-col gap-2">
+      <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
         {links.map((link) => {
           const isActive = pathname === link.href;
           return (
