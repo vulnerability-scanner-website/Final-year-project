@@ -111,8 +111,10 @@ export default function UsersDashboard() {
             <Card className="shadow-md">
               <CardContent className="p-6 flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-500">Total Scans</p>
-                  <p className="text-3xl font-bold">100</p>
+                  <p className="text-sm text-gray-500">Inactive User</p>
+                  <p className="text-3xl font-bold">
+                    {users.filter((u) => u.status === "Inactive").length}
+                  </p>
                 </div>
                 <Scan className="w-6 h-6 text-purple-600" />
               </CardContent>
