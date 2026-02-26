@@ -121,7 +121,7 @@ export default function UsersDashboard() {
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                   >
-                    <option value="">All Status</option>
+                    <option value="" className="">All Status</option>
                     <option value="Active">Active</option>
                     <option value="Pending">Pending</option>
                     <option value="Inactive">Inactive</option>
