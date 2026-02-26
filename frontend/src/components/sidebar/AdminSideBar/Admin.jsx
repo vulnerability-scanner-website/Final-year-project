@@ -15,12 +15,37 @@ export default function AdminSideBar() {
   const pathname = usePathname();
 
   const links = [
-    { name: "Dashboard", href: "/dashboard/admin", icon: <LucideHome size={20} /> },
-    { name: "Security Findings", href: "/dashboard/admin/security_findings", icon: <LucideShield size={20} /> },
-    { name: "Users Management", href: "/dashboard/admin/Users", icon: <LucideUsers size={20} /> },
-    { name: "Reports", href: "/dashboard/admin/Reports", icon: <LucideFileText size={20} /> },
-    { name: "Settings", href: "/dashboard/admin/settings", icon: <LucideSettings size={20} /> },
-    { name: "Logout", href: "/", icon: <LucideLogOut size={20} />, color: "text-red-400" },
+    {
+      name: "Dashboard",
+      href: "/dashboard/admin",
+      icon: <LucideHome size={20} />,
+    },
+    {
+      name: "Scan Management",
+      href: "/dashboard/admin/security_findings",
+      icon: <LucideShield size={20} />,
+    },
+    {
+      name: "Users Management",
+      href: "/dashboard/admin/Users",
+      icon: <LucideUsers size={20} />,
+    },
+    {
+      name: "Reports",
+      href: "/dashboard/admin/Reports",
+      icon: <LucideFileText size={20} />,
+    },
+    {
+      name: "Settings",
+      href: "/dashboard/admin/settings",
+      icon: <LucideSettings size={20} />,
+    },
+    {
+      name: "Logout",
+      href: "/",
+      icon: <LucideLogOut size={20} />,
+      color: "text-red-400",
+    },
   ];
 
   return (
