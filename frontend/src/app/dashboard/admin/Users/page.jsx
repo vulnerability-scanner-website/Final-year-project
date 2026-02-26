@@ -144,14 +144,23 @@ export default function UsersDashboard() {
               />
 
               <select
-                className="w-full md:w-64 border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 px-4 py-2 rounded-md outline-none transition"
+                className="w-full md:w-64 border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 px-4 py-2 rounded-md outline-none transition
+             text-[#003366] bg-white"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
-                <option value="">All Status</option>
-                <option value="Active">Active</option>
-                <option value="Pending">Pending</option>
-                <option value="Inactive">Inactive</option>
+                <option value="" className="text-gray-700">
+                  All Status
+                </option>
+                <option value="Active" className="text-green-600">
+                  Active
+                </option>
+                <option value="Pending" className="text-yellow-600">
+                  Pending
+                </option>
+                <option value="Inactive" className="text-gray-600">
+                  Inactive
+                </option>
               </select>
             </CardContent>
           </Card>
