@@ -11,6 +11,8 @@ export function DashboardHeader({ role }) {
       ? "Manage users, security scans, and system settings"
       : "Manage your security scans and project vulnerabilities"
 
+  
+
   return (
     <header className="flex items-center justify-between border-b bg-background px-6 py-4">
       
