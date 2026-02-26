@@ -1,4 +1,5 @@
 import React from 'react'
+import {header} from "@/components/header/header";
 
 export default function page() {
   return (
