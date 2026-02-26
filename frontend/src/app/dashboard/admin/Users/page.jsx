@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Users, UserCheck, Scan, Plus, Edit, Trash2 } from "lucide-react";
 
 import AdminSideBar from "@/components/sidebar/AdminSideBar/Admin";
+import { DashboardHeader } from "@/components/header/header";
 
 export default function UsersDashboard() {
   // Sample data
@@ -66,18 +67,7 @@ export default function UsersDashboard() {
       <AdminSideBar />
 
       <div className="flex-1 ml-64">
-        <header>
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-gray-800">
-              Users Management
-            </h1>
-            <Button className="bg-[#003366] hover:bg-[#004080] text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              New User
-            </Button>
-          </div>
-        </header>
-
+        <DashboardHeader role="users" />
         <main className="pt-6">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
