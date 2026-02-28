@@ -37,17 +37,6 @@ export default function UsersDashboard() {
   const [statusFilter, setStatusFilter] = useState("");
   const [open, setOpen] = useState(false);
 
-  const activeUsers = users.filter((u) => u.status === "Active").length;
-  const inactiveUsers = users.filter((u) => u.status === "Inactive").length;
-
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch = user.name
-      .toLowerCase()
-      .includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "" || user.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
   const handleToggleStatus = (userId) => {
     setUsers((prev) =>
       prev.map((user) =>
@@ -81,11 +70,11 @@ export default function UsersDashboard() {
           onAddUser={(newUser) => setUsers((prev) => [...prev, newUser])}
         />
 
-        <main className="p-6 space-y-6">
-          {/* ---------------- KPI CARDS ---------------- */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border-none shadow-md hover:shadow-lg transition">
-              <CardContent className="p-6 flex justify-between items-center">
+        <main className="my-6 ">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Card className="shadow-md">
+              <CardContent className="p-5 flex justify-between items-center">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Users</p>
                   <p className="text-3xl font-bold">{users.length}</p>
@@ -109,11 +98,9 @@ export default function UsersDashboard() {
             <Card className="border-none shadow-md hover:shadow-lg transition">
               <CardContent className="p-6 flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-muted-foreground">
-                    Inactive Users
-                  </p>
-                  <p className="text-3xl font-bold text-red-600">
-                    {inactiveUsers}
+                  <p className="text-sm text-gray-500">Deactive Users</p>
+                  <p className="text-3xl font-bold">
+                    {users.filter((u) => u.status === "Inactive").length}
                   </p>
                 </div>
                 <UserX className="w-7 h-7 text-red-600" />
