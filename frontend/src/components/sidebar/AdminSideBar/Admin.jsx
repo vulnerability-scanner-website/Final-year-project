@@ -9,6 +9,7 @@ import {
   LucideSettings,
   LucideShield,
   LucideLogOut,
+  Bell
 } from "lucide-react";
 
 export default function AdminSideBar() {
@@ -34,6 +35,11 @@ export default function AdminSideBar() {
       name: "Reports",
       href: "/dashboard/admin/Reports",
       icon: <LucideFileText size={20} />,
+    },
+    {
+      name: "Notifications",
+      href: "/dashboard/admin/notifications",
+      icon: <Bell size={20} />,
     },
     {
       name: "Settings",

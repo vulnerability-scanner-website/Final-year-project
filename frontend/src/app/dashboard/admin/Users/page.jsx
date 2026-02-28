@@ -34,7 +34,6 @@ export default function UsersDashboard() {
   const [statusFilter, setStatusFilter] = useState("");
   const [open, setOpen] = useState(false);
 
-  // ================= TOGGLE STATUS =================
   const handleToggleStatus = (userId) => {
     setUsers((prev) =>
       prev.map((user) =>
@@ -100,8 +99,7 @@ export default function UsersDashboard() {
           onAddUser={handleAddUser}
         />
 
-        <main className="my-6 px-6">
-          {/* ================= STATS CARDS ================= */}
+        <main className="my-6 ">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <Card className="shadow-md">
               <CardContent className="p-5 flex justify-between items-center">
@@ -150,9 +148,8 @@ export default function UsersDashboard() {
             </Card>
           </div>
 
-          {/* ================= FILTER SECTION ================= */}
           <Card className="shadow-md mb-6">
-            <CardContent className="flex flex-col md:flex-row gap-4 p-6">
+            <CardContent className="flex flex-col md:flex-row gap-3 p-6">
               <input
                 type="text"
                 placeholder="Search by name..."
@@ -175,7 +172,7 @@ export default function UsersDashboard() {
           </Card>
 
           {/* ================= USERS TABLE ================= */}
-          <Card className="shadow-md overflow-hidden">
+          <Card className="shadow-md overflow-hidden px-8">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
