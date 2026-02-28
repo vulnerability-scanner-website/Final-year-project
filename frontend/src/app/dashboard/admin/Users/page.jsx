@@ -39,7 +39,6 @@ export default function UsersDashboard() {
   const [statusFilter, setStatusFilter] = useState("");
   const [open, setOpen] = useState(false);
 
-  // Toggle Active/Inactive
   const handleToggleStatus = (userId) => {
     setUsers((prev) =>
       prev.map((user) =>
@@ -94,7 +93,7 @@ export default function UsersDashboard() {
           onAddUser={handleAddUser}
         />
 
-        <main className="my-6 px-6">
+        <main className="my-6 ">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <Card className="shadow-md">
@@ -122,7 +121,7 @@ export default function UsersDashboard() {
             <Card className="shadow-md">
               <CardContent className="p-6 flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-500">Inactive Users</p>
+                  <p className="text-sm text-gray-500">Deactive Users</p>
                   <p className="text-3xl font-bold">
                     {users.filter((u) => u.status === "Inactive").length}
                   </p>
