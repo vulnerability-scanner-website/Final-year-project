@@ -12,14 +12,14 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Users, UserCheck, Scan, Edit, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Users, UserCheck, UserX, Edit, Trash2, Plus } from "lucide-react";
 
 import AdminSideBar from "@/components/sidebar/AdminSideBar/Admin";
 import { DashboardHeader } from "@/components/header/header";
 import AddUserDialog from "@/components/popup/AddUserDialog";
 
 export default function UsersDashboard() {
-  // Users state
   const [users, setUsers] = useState([
     { id: 1, name: "John Doe", role: "Admin", status: "Active" },
     {
@@ -31,8 +31,6 @@ export default function UsersDashboard() {
     { id: 3, name: "Michael Chen", role: "User", status: "Pending" },
     { id: 4, name: "Emily Brown", role: "Security Analyst", status: "Active" },
     { id: 5, name: "David Wilson", role: "User", status: "Inactive" },
-    { id: 6, name: "Lisa Anderson", role: "Admin", status: "Active" },
-    { id: 7, name: "James Martinez", role: "User", status: "Active" },
   ]);
 
   const [search, setSearch] = useState("");
@@ -45,40 +43,19 @@ export default function UsersDashboard() {
         user.id === userId
           ? {
               ...user,
-              status: user.status === "Active" ? "Deactive" : "Active",
+              status: user.status === "Active" ? "Inactive" : "Active",
             }
           : user,
       ),
     );
   };
 
-  // Filter logic
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch = user.name
-      .toLowerCase()
-      .includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "" || user.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const handleAddUser = (newUser) => {
-    setUsers((prev) => [...prev, newUser]);
-    setOpen(false);
-  };
-
-  const handleEdit = (userId, userName) => {
-    alert(`Edit ${userName}`);
-  };
-
-  const handleDelete = (userId, userName) => {
-    if (window.confirm(`Are you sure you want to delete ${userName}?`)) {
-      setUsers((prev) => prev.filter((u) => u.id !== userId));
-      alert(`${userName} deleted`);
-    }
+  const handleDelete = (userId) => {
+    setUsers((prev) => prev.filter((u) => u.id !== userId));
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-slate-50">
       <AdminSideBar />
 
       <div className="flex-1 ml-64">
@@ -90,7 +67,7 @@ export default function UsersDashboard() {
         <AddUserDialog
           open={open}
           setOpen={setOpen}
-          onAddUser={handleAddUser}
+          onAddUser={(newUser) => setUsers((prev) => [...prev, newUser])}
         />
 
         <main className="my-6 ">
@@ -99,26 +76,26 @@ export default function UsersDashboard() {
             <Card className="shadow-md">
               <CardContent className="p-5 flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-500">Total Users</p>
+                  <p className="text-sm text-muted-foreground">Total Users</p>
                   <p className="text-3xl font-bold">{users.length}</p>
                 </div>
-                <Users className="w-6 h-6 text-[#003366]" />
+                <Users className="w-7 h-7 text-[#003366]" />
               </CardContent>
             </Card>
 
-            <Card className="shadow-md">
+            <Card className="border-none shadow-md hover:shadow-lg transition">
               <CardContent className="p-6 flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-500">Active Users</p>
-                  <p className="text-3xl font-bold">
-                    {users.filter((u) => u.status === "Active").length}
+                  <p className="text-sm text-muted-foreground">Active Users</p>
+                  <p className="text-3xl font-bold text-green-600">
+                    {activeUsers}
                   </p>
                 </div>
-                <UserCheck className="w-6 h-6 text-green-600" />
+                <UserCheck className="w-7 h-7 text-green-600" />
               </CardContent>
             </Card>
 
-            <Card className="shadow-md">
+            <Card className="border-none shadow-md hover:shadow-lg transition">
               <CardContent className="p-6 flex justify-between items-center">
                 <div>
                   <p className="text-sm text-gray-500">Deactive Users</p>
@@ -126,52 +103,62 @@ export default function UsersDashboard() {
                     {users.filter((u) => u.status === "Inactive").length}
                   </p>
                 </div>
-                <Scan className="w-6 h-6 text-purple-600" />
+                <UserX className="w-7 h-7 text-red-600" />
               </CardContent>
             </Card>
           </div>
 
-          {/* Filter Section */}
-          <Card className="shadow-md mb-6">
-            <CardContent className="flex flex-col md:flex-row gap-4">
-              <input
-                type="text"
-                placeholder="Search by name..."
-                className="w-full border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 px-4 py-2 rounded-md outline-none transition"
+          {/* ---------------- FILTER BAR ---------------- */}
+          <Card className="border-none shadow-md">
+            <CardContent className="p-6 flex flex-col md:flex-row gap-4">
+              <Input
+                placeholder="Search users..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                className="focus-visible:ring-[#003366]"
               />
 
               <select
-                className="w-full md:w-64 border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 px-4 py-2 rounded-md outline-none transition"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
+                className="border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#003366]"
               >
                 <option value="">All Status</option>
                 <option value="Active">Active</option>
                 <option value="Pending">Pending</option>
                 <option value="Inactive">Inactive</option>
               </select>
+
+              <Button
+                className="bg-[#003366] hover:bg-[#00264d]"
+                onClick={() => setOpen(true)}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add User
+              </Button>
             </CardContent>
           </Card>
 
-          {/* Users Table */}
-          <Card className="shadow-md overflow-hidden">
+          {/* ---------------- USERS TABLE ---------------- */}
+          <Card className="border-none shadow-md">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>UserId</TableHead>
-                    <TableHead>User</TableHead>
+                    <TableHead>#</TableHead>
+                    <TableHead>Name</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
 
                 <TableBody>
                   {filteredUsers.map((user, index) => (
-                    <TableRow key={user.id}>
+                    <TableRow
+                      key={user.id}
+                      className="hover:bg-slate-100 transition"
+                    >
                       <TableCell>
                         {(index + 1).toString().padStart(2, "0")}
                       </TableCell>
@@ -182,32 +169,28 @@ export default function UsersDashboard() {
 
                       <TableCell>
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
                             user.status === "Active"
-                              ? "bg-green-100 text-green-800"
+                              ? "bg-green-100 text-green-700"
                               : user.status === "Pending"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-gray-100 text-gray-800"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-red-100 text-red-700"
                           }`}
                         >
                           {user.status}
                         </span>
                       </TableCell>
 
-                      <TableCell>
-                        <div className="flex items-center gap-3 cursor-pointer">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(user.id, user.name)}
-                          >
+                      <TableCell className="text-right">
+                        <div className="flex justify-end items-center gap-3">
+                          <Button variant="ghost" size="sm">
                             <Edit className="w-4 h-4 text-[#003366]" />
                           </Button>
 
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(user.id, user.name)}
+                            onClick={() => handleDelete(user.id)}
                           >
                             <Trash2 className="w-4 h-4 text-red-600" />
                           </Button>
@@ -215,12 +198,7 @@ export default function UsersDashboard() {
                           <Switch
                             checked={user.status === "Active"}
                             onCheckedChange={() => handleToggleStatus(user.id)}
-                            disabled={user.status === "Pending"}
-                            className="
-                              cursor-pointer
-                              data-[state=checked]:bg-green-600
-                              data-[state=unchecked]:bg-yellow-950
-                            "
+                            className="data-[state=checked]:bg-green-600"
                           />
                         </div>
                       </TableCell>
@@ -229,7 +207,10 @@ export default function UsersDashboard() {
 
                   {filteredUsers.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-6">
+                      <TableCell
+                        colSpan={5}
+                        className="text-center py-8 text-muted-foreground"
+                      >
                         No users found.
                       </TableCell>
                     </TableRow>
