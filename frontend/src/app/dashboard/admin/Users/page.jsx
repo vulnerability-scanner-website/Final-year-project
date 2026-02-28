@@ -133,9 +133,9 @@ export default function UsersDashboard() {
         />
 
         <main className="my-6 ">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <Card className="shadow-md">
-              <CardContent className="p-5 flex justify-between items-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6  ">
+            <Card className="shadow-md shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border-yellow-400 border">
+              <CardContent className="p-5 flex justify-between items-center ">
                 <div>
                   <p className="text-sm text-gray-500">Total Users</p>
                   <p className="text-3xl font-bold">{users.length}</p>
@@ -144,7 +144,7 @@ export default function UsersDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-md">
+            <Card className="shadow-md shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border-yellow-400 border">
               <CardContent className="p-6 flex justify-between items-center">
                 <div>
                   <p className="text-sm text-gray-500">Active Users</p>
@@ -156,7 +156,7 @@ export default function UsersDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-md">
+            <Card className="shadow-md shadow-sm hover:border-yellow-400 border shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border-yellow-400 border">
               <CardContent className="p-6 flex justify-between items-center">
                 <div>
                   <p className="text-sm text-gray-500">Inactive Users</p>
