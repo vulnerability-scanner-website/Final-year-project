@@ -9,6 +9,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -17,12 +27,18 @@ import { Users, UserCheck, Scan, Edit, Trash2 } from "lucide-react";
 import AdminSideBar from "@/components/sidebar/AdminSideBar/Admin";
 import { DashboardHeader } from "@/components/header/header";
 import AddUserDialog from "@/components/popup/AddUserDialog";
+import EditUserDialog from "@/components/popup/EditUserDialog";
 
 export default function UsersDashboard() {
   // ================= USERS STATE =================
   const [users, setUsers] = useState([
     { id: 1, name: "John Doe", role: "Admin", status: "Active" },
-    { id: 2, name: "Sarah Johnson", role: "Security Analyst", status: "Active" },
+    {
+      id: 2,
+      name: "Sarah Johnson",
+      role: "Security Analyst",
+      status: "Active",
+    },
     { id: 3, name: "Michael Chen", role: "User", status: "Pending" },
     { id: 4, name: "Emily Brown", role: "Security Analyst", status: "Active" },
     { id: 5, name: "David Wilson", role: "User", status: "Inactive" },
@@ -33,6 +49,9 @@ export default function UsersDashboard() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const handleToggleStatus = (userId) => {
     setUsers((prev) =>
@@ -40,49 +59,48 @@ export default function UsersDashboard() {
         user.id === userId
           ? {
               ...user,
-              status:
-                user.status === "Active" ? "Inactive" : "Active",
+              status: user.status === "Active" ? "Inactive" : "Active",
             }
-          : user
-      )
+          : user,
+      ),
     );
   };
 
-  // ================= FILTER LOGIC =================
   const filteredUsers = users.filter((user) => {
     const matchesSearch = user.name
       .toLowerCase()
       .includes(search.toLowerCase());
 
-    const matchesStatus =
-      statusFilter === "" || user.status === statusFilter;
+    const matchesStatus = statusFilter === "" || user.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
 
-  // ================= ADD USER =================
   const handleAddUser = (newUser) => {
     setUsers((prev) => [...prev, newUser]);
     setOpen(false);
   };
 
-  // ================= EDIT =================
-  const handleEdit = (userId, userName) => {
-    alert(`Edit ${userName}`);
+  const handleEdit = (user) => {
+    setSelectedUser(user);
+    setEditOpen(true);
   };
 
-  // ================= DELETE =================
-  const handleDelete = (userId, userName) => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete ${userName}?`
-      )
-    ) {
-      setUsers((prev) => prev.filter((u) => u.id !== userId));
-      alert(`${userName} deleted`);
-    }
+  const handleUpdateUser = (updatedUser) => {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)),
+    );
   };
 
+  const handleDeleteClick = (user) => {
+    setSelectedUser(user);
+    setDeleteOpen(true);
+  };
+
+  const confirmDelete = () => {
+    setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
+    setDeleteOpen(false);
+  };
   return (
     <div className="flex min-h-screen bg-gray-100">
       <AdminSideBar />
@@ -98,6 +116,12 @@ export default function UsersDashboard() {
           setOpen={setOpen}
           onAddUser={handleAddUser}
         />
+        <EditUserDialog
+          open={editOpen}
+          setOpen={setEditOpen}
+          user={selectedUser}
+          onUpdate={handleUpdateUser}
+        />
 
         <main className="my-6 ">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -105,9 +129,7 @@ export default function UsersDashboard() {
               <CardContent className="p-5 flex justify-between items-center">
                 <div>
                   <p className="text-sm text-gray-500">Total Users</p>
-                  <p className="text-3xl font-bold">
-                    {users.length}
-                  </p>
+                  <p className="text-3xl font-bold">{users.length}</p>
                 </div>
                 <Users className="w-6 h-6 text-[#003366]" />
               </CardContent>
@@ -118,11 +140,7 @@ export default function UsersDashboard() {
                 <div>
                   <p className="text-sm text-gray-500">Active Users</p>
                   <p className="text-3xl font-bold">
-                    {
-                      users.filter(
-                        (u) => u.status === "Active"
-                      ).length
-                    }
+                    {users.filter((u) => u.status === "Active").length}
                   </p>
                 </div>
                 <UserCheck className="w-6 h-6 text-green-600" />
@@ -132,15 +150,9 @@ export default function UsersDashboard() {
             <Card className="shadow-md">
               <CardContent className="p-6 flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-500">
-                    Inactive Users
-                  </p>
+                  <p className="text-sm text-gray-500">Inactive Users</p>
                   <p className="text-3xl font-bold">
-                    {
-                      users.filter(
-                        (u) => u.status === "Inactive"
-                      ).length
-                    }
+                    {users.filter((u) => u.status === "Inactive").length}
                   </p>
                 </div>
                 <Scan className="w-6 h-6 text-purple-600" />
@@ -149,11 +161,11 @@ export default function UsersDashboard() {
           </div>
 
           <Card className="shadow-md mb-6">
-            <CardContent className="flex flex-col md:flex-row gap-3 p-6">
+            <CardContent className="flex flex-col md:flex-row gap-3 p-2">
               <input
                 type="text"
                 placeholder="Search by name..."
-                className="w-full border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 px-4 py-2 rounded-md outline-none transition"
+                className="w-full border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 pl-4 rounded-md outline-none transition"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -189,14 +201,10 @@ export default function UsersDashboard() {
                   {filteredUsers.map((user, index) => (
                     <TableRow key={user.id}>
                       <TableCell>
-                        {(index + 1)
-                          .toString()
-                          .padStart(2, "0")}
+                        {(index + 1).toString().padStart(2, "0")}
                       </TableCell>
 
-                      <TableCell className="font-medium">
-                        {user.name}
-                      </TableCell>
+                      <TableCell className="font-medium">{user.name}</TableCell>
 
                       <TableCell>{user.role}</TableCell>
 
@@ -206,8 +214,8 @@ export default function UsersDashboard() {
                             user.status === "Active"
                               ? "bg-green-100 text-green-800"
                               : user.status === "Pending"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-gray-100 text-gray-800"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-gray-100 text-gray-800"
                           }`}
                         >
                           {user.status}
@@ -217,35 +225,27 @@ export default function UsersDashboard() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Button
+                            className="cursor-pointer"
                             variant="ghost"
                             size="sm"
-                            onClick={() =>
-                              handleEdit(user.id, user.name)
-                            }
+                            onClick={() => handleEdit(user)}
                           >
-                            <Edit className="w-4 h-4 text-[#003366]" />
+                            <Edit className="w-4 h-4 text-[#003366] " />
                           </Button>
 
                           <Button
+                            className="cursor-pointer"
                             variant="ghost"
                             size="sm"
-                            onClick={() =>
-                              handleDelete(user.id, user.name)
-                            }
+                            onClick={() => handleDeleteClick(user)}
                           >
                             <Trash2 className="w-4 h-4 text-red-600" />
                           </Button>
 
                           <Switch
-                            checked={
-                              user.status === "Active"
-                            }
-                            onCheckedChange={() =>
-                              handleToggleStatus(user.id)
-                            }
-                            disabled={
-                              user.status === "Pending"
-                            }
+                            checked={user.status === "Active"}
+                            onCheckedChange={() => handleToggleStatus(user.id)}
+                            disabled={user.status === "Pending"}
                             className="cursor-pointer data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-yellow-950"
                           />
                         </div>
@@ -255,10 +255,7 @@ export default function UsersDashboard() {
 
                   {filteredUsers.length === 0 && (
                     <TableRow>
-                      <TableCell
-                        colSpan={5}
-                        className="text-center py-6"
-                      >
+                      <TableCell colSpan={5} className="text-center py-6">
                         No users found.
                       </TableCell>
                     </TableRow>
@@ -267,6 +264,30 @@ export default function UsersDashboard() {
               </Table>
             </div>
           </Card>
+          <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete{" "}
+                  <span className="font-semibold text-red-600">
+                    {selectedUser?.name}
+                  </span>
+                  .
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={confirmDelete}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </main>
       </div>
     </div>
