@@ -101,6 +101,15 @@ export default function UsersDashboard() {
     setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
     setDeleteOpen(false);
   };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 5;
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       <AdminSideBar />
@@ -198,7 +207,7 @@ export default function UsersDashboard() {
                 </TableHeader>
 
                 <TableBody>
-                  {filteredUsers.map((user, index) => (
+                  {currentUsers.map((user, index) => (
                     <TableRow key={user.id}>
                       <TableCell>
                         {(index + 1).toString().padStart(2, "0")}
@@ -264,6 +273,41 @@ export default function UsersDashboard() {
               </Table>
             </div>
           </Card>
+
+          <div className="flex justify-center items-center mt-4 px-4">
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+              >
+                Previous
+              </Button>
+
+              {Array.from({ length: totalPages }, (_, i) => (
+                <Button
+                  key={i}
+                  size="sm"
+                  variant={currentPage === i + 1 ? "default" : "outline"}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </Button>
+              ))}
+
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+
           <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
             <AlertDialogContent>
               <AlertDialogHeader>
