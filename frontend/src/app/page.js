@@ -6,7 +6,6 @@ export default function Home() {
   return (
     <div className="min-h-screen text-white font-sans">
 
-      {/* ================= HEADER ================= */}
       <header className="w-full border-b border-zinc-800 bg-zinc-950/90 backdrop-blur sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <h1 className="text-xl font-bold tracking-wide">
@@ -21,10 +20,10 @@ export default function Home() {
           </nav>
 
           <Link
-            href="/scan"
+            href="/auth/login"
             className="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 transition text-sm font-semibold"
           >
-            Get Started
+            Login
           </Link>
         </div>
       </header>
@@ -54,18 +53,12 @@ export default function Home() {
 
           <div className="mt-10 flex justify-center gap-4">
             <Link
-              href="/scan"
+              href="auth/signup"
               className="px-8 py-3 rounded-lg bg-orange-500 hover:bg-orange-600 transition font-semibold"
             >
-              Start Security Scan
+              Register
             </Link>
 
-            <Link
-              href="/about"
-              className="px-8 py-3 rounded-lg border border-white/30 hover:bg-white/10 transition"
-            >
-              Learn More
-            </Link>
           </div>
         </div>
       </section>
