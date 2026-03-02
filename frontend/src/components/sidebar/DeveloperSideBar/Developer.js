@@ -10,7 +10,7 @@ import {
   User2Icon,
 } from "lucide-react";
 
-export default function AnalystSideBar() {
+export default function DeveloperSideBar() {
   const links = [
     {
       name: "Dashboard",
@@ -41,7 +41,7 @@ export default function AnalystSideBar() {
   ];
 
   return (
-    <aside className="w-64 bg-[#003366] text-white p-6 min-h-screen shadow-lg flex flex-col">
+    <aside className="w-64 bg-[#003366] text-white p-6 min-h-screen shadow-lg flex flex-col fixed top-0 left-0">
       <h2 className="text-3xl font-extrabold mb-10 text-center text-[#FFFFFF ] tracking-wider">
         Developer Panel
       </h2>
