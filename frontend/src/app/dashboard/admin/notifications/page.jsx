@@ -1,29 +1,185 @@
-// "use client";
 
-// import React from "react";
-// import { Button } from "@/components/ui/button";
-// import AdminSideBar from "@/components/sidebar/AdminSideBar/Admin";
+
+// "use client"
+
+// import React, { useState } from "react"
+// import AdminSideBar from "@/components/sidebar/AdminSideBar/Admin"
+// import { Button } from "@/components/ui/button"
+// import { Card, CardContent } from "@/components/ui/card"
+// import { Badge } from "@/components/ui/badge"
+// import { Separator } from "@/components/ui/separator"
+// import { MessageSquare, Clock, Calendar } from "lucide-react"
 
 // export default function Page() {
+//   const notificationsPerPage = 3
+
+//   const mockNotifications = [
+//     // Page 1
+//     {
+//       id: 1,
+//       title: "Department Meeting",
+//       description: "Supervisor provided feedback on your evaluation.",
+//       time: "2 hours ago",
+//       icon: <MessageSquare className="h-5 w-5 text-blue-600" />,
+//       unread: true,
+//     },
+//     {
+//       id: 2,
+//       title: "Evaluation Due Tomorrow",
+//       description: "Final evaluation is due tomorrow at 11:59 PM",
+//       time: "1 day ago",
+//       icon: <Clock className="h-5 w-5 text-red-600" />,
+//       unread: true,
+//     },
+//     {
+//       id: 3,
+//       title: "Meeting Scheduled",
+//       description: "Department meeting scheduled for Friday at 2:00 PM",
+//       time: "2 days ago",
+//       icon: <Calendar className="h-5 w-5 text-blue-600" />,
+//       unread: false,
+//     },
+
+//     // Page 2
+//     {
+//       id: 4,
+//       title: "New Announcement",
+//       description: "A new department policy has been published.",
+//       time: "3 days ago",
+//       icon: <MessageSquare className="h-5 w-5 text-blue-600" />,
+//       unread: true,
+//     },
+//     {
+//       id: 5,
+//       title: "System Update",
+//       description: "System maintenance scheduled this weekend.",
+//       time: "4 days ago",
+//       icon: <Clock className="h-5 w-5 text-red-600" />,
+//       unread: false,
+//     },
+//     {
+//       id: 6,
+//       title: "Reminder",
+//       description: "Submit your weekly report before Friday.",
+//       time: "5 days ago",
+//       icon: <Calendar className="h-5 w-5 text-blue-600" />,
+//       unread: false,
+//     },
+//   ]
+
+//   const totalPages = Math.ceil(mockNotifications.length / notificationsPerPage)
+//   const [currentPage, setCurrentPage] = useState(1)
+
+//   const indexOfLast = currentPage * notificationsPerPage
+//   const indexOfFirst = indexOfLast - notificationsPerPage
+//   const currentNotifications = mockNotifications.slice(
+//     indexOfFirst,
+//     indexOfLast
+//   )
+
 //   return (
-//     <div className="flex min-h-screen bg-gray-100">
+//     <div className="flex min-h-screen bg-muted/40">
 //       <AdminSideBar />
 
-//       <div className="flex-1 ml-64 p-6">
-//         <h1 className="text-2xl font-bold mb-6">
-//           Notification Page
-//         </h1>
+//       <div className="flex-1 ml-64 p-8">
+//         {/* Header */}
+//         <div className="flex items-start justify-between mb-8">
+//           <div>
+//             <h1 className="text-3xl font-bold">Notifications</h1>
+//             <p className="text-muted-foreground mt-1">
+//               Stay updated with important information
+//             </p>
+//           </div>
 
-//         <Button>view notifications</Button>
+//           <Button variant="outline">Mark All Read</Button>
+//         </div>
+
+//         {/* Notifications */}
+//         <div className="space-y-4">
+//           {currentNotifications.map((item) => (
+//             <Card
+//               key={item.id}
+//               className={`rounded-2xl shadow-sm border ${
+//                 item.unread ? "bg-blue-50/40" : ""
+//               }`}
+//             >
+//               <CardContent className="flex items-center justify-between p-6">
+//                 <div className="flex items-start gap-4">
+//                   <div className="bg-blue-100 p-2 rounded-xl">
+//                     {item.icon}
+//                   </div>
+
+//                   <div>
+//                     <div className="flex items-center gap-2">
+//                       <h2 className="font-semibold">{item.title}</h2>
+//                       {item.unread && (
+//                         <Badge className="h-2 w-2 rounded-full p-0 bg-blue-600" />
+//                       )}
+//                     </div>
+
+//                     <p className="text-sm text-muted-foreground mt-1">
+//                       {item.description}
+//                     </p>
+
+//                     <p className="text-xs text-muted-foreground mt-2">
+//                       {item.time}
+//                     </p>
+//                   </div>
+//                 </div>
+
+//                 {item.unread && (
+//                   <Button variant="outline" size="sm">
+//                     Mark Read
+//                   </Button>
+//                 )}
+//               </CardContent>
+//             </Card>
+//           ))}
+//         </div>
+
+//         {/* Pagination */}
+//         <Separator className="my-8" />
+
+//         <div className="flex items-center justify-center gap-4 text-sm">
+//           <Button
+//             variant="ghost"
+//             size="sm"
+//             disabled={currentPage === 1}
+//             onClick={() => setCurrentPage((prev) => prev - 1)}
+//           >
+//             &lt; Previous
+//           </Button>
+
+//           {[...Array(totalPages)].map((_, index) => (
+//             <Button
+//               key={index}
+//               variant={currentPage === index + 1 ? "outline" : "ghost"}
+//               size="sm"
+//               className="w-8 h-8 p-0"
+//               onClick={() => setCurrentPage(index + 1)}
+//             >
+//               {index + 1}
+//             </Button>
+//           ))}
+
+//           <Button
+//             variant="ghost"
+//             size="sm"
+//             disabled={currentPage === totalPages}
+//             onClick={() => setCurrentPage((prev) => prev + 1)}
+//           >
+//             Next &gt;
+//           </Button>
+//         </div>
 //       </div>
 //     </div>
-//   );
+//   )
 // }
 
 
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import AdminSideBar from "@/components/sidebar/AdminSideBar/Admin"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -32,6 +188,86 @@ import { Separator } from "@/components/ui/separator"
 import { MessageSquare, Clock, Calendar } from "lucide-react"
 
 export default function Page() {
+  const notificationsPerPage = 3
+
+  // ✅ Move mock data into state
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      title: "Department Meeting",
+      description: "Supervisor provided feedback on your evaluation.",
+      time: "2 hours ago",
+      icon: <MessageSquare className="h-5 w-5 text-blue-600" />,
+      unread: true,
+    },
+    {
+      id: 2,
+      title: "Evaluation Due Tomorrow",
+      description: "Final evaluation is due tomorrow at 11:59 PM",
+      time: "1 day ago",
+      icon: <Clock className="h-5 w-5 text-red-600" />,
+      unread: true,
+    },
+    {
+      id: 3,
+      title: "Meeting Scheduled",
+      description: "Department meeting scheduled for Friday at 2:00 PM",
+      time: "2 days ago",
+      icon: <Calendar className="h-5 w-5 text-blue-600" />,
+      unread: false,
+    },
+    {
+      id: 4,
+      title: "New Announcement",
+      description: "A new department policy has been published.",
+      time: "3 days ago",
+      icon: <MessageSquare className="h-5 w-5 text-blue-600" />,
+      unread: true,
+    },
+    {
+      id: 5,
+      title: "System Update",
+      description: "System maintenance scheduled this weekend.",
+      time: "4 days ago",
+      icon: <Clock className="h-5 w-5 text-red-600" />,
+      unread: false,
+    },
+    {
+      id: 6,
+      title: "Reminder",
+      description: "Submit your weekly report before Friday.",
+      time: "5 days ago",
+      icon: <Calendar className="h-5 w-5 text-blue-600" />,
+      unread: false,
+    },
+  ])
+
+  const totalPages = Math.ceil(notifications.length / notificationsPerPage)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const indexOfLast = currentPage * notificationsPerPage
+  const indexOfFirst = indexOfLast - notificationsPerPage
+  const currentNotifications = notifications.slice(
+    indexOfFirst,
+    indexOfLast
+  )
+
+  // ✅ Mark single notification as read
+  const handleMarkRead = (id) => {
+    setNotifications((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, unread: false } : item
+      )
+    )
+  }
+
+  // ✅ Mark all notifications as read
+  const handleMarkAllRead = () => {
+    setNotifications((prev) =>
+      prev.map((item) => ({ ...item, unread: false }))
+    )
+  }
+
   return (
     <div className="flex min-h-screen bg-muted/40">
       <AdminSideBar />
@@ -46,110 +282,89 @@ export default function Page() {
             </p>
           </div>
 
-          <Button variant="outline">Mark All Read</Button>
+          <Button variant="outline" onClick={handleMarkAllRead}>
+            Mark All Read
+          </Button>
         </div>
 
-        {/* Notifications List */}
+        {/* Notifications */}
         <div className="space-y-4">
-
-          {/* Notification 1 */}
-          <Card className="rounded-2xl shadow-sm border bg-blue-50/40">
-            <CardContent className="flex items-center justify-between p-6">
-              <div className="flex items-start gap-4">
-                <div className="bg-blue-100 p-2 rounded-xl">
-                  <MessageSquare className="h-5 w-5 text-blue-600" />
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="font-semibold">Department Meeting</h2>
-                    <Badge className="h-2 w-2 rounded-full p-0 bg-blue-600" />
+          {currentNotifications.map((item) => (
+            <Card
+              key={item.id}
+              className={`rounded-2xl shadow-sm border ${
+                item.unread ? "bg-blue-50/40" : ""
+              }`}
+            >
+              <CardContent className="flex items-center justify-between p-6">
+                <div className="flex items-start gap-4">
+                  <div className="bg-blue-100 p-2 rounded-xl">
+                    {item.icon}
                   </div>
 
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Supervisor provided feedback on your evaluation.
-                  </p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="font-semibold">{item.title}</h2>
+                      {item.unread && (
+                        <Badge className="h-2 w-2 rounded-full p-0 bg-blue-600" />
+                      )}
+                    </div>
 
-                  <p className="text-xs text-muted-foreground mt-2">
-                    2 hours ago
-                  </p>
-                </div>
-              </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {item.description}
+                    </p>
 
-              <Button variant="outline" size="sm">
-                Mark Read
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Notification 2 */}
-          <Card className="rounded-2xl shadow-sm border bg-blue-50/30">
-            <CardContent className="flex items-center justify-between p-6">
-              <div className="flex items-start gap-4">
-                <div className="bg-red-100 p-2 rounded-xl">
-                  <Clock className="h-5 w-5 text-red-600" />
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="font-semibold">Evaluation Due Tomorrow</h2>
-                    <Badge className="h-2 w-2 rounded-full p-0 bg-blue-600" />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {item.time}
+                    </p>
                   </div>
-
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Final evaluation is due tomorrow at 11:59 PM
-                  </p>
-
-                  <p className="text-xs text-muted-foreground mt-2">
-                    1 day ago
-                  </p>
                 </div>
-              </div>
 
-              <Button variant="outline" size="sm">
-                Mark Read
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Notification 3 */}
-          <Card className="rounded-2xl shadow-sm border">
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className="bg-blue-100 p-2 rounded-xl">
-                <Calendar className="h-5 w-5 text-blue-600" />
-              </div>
-
-              <div>
-                <h2 className="font-semibold">Meeting Scheduled</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Department meeting scheduled for Friday at 2:00 PM
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  2 days ago
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
+                {item.unread && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleMarkRead(item.id)}
+                  >
+                    Mark Read
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Pagination */}
         <Separator className="my-8" />
 
         <div className="flex items-center justify-center gap-4 text-sm">
-          <Button variant="ghost" size="sm">
-            &lt; previous
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+          >
+            &lt; Previous
           </Button>
 
-          <Button variant="outline" size="sm" className="w-8 h-8 p-0">
-            1
-          </Button>
+          {[...Array(totalPages)].map((_, index) => (
+            <Button
+              key={index}
+              variant={currentPage === index + 1 ? "outline" : "ghost"}
+              size="sm"
+              className="w-8 h-8 p-0"
+              onClick={() => setCurrentPage(index + 1)}
+            >
+              {index + 1}
+            </Button>
+          ))}
 
-          <Button variant="ghost" size="sm">
-            2
-          </Button>
-
-          <Button variant="ghost" size="sm">
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+          >
             Next &gt;
           </Button>
         </div>
