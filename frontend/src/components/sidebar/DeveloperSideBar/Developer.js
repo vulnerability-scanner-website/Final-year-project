@@ -10,7 +10,7 @@ import {
   User2Icon,
 } from "lucide-react";
 
-export default function AnalystSideBar() {
+export default function DeveloperSideBar() {
   const links = [
     {
       name: "Dashboard",
