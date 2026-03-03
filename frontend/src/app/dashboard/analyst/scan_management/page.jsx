@@ -89,7 +89,7 @@ export default function ScanManagement() {
   };
 
   return (
-    <div className="ml-64 p-5 space-y-4">
+    <div className="p-5 space-y-4">
       {/* Header */}
       <DashboardHeader role="scanmanagement" />
 
