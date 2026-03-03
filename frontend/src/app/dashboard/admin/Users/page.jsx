@@ -197,9 +197,9 @@ export default function UsersDashboard() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="py-4">
                     <TableHead>UserId</TableHead>
-                    <TableHead>User</TableHead>
+                    <TableHead>UserName</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
@@ -219,7 +219,7 @@ export default function UsersDashboard() {
 
                       <TableCell>
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          className={`px-4 py-1 rounded-full text-xs font-medium ${
                             user.status === "Active"
                               ? "bg-green-100 text-green-800"
                               : user.status === "Pending"

@@ -55,8 +55,8 @@ export default function AdminSideBar() {
   ];
 
   return (
-    <aside className="w-64 bg-[#003366] text-white p-6 min-h-screen shadow-xl flex flex-col fixed top-0 left-0">
-      <h2 className="text-3xl font-extrabold mb-10 text-center text-[#FFFFFF] tracking-wider">
+    <aside className="w-64 bg-[#ffffff] p-6 min-h-screen shadow-xl flex flex-col fixed top-0 left-0">
+      <h2 className="text-3xl font-extrabold mb-10 text-center tracking-wider">
         Admin Panel
       </h2>
 
