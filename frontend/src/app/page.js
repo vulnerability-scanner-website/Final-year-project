@@ -43,13 +43,13 @@ export default function Home() {
 
         <div className="relative z-10 max-w-4xl">
           <h2 className="text-4xl md:text-6xl font-bold">
-             Website Penetration Testing Platform
+             AI-Powered Website Penetration Testing Platform
           </h2>
 
-          <p className="mt-6 text-lg text-zinc-200">
+          {/* <p className="mt-6 text-lg text-zinc-200">
             Identify vulnerabilities before attackers do.
             Protect your infrastructure with real-time scanning.
-          </p>
+          </p> */}
 
           <div className="mt-10 flex justify-center gap-4">
             <Link
