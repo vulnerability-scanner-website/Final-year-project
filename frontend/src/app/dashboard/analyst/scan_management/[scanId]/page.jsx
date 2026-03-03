@@ -43,7 +43,7 @@ export default function ScanDetailsPage() {
   );
 
   return (
-    <div className="ml-64 p-6 space-y-6">
+    <div className=" p-6 space-y-6">
       {/* Page Header */}
       <h1 className="text-3xl font-bold text-[#003366]">
         Scan Report – #{scanId}
