@@ -30,7 +30,6 @@ import AddUserDialog from "@/components/popup/AddUserDialog";
 import EditUserDialog from "@/components/popup/EditUserDialog";
 
 export default function UsersDashboard() {
-  // ================= USERS STATE =================
   const [users, setUsers] = useState([
     { id: 1, name: "John Doe", role: "Admin", status: "Active" },
     {

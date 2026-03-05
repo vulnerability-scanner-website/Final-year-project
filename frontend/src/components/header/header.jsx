@@ -33,15 +33,23 @@ export function DashboardHeader({ role, onActionClick }) {
       : "New Action";
 
   return (
-    <header className="flex items-center justify-between border-b bg-background px-6 py-4 relative z-10">
-      {/* Left */}
-      <div>
+    <header className="flex items-center justify-between border-b bg-background px-6 py-4 relative overflow-hidden">
+      {/* Bent header effect: bottom-left and top-right angled strips */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* bottom-left bent strip */}
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-primary/5 to-transparent skew-y-12 origin-bottom-left"></div>
+        {/* top-right bent strip */}
+        <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-primary/5 to-transparent -skew-y-12 origin-top-right"></div>
+      </div>
+
+      {/* Left - with higher z-index to appear above bent effect */}
+      <div className="relative z-10">
         <h1 className="text-2xl font-semibold tracking-tight">{pageh1}</h1>
         <p className="text-sm text-muted-foreground">{pageparagraph}</p>
       </div>
 
-      {/* Right - Notification + Add Button */}
-      <div className="flex items-center gap-4 cursor-pointer">
+      {/* Right - Notification + Add Button (with higher z-index) */}
+      <div className="flex items-center gap-4 cursor-pointer relative z-10">
         {/* Notification Bell */}
         <div className="relative">
           <Button variant="ghost" size="icon" className="cursor-pointer">
@@ -61,8 +69,6 @@ export function DashboardHeader({ role, onActionClick }) {
             <Plus className="h-4 w-4" />
             {pagebuttontext}
           </Button>
-
-          {/* Top Right Corner Border */}
           <span className="absolute top-0 right-0 w-0 h-0 border-t-2 border-r-2 border-yellow-400 group-hover:w-6 group-hover:h-6 transition-all duration-300"></span>
 
           {/* Bottom Left Corner Border */}
