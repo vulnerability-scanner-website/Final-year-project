@@ -70,7 +70,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full bg-sky-600 hover:bg-sky-700"
+              className="w-full bg-yellow-700 hover:bg-yellow-900 cursor-pointer"
             >
               Login
             </Button>
