@@ -1,11 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import DeveloperSideBar from "@/components/sidebar/DeveloperSideBar/Developer";
-import { Eye, Download, Trash2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+
 import ViewScanDialog from "@/components/popup/ViewScanDialog";
+import AnalystSideBar from "@/components/sidebar/AnalystSideBar/Analyst";
+
+
 import {
   Table,
   TableBody,
@@ -14,6 +19,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
 import {
   Card,
   CardContent,
@@ -22,51 +35,63 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 
-const scanData = [
-  {
-    id: 1,
-    target: "mywebsite.com",
-    status: "Completed",
-    issues: 2,
-    date: "2024-01-15",
-    duration: "2m 34s",
-    vulnerabilities: [
-      {
-        id: 1,
-        title: "SQL Injection",
-        severity: "High",
-        description: "Unsanitized input detected in login form.",
-        fix: "Use parameterized queries and validate inputs.",
-      },
-      {
-        id: 2,
-        title: "Cross-Site Scripting (XSS)",
-        severity: "Medium",
-        description: "Reflected user input found in search field.",
-        fix: "Escape and sanitize all user input.",
-      },
-    ],
-  },
-  {
-    id: 2,
-    target: "api.mywebsite.com",
-    status: "Running",
-    issues: 0,
-    date: "2024-01-15",
-    duration: "1m 12s",
-    vulnerabilities: [],
-  },
-];
-
 export default function ScanManagementPage() {
+
+  /* ---------------- State ---------------- */
+
+  const [scans, setScans] = useState([
+    {
+      id: 1,
+      target: "mywebsite.com",
+      status: "Completed",
+      issues: 2,
+      date: "2024-01-15",
+      duration: "2m 34s",
+    },
+    {
+      id: 2,
+      target: "api.mywebsite.com",
+      status: "Running",
+      issues: 0,
+      date: "2024-01-15",
+      duration: "1m 12s",
+    },
+  ]);
+
   const [selectedScan, setSelectedScan] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
-  return (
-    <div className="flex">
-      <DeveloperSideBar />
+  const [newScanOpen, setNewScanOpen] = useState(false);
+  const [url, setUrl] = useState("");
 
-      <main className="flex-1  p-8 space-y-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+  /* ---------------- Start Scan ---------------- */
+
+  const handleStartScan = () => {
+    if (!url) return;
+
+    const newScan = {
+      id: scans.length + 1,
+      target: url,
+      status: "Running",
+      issues: 0,
+      date: new Date().toISOString().split("T")[0],
+      duration: "-",
+    };
+
+    setScans([newScan, ...scans]);
+    setUrl("");
+    setNewScanOpen(false);
+  };
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+
+      {/* Sidebar */}
+      <AnalystSideBar />
+
+      {/* Main */}
+      <main className="flex-1 ml-64 p-8">
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -76,22 +101,25 @@ export default function ScanManagementPage() {
             </p>
           </div>
 
-          <Button className="bg-sky-600 hover:bg-sky-700 shadow-sm">
+          <Button
+            onClick={() => setNewScanOpen(true)}
+            className="bg-[#003366] hover:bg-yellow-700 cursor-pointer"
+          >
             <Plus className="mr-2 h-4 w-4" />
             New Scan
           </Button>
         </div>
 
-        {/* Card */}
-        <Card className="shadow-lg border-0 rounded-2xl overflow-hidden">
+        {/* Scan Table */}
+        <Card className="shadow-lg border-0 rounded-2xl mt-6">
           <CardHeader>
-            <CardTitle className="text-lg">Scan History</CardTitle>
+            <CardTitle>Scan History</CardTitle>
             <CardDescription>
               A list of your recent automated security checks.
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="px-10">
+          <CardContent>
             <Table>
               <TableHeader className="bg-gray-100">
                 <TableRow>
@@ -99,13 +127,13 @@ export default function ScanManagementPage() {
                   <TableHead>Status</TableHead>
                   <TableHead className="text-center">Issues</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead className="mr-10">Duration</TableHead>
+                  <TableHead>Duration</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
-                {scanData.map((scan) => (
+                {scans.map((scan) => (
                   <TableRow key={scan.id} className="hover:bg-gray-50">
                     <TableCell>{scan.target}</TableCell>
 
@@ -136,20 +164,19 @@ export default function ScanManagementPage() {
                     <TableCell>{scan.date}</TableCell>
                     <TableCell>{scan.duration}</TableCell>
 
-                    <TableCell className="text-right mr-6">
-                      <div className="flex justify-end flex-wrap">
-                        <Button
-                          variant="ghost"
-                          className=" bg-gray-400 hover:bg-sky-50 text-sky-600 w-full sm:w-auto cursor-pointer"
-                          onClick={() => {
-                            setSelectedScan(scan);
-                            setOpenDialog(true);
-                          }}
-                        >
-                          View Details
-                        </Button>
-                      </div>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedScan(scan);
+                          setOpenDialog(true);
+                        }}
+                      >
+                        View Details
+                      </Button>
                     </TableCell>
+
                   </TableRow>
                 ))}
               </TableBody>
@@ -157,12 +184,37 @@ export default function ScanManagementPage() {
           </CardContent>
         </Card>
 
-        {/* Popup Dialog */}
+        {/* View Scan Dialog */}
         <ViewScanDialog
           open={openDialog}
           onOpenChange={setOpenDialog}
           scan={selectedScan}
         />
+
+        {/* New Scan Dialog */}
+        <Dialog open={newScanOpen} onOpenChange={setNewScanOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Start New Scan</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <Input
+                placeholder="Enter target URL (example: https://example.com)"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+              />
+
+              <Button
+                onClick={handleStartScan}
+                className="w-full bg-[#003366] hover:bg-[#00264d]"
+              >
+                Start Scan
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
       </main>
     </div>
   );
