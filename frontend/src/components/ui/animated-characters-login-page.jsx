@@ -297,14 +297,14 @@ function LoginPage() {
       console.log("✅ Login successful!");
       // Redirect to admin dashboard
       window.location.href = "/dashboard/admin";
-    }else if (email === "analyst@gmail.com" && password === "5678") {
+    } else if (email === "analyst@gmail.com" && password === "5678") {
       console.log("✅ Analyst login successful!");
       // Redirect to analyst dashboard
       window.location.href = "/dashboard/analyst";
     } else if (email === "user@gmail.com" && password === "9012") {
       console.log("✅ User login successful!");
       // Redirect to user dashboard
-      window.location.href = "/dashboard/user";
+      window.location.href = "/dashboard/developer";
     } else {
       setError("Invalid email or password. Please try again.");
       console.log("❌ Login failed");
@@ -786,7 +786,10 @@ function LoginPage() {
           {/* Sign Up Link */}
           <div className="text-center text-sm text-muted-foreground mt-8">
             Don't have an account?{" "}
-            <a href="/auth/signup" className="text-foreground font-medium hover:underline">
+            <a
+              href="/auth/signup"
+              className="text-foreground font-medium hover:underline"
+            >
               Sign Up
             </a>
           </div>

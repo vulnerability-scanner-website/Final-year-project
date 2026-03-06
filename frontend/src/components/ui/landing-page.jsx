@@ -624,11 +624,11 @@ export function DesignAgency() {
                   deliver comprehensive protection for modern businesses.
                 </p>
                 <div className="flex flex-col gap-3 sm:flex-row">
-                  <Button variant="outline" size="lg" className="rounded-3xl">
-                    Our Process
+                  <Button variant="outline" size="lg" className="rounded-3xl" asChild>
+                    <Link href="/process">Our Process</Link>
                   </Button>
-                  <Button variant="outline" size="lg" className="rounded-3xl">
-                    Join Our Team
+                  <Button variant="outline" size="lg" className="rounded-3xl" asChild>
+                    <Link href="/careers">Join Our Team</Link>
                   </Button>
                 </div>
               </motion.div>
@@ -1052,25 +1052,25 @@ export function DesignAgency() {
               <h3 className="text-lg font-medium">Company</h3>
               <nav className="mt-4 flex flex-col space-y-2 text-sm">
                 <Link
-                  href="#about"
+                  href="/about"
                   className="text-muted-foreground hover:text-foreground"
                 >
                   About Us
                 </Link>
                 <Link
-                  href="#"
+                  href="/careers"
                   className="text-muted-foreground hover:text-foreground"
                 >
                   Careers
                 </Link>
                 <Link
-                  href="#"
+                  href="/process"
                   className="text-muted-foreground hover:text-foreground"
                 >
                   Our Process
                 </Link>
                 <Link
-                  href="#"
+                  href="/news"
                   className="text-muted-foreground hover:text-foreground"
                 >
                   News & Press
@@ -1112,25 +1112,13 @@ export function DesignAgency() {
               <h3 className="text-lg font-medium">Resources</h3>
               <nav className="mt-4 flex flex-col space-y-2 text-sm">
                 <Link
-                  href="#"
+                  href="/blog"
                   className="text-muted-foreground hover:text-foreground"
                 >
                   Blog
                 </Link>
                 <Link
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Case Studies
-                </Link>
-                <Link
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Guides & Tutorials
-                </Link>
-                <Link
-                  href="#"
+                  href="/faq"
                   className="text-muted-foreground hover:text-foreground"
                 >
                   FAQ
@@ -1141,22 +1129,16 @@ export function DesignAgency() {
               <h3 className="text-lg font-medium">Legal</h3>
               <nav className="mt-4 flex flex-col space-y-2 text-sm">
                 <Link
-                  href="#"
+                  href="/privacy-policy"
                   className="text-muted-foreground hover:text-foreground"
                 >
                   Privacy Policy
                 </Link>
                 <Link
-                  href="#"
+                  href="/terms-of-service"
                   className="text-muted-foreground hover:text-foreground"
                 >
                   Terms of Service
-                </Link>
-                <Link
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Cookie Policy
                 </Link>
               </nav>
             </div>
@@ -1182,11 +1164,8 @@ export function DesignAgency() {
         <div className="border-t">
           <div className="container flex flex-col items-center justify-between gap-3 py-6 md:h-16 md:flex-row md:py-0">
             <p className="text-xs text-muted-foreground">
-              &copy; {new Date().getFullYear()} Design Studio. All rights
+              &copy; {new Date().getFullYear()} CyberSecure. All rights
               reserved.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Crafted with passion in New York City
             </p>
           </div>
         </div>
