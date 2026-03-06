@@ -1,13 +1,18 @@
-"use client"
+"use client";
 
-import React from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Shield, Clock, CheckCircle, AlertCircle, Plus } from "lucide-react"
+import React from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Shield, Clock, CheckCircle, AlertCircle, Plus } from "lucide-react";
 
 export default function Page() {
-
   const recentScans = [
     {
       id: 1,
@@ -30,11 +35,10 @@ export default function Page() {
       status: "Completed",
       issues: 0,
     },
-  ]
+  ];
 
   return (
     <div className="ml-64 p-6 space-y-8 bg-gray-50 min-h-screen">
-
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -52,25 +56,35 @@ export default function Page() {
 
       {/* Stats Cards */}
       <div className="grid md:grid-cols-4 gap-6">
-
         <StatCard title="My Scans" value="23" icon={<Shield />} color="blue" />
-        <StatCard title="In Progress" value="3" icon={<Clock />} color="yellow" />
-        <StatCard title="Completed" value="18" icon={<CheckCircle />} color="green" />
-        <StatCard title="Total Issues" value="45" icon={<AlertCircle />} color="red" />
-
+        <StatCard
+          title="In Progress"
+          value="3"
+          icon={<Clock />}
+          color="yellow"
+        />
+        <StatCard
+          title="Completed"
+          value="18"
+          icon={<CheckCircle />}
+          color="green"
+        />
+        <StatCard
+          title="Total Issues"
+          value="45"
+          icon={<AlertCircle />}
+          color="red"
+        />
       </div>
 
       {/* Recent Scans */}
       <Card>
         <CardHeader>
           <CardTitle>My Recent Scans</CardTitle>
-          <CardDescription>
-            Overview of your latest scans
-          </CardDescription>
+          <CardDescription>Overview of your latest scans</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
-
           {recentScans.map((scan) => (
             <div
               key={scan.id}
@@ -84,7 +98,6 @@ export default function Page() {
               </div>
 
               <div className="flex items-center gap-4">
-
                 <Badge
                   variant="secondary"
                   className={
@@ -106,14 +119,11 @@ export default function Page() {
               </div>
             </div>
           ))}
-
         </CardContent>
       </Card>
-
     </div>
-  )
+  );
 }
-
 
 /* Reusable Stat Card */
 function StatCard({ title, value, icon, color }) {
@@ -122,7 +132,7 @@ function StatCard({ title, value, icon, color }) {
     yellow: "bg-yellow-500/10 text-yellow-600",
     green: "bg-green-500/10 text-green-600",
     red: "bg-red-500/10 text-red-600",
-  }
+  };
 
   return (
     <Card>
@@ -132,10 +142,8 @@ function StatCard({ title, value, icon, color }) {
           <h2 className="text-3xl font-bold">{value}</h2>
         </div>
 
-        <div className={`p-4 rounded-xl ${colors[color]}`}>
-          {icon}
-        </div>
+        <div className={`p-4 rounded-xl ${colors[color]}`}>{icon}</div>
       </CardContent>
     </Card>
-  )
+  );
 }
