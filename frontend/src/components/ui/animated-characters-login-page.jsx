@@ -293,7 +293,7 @@ function LoginPage() {
     await new Promise((resolve) => setTimeout(resolve, 300));
 
     // Mock authentication - validate against dummy credentials
-    if (email === "erik@gmail.com" && password === "1234") {
+    if (email === "admin@gmail.com" && password === "1234") {
       console.log("✅ Login successful!");
       // Redirect to admin dashboard
       window.location.href = "/dashboard/admin";

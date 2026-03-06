@@ -22,6 +22,8 @@ import {
   ScanSearch,
   Lock,
   Server,
+  User,
+  UserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +61,7 @@ const itemFadeIn = {
 export function DesignAgency() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -490,7 +493,7 @@ export function DesignAgency() {
           </motion.div>
         </section>
 
-        {/* Portfolio/Work Bento Grid */}
+        {/* Portfolio/Work Slider */}
         <section id="work" className="w-full py-12 md:py-24 lg:py-32">
           <motion.div
             initial="hidden"
@@ -528,155 +531,60 @@ export function DesignAgency() {
                 </motion.p>
               </div>
             </div>
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="mx-auto grid max-w-7xl gap-3 py-12 md:grid-cols-4 md:grid-rows-2 lg:gap-3"
-            >
-              {/* Bento Grid Items */}
-              <motion.div
-                variants={itemFadeIn}
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-                className="group relative overflow-hidden rounded-3xl md:col-span-2 md:row-span-2 h-[400px] md:h-auto"
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
-                <Image
-                  src="https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=1200&h=800&q=80"
-                  alt="E-commerce Security Audit"
-                  fill
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 flex flex-col justify-end p-6 text-white opacity-0 transition-opacity group-hover:opacity-100">
-                  <h3 className="text-xl font-bold">
-                    E-commerce Security Audit
-                  </h3>
-                  <p className="text-sm">
-                    Complete security assessment of online retail platform
-                  </p>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="mt-3"
-                  >
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-3xl bg-white/20 backdrop-blur-sm border-white/40 text-white hover:bg-white/30"
-                    >
-                      View Project <ArrowUpRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </motion.div>
-                </div>
-              </motion.div>
-              <motion.div
-                variants={itemFadeIn}
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-                className="group relative overflow-hidden rounded-3xl h-[200px]"
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
-                <Image
-                  src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&h=600&q=80"
-                  alt="Banking App Security"
-                  fill
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 flex flex-col justify-end p-6 text-white opacity-0 transition-opacity group-hover:opacity-100">
-                  <h3 className="text-xl font-bold">
-                    Banking App Vulnerability Assessment
-                  </h3>
-                  <p className="text-sm">
-                    Critical security testing for financial mobile application
-                  </p>
-                </div>
-              </motion.div>
-              <motion.div
-                variants={itemFadeIn}
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-                className="group relative overflow-hidden rounded-3xl h-[200px]"
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
-                <Image
-                  src="https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=600&h=600&q=80"
-                  alt="Healthcare Data Protection"
-                  fill
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 flex flex-col justify-end p-6 text-white opacity-0 transition-opacity group-hover:opacity-100">
-                  <h3 className="text-xl font-bold">
-                    Healthcare Data Protection
-                  </h3>
-                  <p className="text-sm">
-                    HIPAA compliance and data security implementation
-                  </p>
-                </div>
-              </motion.div>
-              <motion.div
-                variants={itemFadeIn}
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-                className="group relative overflow-hidden rounded-3xl h-[200px]"
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
-                <Image
-                  src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=600&q=80"
-                  alt="Enterprise Network Security"
-                  fill
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 flex flex-col justify-end p-6 text-white opacity-0 transition-opacity group-hover:opacity-100">
-                  <h3 className="text-xl font-bold">
-                    Enterprise Network Security
-                  </h3>
-                  <p className="text-sm">
-                    Infrastructure penetration testing and hardening
-                  </p>
-                </div>
-              </motion.div>
-              <motion.div
-                variants={itemFadeIn}
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-                className="group relative overflow-hidden rounded-3xl md:col-span-2 h-[200px]"
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
-                <Image
-                  src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=1200&h=600&q=80"
-                  alt="Cloud Security Assessment"
-                  fill
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 flex flex-col justify-end p-6 text-white opacity-0 transition-opacity group-hover:opacity-100">
-                  <h3 className="text-xl font-bold">
-                    Cloud Security Assessment
-                  </h3>
-                  <p className="text-sm">
-                    AWS/Azure security audit and compliance testing
-                  </p>
-                </div>
-              </motion.div>
-            </motion.div>
-            <div className="flex justify-center pb-10">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button size="lg" className="rounded-3xl group">
-                  View All Security Cases
-                  <motion.span
-                    initial={{ x: 0 }}
-                    whileHover={{ x: 5 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                  >
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </motion.span>
-                </Button>
-              </motion.div>
+            <div className="relative py-12">
+              <div className="overflow-hidden">
+                <motion.div
+                  animate={{ x: `-${currentSlide * 100}%` }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="flex"
+                >
+                  {[
+                    {
+                      img: "https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=1200&h=800&q=80",
+                      title: "E-commerce Security Audit",
+                      desc: "Complete security assessment of online retail platform",
+                    },
+                    {
+                      img: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&h=800&q=80",
+                      title: "Banking App Vulnerability Assessment",
+                      desc: "Critical security testing for financial mobile application",
+                    },
+                    {
+                      img: "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=1200&h=800&q=80",
+                      title: "Healthcare Data Protection",
+                      desc: "HIPAA compliance and data security implementation",
+                    },
+                  ].map((slide, index) => (
+                    <div key={index} className="min-w-full px-4">
+                      <div className="group relative overflow-hidden rounded-3xl h-[400px] md:h-[500px]">
+                        <Image
+                          src={slide.img}
+                          alt={slide.title}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6 text-white">
+                          <h3 className="text-2xl font-bold">{slide.title}</h3>
+                          <p className="text-sm mt-2">{slide.desc}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </motion.div>
+              </div>
+              <div className="flex justify-center gap-2 mt-6">
+                {[0, 1, 2].map((index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`h-2 rounded-full transition-all ${
+                      currentSlide === index
+                        ? "w-8 bg-primary"
+                        : "w-2 bg-muted-foreground/30"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </motion.div>
         </section>
@@ -757,10 +665,10 @@ export function DesignAgency() {
                 className="mt-8 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
               >
                 {[
-                  { name: "Alpha Guyasa", role: "Security Architect" },
-                  { name: "Abdi Fekeda", role: "Penetration Testing Lead" },
-                  { name: "Milkesa Eshetu", role: "AI Security Engineer" },
-                  { name: "Kenesa Asfaw", role: "Compliance Specialist" },
+                  { name: "Alpha Guyasa", role: "Penetration Tester" },
+                  { name: "Abdi Fekeda", role: "Full Stack Developer" },
+                  { name: "Milkesa Eshetu", role: "Mobile App Developer" },
+                  { name: "Kenesa Asfaw", role: "AI Engineer" },
                 ].map((member, index) => (
                   <motion.div
                     key={index}
@@ -769,7 +677,15 @@ export function DesignAgency() {
                     className="group relative overflow-hidden rounded-3xl"
                   >
                     <Image
-                      src={index === 0 ? "/images/alpha.png" : index === 1 ? "/images/abdi.png" : `https://images.unsplash.com/photo-${index === 2 ? "1472099645785-5658abf4ff4e" : "1580489944761-15a19d654956"}?w=300&h=400&q=80`}
+                      src={
+                        index === 0
+                          ? "/images/alpha.png"
+                          : index === 1
+                            ? "/images/abdi.png"
+                            : index === 2
+                              ? "/images/milkesa.png"
+                              : "/images/kenesa.png"
+                      }
                       alt={member.name}
                       width={300}
                       height={400}
@@ -835,26 +751,30 @@ export function DesignAgency() {
                 {
                   quote:
                     "CyberSecure identified critical vulnerabilities we missed in our internal audits. Their AI platform saved us from potential breaches worth millions.",
-                  author: "Sarah Chen",
+                  author: "Abel Tasew",
                   company: "CISO, TechCorp",
+                  gender: "male",
                 },
                 {
                   quote:
                     "The attention to detail and creative solutions provided by the team helped us increase our conversion rate by 40%.",
-                  author: "Michael Chen",
+                  author: "Lemma Bekele",
                   company: "Marketing Director, GrowthCo",
+                  gender: "male",
                 },
                 {
                   quote:
                     "Their strategic approach to design not only improved our user experience but also strengthened our brand identity.",
-                  author: "Emma Rodriguez",
+                  author: "Tigist Alemu",
                   company: "Product Manager, InnovateLabs",
+                  gender: "female",
                 },
                 {
                   quote:
                     "From concept to execution, the team demonstrated exceptional skill and professionalism. Highly recommended!",
-                  author: "David Kim",
+                  author: "Kebede Hailu",
                   company: "Founder, NextWave",
+                  gender: "male",
                 },
               ].map((testimonial, index) => (
                 <motion.div
@@ -884,7 +804,13 @@ export function DesignAgency() {
                     </blockquote>
                   </div>
                   <div className="mt-6 flex items-center">
-                    <div className="h-10 w-10 rounded-full bg-muted"></div>
+                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                      {testimonial.gender === "female" ? (
+                        <User className="h-5 w-5 text-pink-500" />
+                      ) : (
+                        <UserRound className="h-5 w-5 text-blue-500" />
+                      )}
+                    </div>
                     <div className="ml-4">
                       <p className="font-medium">{testimonial.author}</p>
                       <p className="text-sm text-muted-foreground">
@@ -934,7 +860,7 @@ export function DesignAgency() {
                   <div>
                     <h3 className="font-medium">Our Location</h3>
                     <p className="text-sm text-muted-foreground">
-                      123 Security Blvd, Cyber City, 10001
+                      Bole Sub City, Woreda 10, Addis Ababa, Ethiopia
                     </p>
                   </div>
                 </motion.div>
@@ -962,7 +888,7 @@ export function DesignAgency() {
                   <div>
                     <h3 className="font-medium">Call Us</h3>
                     <p className="text-sm text-muted-foreground">
-                      +1 (555) SEC-URITY
+                      +251975567560 CyberSecure
                     </p>
                   </div>
                 </motion.div>
