@@ -28,6 +28,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import CyberneticGridShader from "@/components/ui/cybernetic-grid-shader";
+import { Testimonials } from "@/components/ui/twitter-testimonial-cards";
+import ExpandOnHover from "@/components/ui/expand-cards";
+import { ScannerCardStream } from "@/components/ui/scanner-card-stream";
 
 // Animation variants
 const fadeIn = {
@@ -77,7 +81,15 @@ export function DesignAgency() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="relative flex min-h-screen flex-col">
+      {/* Background Shader */}
+      <div className="fixed inset-0 z-0">
+        <CyberneticGridShader />
+        <div className="absolute inset-0 bg-black/60" />
+      </div>
+      
+      {/* Content */}
+      <div className="relative z-10 flex min-h-screen flex-col">
       {/* Header */}
       <motion.header
         initial={{ y: -100 }}
@@ -243,7 +255,7 @@ export function DesignAgency() {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.4 }}
-                    className="max-w-[600px] text-muted-foreground md:text-xl"
+                    className="max-w-[600px] text-foreground md:text-xl"
                   >
                     Our advanced AI platform identifies vulnerabilities before
                     attackers do, protecting your web applications with
@@ -379,7 +391,7 @@ export function DesignAgency() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
-            className="container px-4 md:px-6 border border-muted rounded-3xl"
+            className="container px-4 md:px-6"
           >
             <div className="flex flex-col items-center justify-center space-y-4 text-center py-10">
               <div className="space-y-3">
@@ -395,7 +407,7 @@ export function DesignAgency() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl"
+                  className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-white"
                 >
                   Our Security Services
                 </motion.h2>
@@ -410,86 +422,26 @@ export function DesignAgency() {
                 </motion.p>
               </div>
             </div>
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="mx-auto grid max-w-5xl items-center gap-3 py-12 md:grid-cols-2 lg:grid-cols-3"
-            >
-              {[
-                {
-                  icon: <ShieldCheck className="h-10 w-10 text-orange-500" />,
-                  title: "Security Assessment",
-                  description:
-                    "Comprehensive vulnerability analysis and risk assessment of your web applications and infrastructure.",
-                },
-                {
-                  icon: <ScanSearch className="h-10 w-10 text-orange-500" />,
-                  title: "Automated Scanning",
-                  description:
-                    "AI-powered detection of SQL injection, XSS, and other critical security vulnerabilities.",
-                },
-                {
-                  icon: <Lock className="h-10 w-10 text-orange-500" />,
-                  title: "Data Protection",
-                  description:
-                    "Secure sensitive data and user credentials with enterprise-grade encryption and protection.",
-                },
-                {
-                  icon: <Server className="h-10 w-10 text-orange-500" />,
-                  title: "Server Analysis",
-                  description:
-                    "Identify server weaknesses, outdated software, and configuration vulnerabilities.",
-                },
-                {
-                  icon: <ShieldCheck className="h-10 w-10 text-orange-500" />,
-                  title: "Compliance Testing",
-                  description:
-                    "Ensure your applications meet industry security standards and regulatory requirements.",
-                },
-                {
-                  icon: <ScanSearch className="h-10 w-10 text-orange-500" />,
-                  title: "Security Reports",
-                  description:
-                    "Detailed vulnerability reports with actionable recommendations and remediation steps.",
-                },
-              ].map((service, index) => (
-                <motion.div
-                  key={index}
-                  variants={itemFadeIn}
-                  whileHover={{ y: -10, transition: { duration: 0.3 } }}
-                  className="group relative overflow-hidden rounded-3xl border p-6 shadow-sm transition-all hover:shadow-md bg-background/80"
-                >
-                  <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-all duration-300"></div>
-                  <div className="relative space-y-3">
-                    <div className="mb-4">{service.icon}</div>
-                    <h3 className="text-xl font-bold">{service.title}</h3>
-                    <p className="text-muted-foreground">
-                      {service.description}
-                    </p>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between">
-                    <Link
-                      href="#"
-                      className="text-sm font-medium text-orange-500 underline-offset-4 hover:underline"
-                    >
-                      Learn more
-                    </Link>
-                    <motion.div
-                      whileHover={{ x: 5 }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 10,
-                      }}
-                    >
-                      <ArrowRight className="h-4 w-4 text-orange-500" />
-                    </motion.div>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
+            <div className="py-12">
+              <ScannerCardStream
+                cardImages={[
+                  "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80",
+                  "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80",
+                  "https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=800&q=80",
+                  "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80",
+                  "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=800&q=80",
+                  "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80",
+                ]}
+                cardTexts={[
+                  { title: "Penetration Testing", description: "Comprehensive security testing to identify vulnerabilities" },
+                  { title: "Vulnerability Assessment", description: "Automated scanning and analysis of security weaknesses" },
+                  { title: "Security Auditing", description: "In-depth review of your security infrastructure" },
+                  { title: "Infrastructure Security", description: "Protect your servers and cloud infrastructure" },
+                  { title: "Compliance Testing", description: "Ensure regulatory compliance and standards" },
+                  { title: "Security Consulting", description: "Expert guidance on security best practices" },
+                ]}
+              />
+            </div>
           </motion.div>
         </section>
 
@@ -608,7 +560,7 @@ export function DesignAgency() {
                 <div className="inline-block rounded-3xl bg-muted px-3 py-1 text-sm">
                   About Us
                 </div>
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-white">
                   Our Security Mission
                 </h2>
                 <p className="text-muted-foreground md:text-xl/relaxed">
@@ -653,51 +605,13 @@ export function DesignAgency() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="text-2xl font-bold tracking-tighter sm:text-3xl"
+                className="text-2xl font-bold tracking-tighter sm:text-3xl text-white"
               >
                 Meet Our Team
               </motion.h3>
-              <motion.div
-                variants={staggerContainer}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                className="mt-8 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-              >
-                {[
-                  { name: "Alpha Guyasa", role: "Penetration Tester" },
-                  { name: "Abdi Fekeda", role: "Full Stack Developer" },
-                  { name: "Milkesa Eshetu", role: "Mobile App Developer" },
-                  { name: "Kenesa Asfaw", role: "AI Engineer" },
-                ].map((member, index) => (
-                  <motion.div
-                    key={index}
-                    variants={itemFadeIn}
-                    whileHover={{ y: -10 }}
-                    className="group relative overflow-hidden rounded-3xl"
-                  >
-                    <Image
-                      src={
-                        index === 0
-                          ? "/images/alpha.png"
-                          : index === 1
-                            ? "/images/abdi.png"
-                            : index === 2
-                              ? "/images/milkesa.png"
-                              : "/images/kenesa.png"
-                      }
-                      alt={member.name}
-                      width={300}
-                      height={400}
-                      className="h-[300px] w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/60 to-transparent p-4 text-white">
-                      <h4 className="font-bold">{member.name}</h4>
-                      <p className="text-sm">{member.role}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
+              <div className="mt-8">
+                <ExpandOnHover />
+              </div>
             </div>
           </motion.div>
         </section>
@@ -709,7 +623,7 @@ export function DesignAgency() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
-            className="container px-4 md:px-6 border border-muted rounded-3xl bg-muted/20"
+            className="container px-4 md:px-6"
           >
             <div className="flex flex-col items-center justify-center space-y-4 text-center py-10">
               <div className="space-y-3">
@@ -725,7 +639,7 @@ export function DesignAgency() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl"
+                  className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-white"
                 >
                   What Our Clients Say
                 </motion.h2>
@@ -740,87 +654,46 @@ export function DesignAgency() {
                 </motion.p>
               </div>
             </div>
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="mx-auto grid max-w-5xl gap-3 py-12 lg:grid-cols-2"
-            >
-              {[
+            <div className="flex justify-center py-12">
+              <Testimonials cards={[
                 {
-                  quote:
-                    "CyberSecure identified critical vulnerabilities we missed in our internal audits. Their AI platform saved us from potential breaches worth millions.",
-                  author: "Abel Tasew",
-                  company: "CISO, TechCorp",
-                  gender: "male",
+                  className: "[grid-area:stack] hover:-translate-y-10 before:absolute before:w-[100%] before:outline-1 before:rounded-2xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/60 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-500 hover:grayscale-0 before:left-0 before:top-0",
+                  avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Abel",
+                  username: "Abel Tasew",
+                  handle: "@abeltasew",
+                  content: "CyberSecure identified critical vulnerabilities we missed in our internal audits. Their AI platform saved us from potential breaches worth millions.",
+                  date: "Jan 5, 2026",
+                  verified: true,
+                  likes: 245,
+                  retweets: 42,
+                  tweetUrl: "https://x.com",
                 },
                 {
-                  quote:
-                    "The attention to detail and creative solutions provided by the team helped us increase our conversion rate by 40%.",
-                  author: "Lemma Bekele",
-                  company: "Marketing Director, GrowthCo",
-                  gender: "male",
+                  className: "[grid-area:stack] translate-x-8 sm:translate-x-16 translate-y-6 sm:translate-y-10 hover:-translate-y-1 before:absolute before:w-[100%] before:outline-1 before:rounded-2xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/60 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-500 hover:grayscale-0 before:left-0 before:top-0",
+                  avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Lemma",
+                  username: "Lemma Bekele",
+                  handle: "@lemmabekele",
+                  content: "The attention to detail and creative solutions provided by the team helped us increase our security posture by 40%.",
+                  date: "Jan 3, 2026",
+                  verified: true,
+                  likes: 189,
+                  retweets: 28,
+                  tweetUrl: "https://x.com",
                 },
                 {
-                  quote:
-                    "Their strategic approach to design not only improved our user experience but also strengthened our brand identity.",
-                  author: "Tigist Alemu",
-                  company: "Product Manager, InnovateLabs",
-                  gender: "female",
+                  className: "[grid-area:stack] translate-x-16 sm:translate-x-32 translate-y-12 sm:translate-y-20 hover:translate-y-6 sm:hover:translate-y-10",
+                  avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tigist",
+                  username: "Tigist Alemu",
+                  handle: "@tigistalemu",
+                  content: "Their strategic approach to security not only improved our infrastructure but also strengthened our brand trust.",
+                  date: "Jan 1, 2026",
+                  verified: true,
+                  likes: 312,
+                  retweets: 56,
+                  tweetUrl: "https://x.com",
                 },
-                {
-                  quote:
-                    "From concept to execution, the team demonstrated exceptional skill and professionalism. Highly recommended!",
-                  author: "Kebede Hailu",
-                  company: "Founder, NextWave",
-                  gender: "male",
-                },
-              ].map((testimonial, index) => (
-                <motion.div
-                  key={index}
-                  variants={itemFadeIn}
-                  whileHover={{ y: -10 }}
-                  className="flex flex-col justify-between rounded-3xl border bg-background p-6 shadow-sm"
-                >
-                  <div>
-                    <div className="flex gap-0.5 text-yellow-500">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          className="h-5 w-5"
-                        >
-                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <blockquote className="mt-4 text-lg font-medium leading-relaxed">
-                      "{testimonial.quote}"
-                    </blockquote>
-                  </div>
-                  <div className="mt-6 flex items-center">
-                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                      {testimonial.gender === "female" ? (
-                        <User className="h-5 w-5 text-pink-500" />
-                      ) : (
-                        <UserRound className="h-5 w-5 text-blue-500" />
-                      )}
-                    </div>
-                    <div className="ml-4">
-                      <p className="font-medium">{testimonial.author}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {testimonial.company}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
+              ]} />
+            </div>
           </motion.div>
         </section>
 
@@ -842,7 +715,7 @@ export function DesignAgency() {
               <div className="inline-block rounded-3xl bg-muted px-3 py-1 text-sm">
                 Contact
               </div>
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight text-white">
                 Secure Your Applications Today
               </h2>
               <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -1016,11 +889,11 @@ export function DesignAgency() {
               >
                 <ShieldCheck className="h-5 w-5 text-primary-foreground" />
               </motion.div>
-              <span className="font-bold text-xl">
+              <span className="font-bold text-xl text-white">
                 Cyber<span className="text-orange-500">Secure</span>
               </span>
             </Link>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-white">
               We protect digital infrastructure with AI-powered security testing
               and vulnerability assessment.
             </p>
@@ -1049,7 +922,7 @@ export function DesignAgency() {
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <div>
-              <h3 className="text-lg font-medium">Company</h3>
+              <h3 className="text-lg font-medium text-white">Company</h3>
               <nav className="mt-4 flex flex-col space-y-2 text-sm">
                 <Link
                   href="/about"
@@ -1078,7 +951,7 @@ export function DesignAgency() {
               </nav>
             </div>
             <div>
-              <h3 className="text-lg font-medium">Services</h3>
+              <h3 className="text-lg font-medium text-white">Services</h3>
               <nav className="mt-4 flex flex-col space-y-2 text-sm">
                 <Link
                   href="#"
@@ -1109,7 +982,7 @@ export function DesignAgency() {
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <div>
-              <h3 className="text-lg font-medium">Resources</h3>
+              <h3 className="text-lg font-medium text-white">Resources</h3>
               <nav className="mt-4 flex flex-col space-y-2 text-sm">
                 <Link
                   href="/blog"
@@ -1126,7 +999,7 @@ export function DesignAgency() {
               </nav>
             </div>
             <div>
-              <h3 className="text-lg font-medium">Legal</h3>
+              <h3 className="text-lg font-medium text-white">Legal</h3>
               <nav className="mt-4 flex flex-col space-y-2 text-sm">
                 <Link
                   href="/privacy-policy"
@@ -1144,8 +1017,8 @@ export function DesignAgency() {
             </div>
           </div>
           <div className="space-y-3">
-            <h3 className="text-lg font-medium">Subscribe to our newsletter</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="text-lg font-medium text-white">Subscribe to our newsletter</h3>
+            <p className="text-sm text-white">
               Stay updated with our latest projects, design tips, and company
               news.
             </p>
@@ -1163,13 +1036,14 @@ export function DesignAgency() {
         </motion.div>
         <div className="border-t">
           <div className="container flex flex-col items-center justify-between gap-3 py-6 md:h-16 md:flex-row md:py-0">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-foreground">
               &copy; {new Date().getFullYear()} CyberSecure. All rights
               reserved.
             </p>
           </div>
         </div>
       </footer>
+      </div>
     </div>
   );
 }
