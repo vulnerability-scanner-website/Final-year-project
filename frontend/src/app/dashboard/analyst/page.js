@@ -11,8 +11,74 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Shield, Clock, CheckCircle, AlertCircle, Plus } from "lucide-react";
+import { Shield, Clock, CheckCircle, AlertCircle, Plus, Globe, Server, Network } from "lucide-react";
 import AnalystSideBar from "@/components/sidebar/AnalystSideBar/Analyst";
+import { FeatureCard } from "@/components/ui/feature-card";
+import { CardStack } from "@/components/ui/card-stack";
+
+const ScanItem = ({
+  icon,
+  title,
+  status,
+  progress,
+  issues,
+  total,
+  date,
+}) => (
+  <div className="mb-4 flex items-center gap-4 last:mb-0">
+    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+      {icon}
+    </div>
+    <div className="flex-1">
+      <div className="flex justify-between">
+        <p className="font-medium text-card-foreground">{title}</p>
+        <p className="text-sm font-semibold text-card-foreground">{progress}%</p>
+      </div>
+      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className="h-full bg-primary"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+        <span>{issues} of {total} issues</span>
+        {date && <span>{date}</span>}
+        <span>{status}</span>
+      </div>
+    </div>
+  </div>
+);
+
+const items = [
+  {
+    id: 1,
+    title: "My Scans",
+    description: "23 Total security scans",
+    imageSrc: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&q=80",
+    href: "#",
+  },
+  {
+    id: 2,
+    title: "In Progress",
+    description: "3 Scans currently running",
+    imageSrc: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80",
+    href: "#",
+  },
+  {
+    id: 3,
+    title: "Completed",
+    description: "18 Successfully finished scans",
+    imageSrc: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80",
+    href: "#",
+  },
+  {
+    id: 4,
+    title: "Total Issues",
+    description: "45 Vulnerabilities detected",
+    imageSrc: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&q=80",
+    href: "#",
+  },
+];
 
 export default function Page() {
   return (
@@ -35,94 +101,56 @@ export default function Page() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-6">
-          <Card>
-            <CardContent className="flex justify-between items-center p-6">
-              <div>
-                <p className="text-muted-foreground">My Scans</p>
-                <h2 className="text-3xl font-bold">23</h2>
-              </div>
-              <div className="bg-blue-500/10 p-4 rounded-xl">
-                <Shield className="text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="flex justify-between items-center p-6">
-              <div>
-                <p className="text-muted-foreground">In Progress</p>
-                <h2 className="text-3xl font-bold">3</h2>
-              </div>
-              <div className="bg-yellow-500/10 p-4 rounded-xl">
-                <Clock className="text-yellow-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="flex justify-between items-center p-6">
-              <div>
-                <p className="text-muted-foreground">Completed</p>
-                <h2 className="text-3xl font-bold">18</h2>
-              </div>
-              <div className="bg-green-500/10 p-4 rounded-xl">
-                <CheckCircle className="text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="flex justify-between items-center p-6">
-              <div>
-                <p className="text-muted-foreground">Total Issues</p>
-                <h2 className="text-3xl font-bold">45</h2>
-              </div>
-              <div className="bg-red-500/10 p-4 rounded-xl">
-                <AlertCircle className="text-red-600" />
-              </div>
-            </CardContent>
-          </Card>
+        <div className="w-full overflow-hidden">
+          <div className="mx-auto w-full max-w-md">
+            <CardStack
+              items={items}
+              initialIndex={0}
+              cardWidth={400}
+              cardHeight={280}
+              autoAdvance
+              intervalMs={2000}
+              pauseOnHover
+              showDots
+            />
+          </div>
         </div>
 
       
 
         {/* Recent Scans */}
-        <Card>
-          <CardHeader>
-            <CardTitle>My Recent Scans</CardTitle>
-            <CardDescription>Overview of your latest scans</CardDescription>
-          </CardHeader>
-
-          <Separator />
-
-          <CardContent className="space-y-4 p-6">
-            {/* Scan Item */}
-            <div className="flex justify-between items-center border rounded-lg p-4">
-              <div>
-                <h4 className="font-semibold">Website Security Scan</h4>
-                <p className="text-sm text-muted-foreground">
-                  Completed on March 1, 2026
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <Badge
-                  variant="secondary"
-                  className="bg-green-100 text-green-700"
-                >
-                  Completed
-                </Badge>
-
-                <span className="text-sm text-muted-foreground">5 issues</span>
-
-                <Button variant="outline" size="sm">
-                  View
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <FeatureCard
+          title="My Recent Scans"
+          description="Overview of your latest security scans and their progress"
+        >
+          <div className="flex flex-col space-y-4">
+            <ScanItem
+              icon={<Globe className="h-6 w-6 text-primary" />}
+              title="Website Security Scan"
+              progress={63}
+              issues={25}
+              total={40}
+              status="In Progress"
+            />
+            <ScanItem
+              icon={<Server className="h-6 w-6 text-primary" />}
+              title="API Vulnerability Test"
+              progress={63}
+              issues={35}
+              total={45}
+              status="Scanning"
+            />
+            <ScanItem
+              icon={<Network className="h-6 w-6 text-primary" />}
+              title="Network Security Audit"
+              progress={100}
+              issues={42}
+              total={42}
+              status="Completed"
+              date="2 days ago"
+            />
+          </div>
+        </FeatureCard>
       </div>
     </>
   );

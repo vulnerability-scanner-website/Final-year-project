@@ -2,148 +2,146 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Clock, CheckCircle, AlertCircle, Plus } from "lucide-react";
+import { Shield, Clock, CheckCircle, AlertCircle, Plus, Globe, Server, Network } from "lucide-react";
+import DeveloperSideBar from "@/components/sidebar/DeveloperSideBar/Developer";
+import { CardStack } from "@/components/ui/card-stack";
+import { FeatureCard } from "@/components/ui/feature-card";
+
+const ScanItem = ({
+  icon,
+  title,
+  status,
+  progress,
+  issues,
+  total,
+  date,
+}) => (
+  <div className="mb-4 flex items-center gap-4 last:mb-0">
+    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+      {icon}
+    </div>
+    <div className="flex-1">
+      <div className="flex justify-between">
+        <p className="font-medium text-card-foreground">{title}</p>
+        <p className="text-sm font-semibold text-card-foreground">{progress}%</p>
+      </div>
+      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className="h-full bg-primary"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+        <span>{issues} of {total} issues</span>
+        {date && <span>{date}</span>}
+        <span>{status}</span>
+      </div>
+    </div>
+  </div>
+);
+
+const items = [
+  {
+    id: 1,
+    title: "My Scans",
+    description: "23 Total security scans",
+    imageSrc: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&q=80",
+    href: "#",
+  },
+  {
+    id: 2,
+    title: "In Progress",
+    description: "3 Scans currently running",
+    imageSrc: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80",
+    href: "#",
+  },
+  {
+    id: 3,
+    title: "Completed",
+    description: "18 Successfully finished scans",
+    imageSrc: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80",
+    href: "#",
+  },
+  {
+    id: 4,
+    title: "Total Issues",
+    description: "45 Vulnerabilities detected",
+    imageSrc: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&q=80",
+    href: "#",
+  },
+];
 
 export default function Page() {
-  const recentScans = [
-    {
-      id: 1,
-      name: "Website Security Scan",
-      date: "March 1, 2026",
-      status: "Completed",
-      issues: 5,
-    },
-    {
-      id: 2,
-      name: "API Vulnerability Scan",
-      date: "March 2, 2026",
-      status: "In Progress",
-      issues: 2,
-    },
-    {
-      id: 3,
-      name: "Mobile App Scan",
-      date: "March 3, 2026",
-      status: "Completed",
-      issues: 0,
-    },
-  ];
-
   return (
-    <div className="ml-64 p-6 space-y-8 bg-gray-50 min-h-screen">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">My Dashboard</h1>
-          <p className="text-muted-foreground">
-            Monitor your security scans and vulnerabilities
-          </p>
+    <>
+      <DeveloperSideBar />
+      <div className="ml-64 p-6 space-y-8 min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">My Dashboard</h1>
+            <p className="text-muted-foreground">
+              Monitor your security scans and vulnerabilities
+            </p>
+          </div>
+
+          <Button className="gap-2">
+            <Plus size={16} />
+            New Scan
+          </Button>
         </div>
 
-        <Button className="gap-2">
-          <Plus size={16} />
-          New Scan
-        </Button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid md:grid-cols-4 gap-6">
-        <StatCard title="My Scans" value="23" icon={<Shield />} color="blue" />
-        <StatCard
-          title="In Progress"
-          value="3"
-          icon={<Clock />}
-          color="yellow"
-        />
-        <StatCard
-          title="Completed"
-          value="18"
-          icon={<CheckCircle />}
-          color="green"
-        />
-        <StatCard
-          title="Total Issues"
-          value="45"
-          icon={<AlertCircle />}
-          color="red"
-        />
-      </div>
-
-      {/* Recent Scans */}
-      <Card>
-        <CardHeader>
-          <CardTitle>My Recent Scans</CardTitle>
-          <CardDescription>Overview of your latest scans</CardDescription>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
-          {recentScans.map((scan) => (
-            <div
-              key={scan.id}
-              className="flex justify-between items-center border rounded-lg p-4 hover:bg-gray-50 transition"
-            >
-              <div>
-                <h4 className="font-semibold">{scan.name}</h4>
-                <p className="text-sm text-muted-foreground">
-                  {scan.status} on {scan.date}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <Badge
-                  variant="secondary"
-                  className={
-                    scan.status === "Completed"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-yellow-100 text-yellow-700"
-                  }
-                >
-                  {scan.status}
-                </Badge>
-
-                <span className="text-sm text-muted-foreground">
-                  {scan.issues} issues
-                </span>
-
-                <Button variant="outline" size="sm">
-                  View
-                </Button>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-/* Reusable Stat Card */
-function StatCard({ title, value, icon, color }) {
-  const colors = {
-    blue: "bg-blue-500/10 text-blue-600",
-    yellow: "bg-yellow-500/10 text-yellow-600",
-    green: "bg-green-500/10 text-green-600",
-    red: "bg-red-500/10 text-red-600",
-  };
-
-  return (
-    <Card>
-      <CardContent className="flex justify-between items-center p-6">
-        <div>
-          <p className="text-muted-foreground">{title}</p>
-          <h2 className="text-3xl font-bold">{value}</h2>
+        {/* Stats Cards */}
+        <div className="w-full overflow-hidden">
+          <div className="mx-auto w-full max-w-md">
+            <CardStack
+              items={items}
+              initialIndex={0}
+              cardWidth={450}
+              cardHeight={300}
+              autoAdvance
+              intervalMs={2000}
+              pauseOnHover
+              showDots
+            />
+          </div>
         </div>
 
-        <div className={`p-4 rounded-xl ${colors[color]}`}>{icon}</div>
-      </CardContent>
-    </Card>
+        {/* Recent Scans */}
+        <FeatureCard
+          title="My Recent Scans"
+          description="Overview of your latest security scans and their progress"
+        >
+          <div className="flex flex-col space-y-4">
+            <ScanItem
+              icon={<Globe className="h-6 w-6 text-primary" />}
+              title="Website Security Scan"
+              progress={63}
+              issues={25}
+              total={40}
+              status="In Progress"
+            />
+            <ScanItem
+              icon={<Server className="h-6 w-6 text-primary" />}
+              title="API Vulnerability Test"
+              progress={63}
+              issues={35}
+              total={45}
+              status="Scanning"
+            />
+            <ScanItem
+              icon={<Network className="h-6 w-6 text-primary" />}
+              title="Network Security Audit"
+              progress={100}
+              issues={42}
+              total={42}
+              status="Completed"
+              date="2 days ago"
+            />
+          </div>
+        </FeatureCard>
+      </div>
+    </>
   );
 }
