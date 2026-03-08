@@ -71,6 +71,21 @@ function CardAction({
   );
 }
 
+function CardToolbar({
+  className,
+  ...props
+}) {
+  return (
+    <div
+      data-slot="card-toolbar"
+      className={cn(
+        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
+        className
+      )}
+      {...props} />
+  );
+}
+
 function CardContent({
   className,
   ...props
@@ -96,6 +111,7 @@ export {
   CardFooter,
   CardTitle,
   CardAction,
+  CardToolbar,
   CardDescription,
   CardContent,
 }
