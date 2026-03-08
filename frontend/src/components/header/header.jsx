@@ -3,8 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Bell } from "lucide-react";
+import NewScanDialog from "@/components/popup/NewScanDialog";
+import { useState } from "react";
 
 export function DashboardHeader({ role, onActionClick }) {
+  const [showNewScanDialog, setShowNewScanDialog] = useState(false);
+
   const pageh1 =
     role === "admin"
       ? "Admin Dashboard"
@@ -32,7 +36,16 @@ export function DashboardHeader({ role, onActionClick }) {
       ? "Add New User"
       : "New Action";
 
+  const handleButtonClick = () => {
+    if (role === "admin") {
+      setShowNewScanDialog(true);
+    } else if (onActionClick) {
+      onActionClick();
+    }
+  };
+
   return (
+    <>
     <header className="flex items-center justify-between border-b bg-background px-6 py-4 relative overflow-hidden">
       {/* Bent header effect: bottom-left and top-right angled strips */}
       <div className="absolute inset-0 pointer-events-none">
@@ -64,7 +77,7 @@ export function DashboardHeader({ role, onActionClick }) {
         <div className="relative inline-block group">
           <Button
             className="relative z-10 flex items-center gap-2 bg-[#003366] hover:bg-[#004080] text-white cursor-pointer transition-all duration-300"
-            onClick={onActionClick}
+            onClick={handleButtonClick}
           >
             <Plus className="h-4 w-4" />
             {pagebuttontext}
@@ -76,5 +89,9 @@ export function DashboardHeader({ role, onActionClick }) {
         </div>
       </div>
     </header>
+    {role === "admin" && showNewScanDialog && (
+      <NewScanDialog open={showNewScanDialog} onOpenChange={setShowNewScanDialog} />
+    )}
+    </>
   );
 }
