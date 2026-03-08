@@ -8,6 +8,7 @@ import {
   LucideFileText,
   LucideActivity,
   LucideLogOut,
+  Wallet,
 } from "lucide-react";
 
 export default function AnalystSideBar() {
@@ -18,6 +19,11 @@ export default function AnalystSideBar() {
       name: "Dashboard",
       href: "/dashboard/analyst",
       icon: <LucideHome size={20} />,
+    },
+    {
+      name: "subcription",
+      href: "/dashboard/analyst/price",
+      icon: <Wallet size={20} />,
     },
     {
       name: "Scan Management",

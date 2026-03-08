@@ -9,7 +9,8 @@ import {
   LucideSettings,
   LucideShield,
   LucideLogOut,
-  Bell
+  Bell,
+  Wallet 
 } from "lucide-react";
 
 export default function AdminSideBar() {
@@ -25,6 +26,11 @@ export default function AdminSideBar() {
       name: "Scan Management",
       href: "/dashboard/admin/scan_management",
       icon: <LucideShield size={20} />,
+    },
+    {
+      name: "manage_subscription",
+      href: "/dashboard/admin/price-management",
+      icon: <Wallet  size={20} />,
     },
     {
       name: "Users Management",
