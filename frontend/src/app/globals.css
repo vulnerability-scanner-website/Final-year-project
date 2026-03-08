@@ -48,6 +48,14 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-color-destructive-foreground: var(----color-destructive-foreground);
   --color-color-color-destructive-foreground: var(----color-color-destructive-foreground);
+  @keyframes spin {
+  0% {
+    transform: rotate(0deg);
+    }
+  100% {
+    transform: rotate(360deg);
+    }
+  }
 }
 
 :root {
