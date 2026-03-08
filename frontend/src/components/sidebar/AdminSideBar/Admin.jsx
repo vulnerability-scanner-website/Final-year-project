@@ -28,7 +28,7 @@ export default function AdminSideBar() {
       icon: <LucideShield size={20} />,
     },
     {
-      name: "manage_subscription",
+      name: "subscription",
       href: "/dashboard/admin/price-management",
       icon: <Wallet  size={20} />,
     },
