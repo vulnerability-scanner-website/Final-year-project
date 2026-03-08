@@ -2,12 +2,12 @@
 
 import React from 'react';
 import PricingSection4 from "@/components/ui/pricing-section-4";
-import DeveloperSideBar from "@/components/sidebar/DeveloperSideBar/Developer";
+import AnalystSideBar from "@/components/sidebar/AnalystSideBar/Analyst";
 
 export default function Page() {
   return (
     <>
-      <DeveloperSideBar />
+      <AnalystSideBar />
       <div className="ml-64">
         <PricingSection4 />
       </div>
