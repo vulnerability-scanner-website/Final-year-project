@@ -19,9 +19,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+
 import { ShieldCheck, Bug } from "lucide-react";
 import { DashboardHeader } from "@/components/header/header";
-import { bg } from "date-fns/locale";
 
 /* ---------------- Mock Data ---------------- */
 
@@ -73,7 +73,7 @@ const vulnerabilities = [
   },
 ];
 
-/* ---------------- Helpers ---------------- */
+/* ---------------- Helper ---------------- */
 
 const getVulnCount = (scanId) =>
   vulnerabilities.filter((v) => v.scanId === scanId).length;
@@ -85,41 +85,40 @@ export default function ScanManagement() {
 
   const handleManageAction = (action, scanId) => {
     console.log(`Action: ${action} on scan ${scanId}`);
-    // connect to API later
   };
 
   return (
-    <div className="ml-64 p-5 space-y-4">
+    <div className="ml-64 p-5 space-y-6">
       {/* Header */}
       <DashboardHeader role="scanmanagement" />
 
-      <Tabs defaultValue="active">
-        <Tabs defaultValue="active">
-          <TabsList className="grid w-full grid-cols-2 max-w-md h-14 bg-[#e6eef5] p-1 rounded-lg">
-            <TabsTrigger
-              value="active"
-              className="h-full text-lg font-semibold px-6 rounded-md
-               data-[state=active]:bg-[#003366]
-               data-[state=active]:text-white
-               transition"
-            >
-              Active Scans
-            </TabsTrigger>
+      <Tabs defaultValue="active" className="space-y-6">
+        {/* Tabs Header */}
+        <TabsList className="grid w-full grid-cols-2 max-w-md h-14 bg-[#e6eef5] p-1 rounded-lg">
+          <TabsTrigger
+            value="active"
+            className="h-full text-lg font-semibold px-6 rounded-md
+              data-[state=active]:bg-[#003366]
+              data-[state=active]:text-white
+              transition"
+          >
+            Active Scans
+          </TabsTrigger>
 
-            <TabsTrigger
-              value="vulnerabilities"
-              className="h-full text-lg font-semibold px-6 rounded-md
-               data-[state=active]:bg-[#003366]
-               data-[state=active]:text-white
-               transition"
-            >
-              Vulnerabilities
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+          <TabsTrigger
+            value="vulnerabilities"
+            className="h-full text-lg font-semibold px-6 rounded-md
+              data-[state=active]:bg-[#003366]
+              data-[state=active]:text-white
+              transition"
+          >
+            Vulnerabilities
+          </TabsTrigger>
+        </TabsList>
 
         {/* ---------------- Active Scans ---------------- */}
-        <TabsContent value="active" className="mt-6 space-y-6">
+
+        <TabsContent value="active" className="space-y-6">
           {activeScans.map((scan) => (
             <Card
               key={scan.id}
@@ -131,18 +130,20 @@ export default function ScanManagement() {
                     <ShieldCheck className="h-5 w-5 text-[#003366]" />
                     {scan.name}
                   </CardTitle>
+
                   <CardDescription className="text-gray-600">
                     {scan.target}
                   </CardDescription>
                 </div>
+
                 <Badge
                   variant="outline"
                   className={`${
                     scan.status === "Running"
                       ? "text-green-600 border-green-600"
                       : scan.status === "Queued"
-                        ? "text-yellow-600 border-yellow-600"
-                        : "text-blue-600 border-blue-600"
+                      ? "text-yellow-600 border-yellow-600"
+                      : "text-blue-600 border-blue-600"
                   }`}
                 >
                   {scan.status}
@@ -150,26 +151,35 @@ export default function ScanManagement() {
               </CardHeader>
 
               <CardContent className="space-y-4">
+                {/* Progress */}
                 <Progress
                   value={scan.progress}
                   className="bg-gray-300 [&>div]:bg-[#003366]"
                 />
+
                 <div className="flex justify-between text-sm">
                   <span className="text-[#003366] font-medium">
                     Progress: {scan.progress}%
                   </span>
 
-                  <span className="text-gray-500">Started: {scan.started}</span>
+                  <span className="text-gray-500">
+                    Started: {scan.started}
+                  </span>
                 </div>
 
+                {/* Vulnerability Info */}
                 <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2 text-sm">
                   <span className="font-medium text-[#003366]">
                     Active Scan #{scan.id}
                   </span>
+
                   <span className="text-muted-foreground">→</span>
+
                   <span className="flex items-center gap-1 text-gray-700">
                     Generated
-                    <Badge variant="destructive">{getVulnCount(scan.id)}</Badge>
+                    <Badge variant="destructive">
+                      {getVulnCount(scan.id)}
+                    </Badge>
                     <span className="font-medium text-[#003366]">
                       vulnerabilities
                     </span>
@@ -178,54 +188,71 @@ export default function ScanManagement() {
 
                 <Separator />
 
+                {/* Buttons */}
                 <div className="flex justify-end gap-2">
-                  {/* View Details Button */}
+                  {/* View Details */}
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() =>
-                      router.push(`/dashboard/admin/scan_management/${scan.id}`)
+                      router.push(
+                        `/dashboard/developer/scan_management/${scan.id}`
+                      )
                     }
-                    className={"hover:bg-amber-500"}
+                    className="hover:bg-amber-500 cursor-pointer"
                   >
                     View Details
                   </Button>
 
-                  {/* Manage Dropdown */}
+                  {/* Manage */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button size="sm" className={"bg-[#003366]"}>
+                      <Button
+                        size="sm"
+                        className="bg-[#003366] cursor-pointer"
+                      >
                         Manage
                       </Button>
                     </DropdownMenuTrigger>
+
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        onClick={() => handleManageAction("pause", scan.id)}
-                        className="data-[highlighted]:bg-yellow-600 data-[highlighted]:text-white"
+                        onClick={() =>
+                          handleManageAction("pause", scan.id)
+                        }
                       >
                         Pause Scan
                       </DropdownMenuItem>
+
                       <DropdownMenuItem
-                        onClick={() => handleManageAction("resume", scan.id)}
-                        className="data-[highlighted]:bg-green-600 data-[highlighted]:text-white"
+                        onClick={() =>
+                          handleManageAction("resume", scan.id)
+                        }
                       >
                         Resume Scan
                       </DropdownMenuItem>
+
                       <DropdownMenuItem
-                        onClick={() => handleManageAction("stop", scan.id)}
-                        className="data-[highlighted]:bg-red-600 data-[highlighted]:text-white"
+                        onClick={() =>
+                          handleManageAction("stop", scan.id)
+                        }
                       >
                         Stop Scan
                       </DropdownMenuItem>
+
                       <DropdownMenuItem
-                        onClick={() => handleManageAction("rerun", scan.id)}
-                        className="data-[highlighted]:bg-[#003366] data-[highlighted]:text-white"
+                        onClick={() =>
+                          handleManageAction("rerun", scan.id)
+                        }
                       >
                         Re-run Scan
                       </DropdownMenuItem>
+
                       <DropdownMenuItem
-                        onClick={() => handleManageAction("delete", scan.id)}
-                        className="text-red-600 data-[highlighted]:bg-red-600 data-[highlighted]:text-white"
+                        className="text-red-600"
+                        onClick={() =>
+                          handleManageAction("delete", scan.id)
+                        }
                       >
                         Delete Scan
                       </DropdownMenuItem>
@@ -238,21 +265,51 @@ export default function ScanManagement() {
         </TabsContent>
 
         {/* ---------------- Vulnerabilities ---------------- */}
-        <TabsContent value="vulnerabilities" className="mt-6 space-y-4">
+
+        <TabsContent value="vulnerabilities" className="space-y-4">
+          {/* Counter */}
+          <div className="text-sm text-gray-600">
+            Total Vulnerabilities
+            <Badge variant="destructive" className="ml-2">
+              {vulnerabilities.length}
+            </Badge>
+          </div>
+
           {vulnerabilities.map((vuln) => (
             <Card
               key={vuln.id}
+              className="cursor-pointer hover:shadow-lg transition-shadow border hover:border-red-400"
               onClick={() =>
-                router.push(`/admin/scan_management/${vuln.scanId}`)
+                router.push(
+                  `/dashboard/developer/scan_management/${vuln.scanId}`
+                )
               }
-              className="cursor-pointer hover:shadow-lg transition-shadow"
             >
               <CardHeader className="flex justify-between items-start">
                 <div>
-                  <CardTitle>{vuln.title}</CardTitle>
-                  <CardDescription>Scan #{vuln.scanId}</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bug className="h-4 w-4 text-red-500" />
+                    {vuln.title}
+                  </CardTitle>
+
+                  <CardDescription>
+                    Found in Scan #{vuln.scanId}
+                  </CardDescription>
                 </div>
-                <Badge variant="destructive">{vuln.severity}</Badge>
+
+                <Badge
+                  variant={
+                    vuln.severity === "Critical"
+                      ? "destructive"
+                      : vuln.severity === "High"
+                      ? "destructive"
+                      : vuln.severity === "Medium"
+                      ? "secondary"
+                      : "outline"
+                  }
+                >
+                  {vuln.severity}
+                </Badge>
               </CardHeader>
             </Card>
           ))}
