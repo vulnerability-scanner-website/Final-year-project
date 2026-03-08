@@ -1,192 +1,161 @@
 "use client"
-import React, { useState } from "react"
+import React from "react"
 import AdminSideBar from "@/components/sidebar/AdminSideBar/Admin"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { MessageSquare, Clock, Calendar } from "lucide-react"
+import { EmailClientCard } from '@/components/ui/email-client-card';
+import { Send, Trash } from 'lucide-react';
 
 export default function Page() {
-  const notificationsPerPage = 3
+  const notifications = [
+    {
+      avatarSrc: 'https://i.pravatar.cc/150?img=1',
+      avatarFallback: 'DM',
+      senderName: 'Department Meeting',
+      senderEmail: 'admin@company.com',
+      timestamp: '2 hours ago',
+      message: 'Supervisor provided feedback on your evaluation.',
+      reactions: ['👍', '✅', '📝'],
+    },
+    {
+      avatarSrc: 'https://i.pravatar.cc/150?img=2',
+      avatarFallback: 'ED',
+      senderName: 'Evaluation Due',
+      senderEmail: 'system@company.com',
+      timestamp: '1 day ago',
+      message: 'Final evaluation is due tomorrow at 11:59 PM',
+      reactions: ['⏰', '⚠️', '📅'],
+    },
+    {
+      avatarSrc: 'https://i.pravatar.cc/150?img=3',
+      avatarFallback: 'MS',
+      senderName: 'Meeting Scheduled',
+      senderEmail: 'calendar@company.com',
+      timestamp: '2 days ago',
+      message: 'Department meeting scheduled for Friday at 2:00 PM',
+      reactions: ['📅', '👥', '🕐'],
+    },
+    {
+      avatarSrc: 'https://i.pravatar.cc/150?img=4',
+      avatarFallback: 'NA',
+      senderName: 'New Announcement',
+      senderEmail: 'hr@company.com',
+      timestamp: '3 days ago',
+      message: 'A new department policy has been published.',
+      reactions: ['📢', '📋', '✨'],
+    },
+    {
+      avatarSrc: 'https://i.pravatar.cc/150?img=5',
+      avatarFallback: 'SU',
+      senderName: 'System Update',
+      senderEmail: 'it@company.com',
+      timestamp: '4 days ago',
+      message: 'System maintenance scheduled this weekend.',
+      reactions: ['🔧', '💻', '⚙️'],
+    },
+    {
+      avatarSrc: 'https://i.pravatar.cc/150?img=6',
+      avatarFallback: 'RM',
+      senderName: 'Reminder',
+      senderEmail: 'notifications@company.com',
+      timestamp: '5 days ago',
+      message: 'Submit your weekly report before Friday.',
+      reactions: ['📝', '⏰', '✅'],
+    },
+    {
+      avatarSrc: 'https://i.pravatar.cc/150?img=7',
+      avatarFallback: 'SR',
+      senderName: 'Security Report',
+      senderEmail: 'security@company.com',
+      timestamp: '6 days ago',
+      message: 'New security vulnerabilities detected in your recent scan. Please review the findings.',
+      reactions: ['🔒', '⚠️', '🛡️'],
+    },
+    {
+      avatarSrc: 'https://i.pravatar.cc/150?img=8',
+      avatarFallback: 'TA',
+      senderName: 'Team Achievement',
+      senderEmail: 'team@company.com',
+      timestamp: '1 week ago',
+      message: 'Congratulations! Your team has successfully completed all security scans for this quarter.',
+      reactions: ['🎉', '🏆', '👏'],
+    },
+    {
+      avatarSrc: 'https://i.pravatar.cc/150?img=9',
+      avatarFallback: 'PA',
+      senderName: 'Performance Alert',
+      senderEmail: 'monitoring@company.com',
+      timestamp: '1 week ago',
+      message: 'System performance metrics show optimal results. All services running smoothly.',
+      reactions: ['📊', '✅', '🚀'],
+    },
+    {
+      avatarSrc: 'https://i.pravatar.cc/150?img=10',
+      avatarFallback: 'BU',
+      senderName: 'Backup Complete',
+      senderEmail: 'backup@company.com',
+      timestamp: '2 weeks ago',
+      message: 'Automated backup completed successfully. All data has been securely stored.',
+      reactions: ['💾', '✅', '🔐'],
+    },
+    {
+      avatarSrc: 'https://i.pravatar.cc/150?img=11',
+      avatarFallback: 'LR',
+      senderName: 'License Renewal',
+      senderEmail: 'licensing@company.com',
+      timestamp: '2 weeks ago',
+      message: 'Your software license will expire in 30 days. Please renew to continue using all features.',
+      reactions: ['📜', '⏰', '💳'],
+    },
+    {
+      avatarSrc: 'https://i.pravatar.cc/150?img=12',
+      avatarFallback: 'TR',
+      senderName: 'Training Required',
+      senderEmail: 'training@company.com',
+      timestamp: '3 weeks ago',
+      message: 'New security training module is now available. Complete it before the end of the month.',
+      reactions: ['🎓', '📚', '✅'],
+    },
+  ];
 
-  // ✅ Move mock data into state
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Department Meeting",
-      description: "Supervisor provided feedback on your evaluation.",
-      time: "2 hours ago",
-      icon: <MessageSquare className="h-5 w-5 text-blue-600" />,
-      unread: true,
-    },
-    {
-      id: 2,
-      title: "Evaluation Due Tomorrow",
-      description: "Final evaluation is due tomorrow at 11:59 PM",
-      time: "1 day ago",
-      icon: <Clock className="h-5 w-5 text-red-600" />,
-      unread: true,
-    },
-    {
-      id: 3,
-      title: "Meeting Scheduled",
-      description: "Department meeting scheduled for Friday at 2:00 PM",
-      time: "2 days ago",
-      icon: <Calendar className="h-5 w-5 text-blue-600" />,
-      unread: false,
-    },
-    {
-      id: 4,
-      title: "New Announcement",
-      description: "A new department policy has been published.",
-      time: "3 days ago",
-      icon: <MessageSquare className="h-5 w-5 text-blue-600" />,
-      unread: true,
-    },
-    {
-      id: 5,
-      title: "System Update",
-      description: "System maintenance scheduled this weekend.",
-      time: "4 days ago",
-      icon: <Clock className="h-5 w-5 text-red-600" />,
-      unread: false,
-    },
-    {
-      id: 6,
-      title: "Reminder",
-      description: "Submit your weekly report before Friday.",
-      time: "5 days ago",
-      icon: <Calendar className="h-5 w-5 text-blue-600" />,
-      unread: false,
-    },
-  ])
+  const handleReaction = (reaction) => {
+    console.log(`Reacted with: ${reaction}`);
+  };
 
-  const totalPages = Math.ceil(notifications.length / notificationsPerPage)
-  const [currentPage, setCurrentPage] = useState(1)
-
-  const indexOfLast = currentPage * notificationsPerPage
-  const indexOfFirst = indexOfLast - notificationsPerPage
-  const currentNotifications = notifications.slice(
-    indexOfFirst,
-    indexOfLast
-  )
-
-  // ✅ Mark single notification as read
-  const handleMarkRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, unread: false } : item
-      )
-    )
-  }
-
-  // ✅ Mark all notifications as read
-  const handleMarkAllRead = () => {
-    setNotifications((prev) =>
-      prev.map((item) => ({ ...item, unread: false }))
-    )
-  }
+  const handleAction = (index) => {
+    const action = ['Send', 'Delete'][index];
+    console.log(`Action clicked: ${action}`);
+  };
 
   return (
     <div className="flex min-h-screen bg-muted/40">
       <AdminSideBar />
 
       <div className="flex-1 ml-64 p-8">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Notifications</h1>
-            <p className="text-muted-foreground mt-1">
-              Stay updated with important information
-            </p>
-          </div>
-
-          <Button variant="outline" onClick={handleMarkAllRead}>
-            Mark All Read
-          </Button>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">Notifications</h1>
+          <p className="text-muted-foreground mt-1">
+            Stay updated with important information
+          </p>
         </div>
-
-        {/* Notifications */}
-        <div className="space-y-4">
-          {currentNotifications.map((item) => (
-            <Card
-              key={item.id}
-              className={`rounded-2xl shadow-sm border ${
-                item.unread ? "bg-blue-50/40" : ""
-              }`}
-            >
-              <CardContent className="flex items-center justify-between p-6">
-                <div className="flex items-start gap-4">
-                  <div className="bg-blue-100 p-2 rounded-xl">
-                    {item.icon}
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="font-semibold">{item.title}</h2>
-                      {item.unread && (
-                        <Badge className="h-2 w-2 rounded-full p-0 bg-blue-600" />
-                      )}
-                    </div>
-
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {item.description}
-                    </p>
-
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {item.time}
-                    </p>
-                  </div>
-                </div>
-
-                {item.unread && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleMarkRead(item.id)}
-                  >
-                    Mark Read
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Pagination */}
-        <Separator className="my-8" />
-
-        <div className="flex items-center justify-center gap-4 text-sm">
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-          >
-            &lt; Previous
-          </Button>
-
-          {[...Array(totalPages)].map((_, index) => (
-            <Button
+        
+        <div className="space-y-4 w-full max-w-full">
+          {notifications.map((notification, index) => (
+            <EmailClientCard
               key={index}
-              variant={currentPage === index + 1 ? "outline" : "ghost"}
-              size="sm"
-              className="w-8 h-8 p-0"
-              onClick={() => setCurrentPage(index + 1)}
-            >
-              {index + 1}
-            </Button>
+              avatarSrc={notification.avatarSrc}
+              avatarFallback={notification.avatarFallback}
+              senderName={notification.senderName}
+              senderEmail={notification.senderEmail}
+              timestamp={notification.timestamp}
+              message={notification.message}
+              reactions={notification.reactions}
+              onReactionClick={handleReaction}
+              onActionClick={handleAction}
+              actions={[
+                <Send key="send" className="w-4 h-4" />,
+                <Trash key="trash" className="w-4 h-4" />,
+              ]}
+            />
           ))}
-
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-          >
-            Next &gt;
-          </Button>
         </div>
       </div>
     </div>
