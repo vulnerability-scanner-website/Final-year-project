@@ -8,6 +8,7 @@ import {
   LucideFileText,
   LucideLogOut,
   User2Icon,
+  Wallet,
 } from "lucide-react";
 
 export default function DeveloperSideBar() {
@@ -18,6 +19,11 @@ export default function DeveloperSideBar() {
       name: "Dashboard",
       href: "/dashboard/developer",
       icon: LucideHome,
+    },
+    {
+      name: "subcription",
+      href: "/dashboard/developer/price",
+      icon: Wallet,
     },
     {
       name: "Scan Management",
