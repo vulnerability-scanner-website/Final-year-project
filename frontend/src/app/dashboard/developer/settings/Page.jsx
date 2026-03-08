@@ -7,140 +7,132 @@ import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 
-export default function Page() {
-
-  const [scanEmail, setScanEmail] = useState(true)
-  const [criticalAlerts, setCriticalAlerts] = useState(true)
+export default function DeveloperSettings() {
+  const [emailNotif, setEmailNotif] = useState(true)
+  const [scanAlerts, setScanAlerts] = useState(true)
   const [weeklyReports, setWeeklyReports] = useState(false)
-  const [autoScan, setAutoScan] = useState(false)
+  const [apiAccess, setApiAccess] = useState(false)
 
   return (
     <div className="ml-64 p-6 space-y-6 bg-gray-50 min-h-screen">
-
-      {/* Header */}
+      
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Settings</h1>
-        <Button>Save Changes</Button>
+        <div>
+          <h1 className="text-3xl font-bold text-[#003366]">Settings</h1>
+          <p className="text-gray-600 mt-1">Manage your account and preferences</p>
+        </div>
+        <Button className="bg-[#003366] hover:bg-[#002244]">Save Changes</Button>
       </div>
 
-      {/* Profile + Notifications */}
       <div className="grid md:grid-cols-2 gap-6">
 
-        {/* Developer Account */}
         <Card>
           <CardHeader>
-            <CardTitle>Developer Account</CardTitle>
+            <CardTitle>Profile Information</CardTitle>
             <CardDescription>
-              Manage your developer information
+              Update your personal information
             </CardDescription>
           </CardHeader>
-
           <CardContent className="space-y-4">
-
             <div>
-              <label className="text-sm">Full Name</label>
-              <Input defaultValue="Developer Name" />
+              <label className="text-sm font-medium">Full Name</label>
+              <Input defaultValue="John Doe" />
             </div>
 
             <div>
-              <label className="text-sm">Email</label>
-              <Input defaultValue="developer@email.com" />
+              <label className="text-sm font-medium">Email</label>
+              <Input defaultValue="john@example.com" />
             </div>
 
             <div>
-              <label className="text-sm">Organization</label>
-              <Input placeholder="Company or Organization" />
+              <label className="text-sm font-medium">Phone</label>
+              <Input defaultValue="+1 234 567 8900" />
             </div>
-
           </CardContent>
         </Card>
 
-        {/* Notifications */}
         <Card>
           <CardHeader>
             <CardTitle>Notification Settings</CardTitle>
             <CardDescription>
-              Configure alerts and report notifications
+              Configure your notification preferences
             </CardDescription>
           </CardHeader>
-
           <CardContent className="space-y-5">
 
             <div className="flex justify-between items-center">
               <div>
-                <p>Scan Completion Email</p>
-                <p className="text-sm text-muted-foreground">
-                  Get notified when scans finish
+                <p className="font-medium">Email Notifications</p>
+                <p className="text-sm text-gray-500">
+                  Receive notifications via email
                 </p>
               </div>
-              <Switch checked={scanEmail} onCheckedChange={setScanEmail} />
+              <Switch checked={emailNotif} onCheckedChange={setEmailNotif} />
             </div>
 
             <Separator />
 
             <div className="flex justify-between items-center">
               <div>
-                <p>Critical Vulnerability Alerts</p>
-                <p className="text-sm text-muted-foreground">
-                  Notify when critical vulnerabilities appear
+                <p className="font-medium">Scan Alerts</p>
+                <p className="text-sm text-gray-500">
+                  Get alerts when scans complete
                 </p>
               </div>
-              <Switch checked={criticalAlerts} onCheckedChange={setCriticalAlerts} />
+              <Switch checked={scanAlerts} onCheckedChange={setScanAlerts} />
             </div>
 
             <Separator />
 
             <div className="flex justify-between items-center">
               <div>
-                <p>Weekly Security Reports</p>
-                <p className="text-sm text-muted-foreground">
-                  Receive weekly vulnerability summaries
+                <p className="font-medium">Weekly Reports</p>
+                <p className="text-sm text-gray-500">
+                  Receive weekly summary reports
                 </p>
               </div>
               <Switch checked={weeklyReports} onCheckedChange={setWeeklyReports} />
             </div>
-
           </CardContent>
         </Card>
-
       </div>
 
-      {/* Scan Settings + Security */}
       <div className="grid md:grid-cols-2 gap-6">
 
-        {/* Scan Configuration */}
         <Card>
           <CardHeader>
-            <CardTitle>Scan Configuration</CardTitle>
+            <CardTitle>Security Settings</CardTitle>
             <CardDescription>
-              Control automated vulnerability scanning
+              Manage your security preferences
             </CardDescription>
           </CardHeader>
-
           <CardContent className="space-y-5">
 
             <div className="flex justify-between items-center">
               <div>
-                <p>Automatic Scanning</p>
-                <p className="text-sm text-muted-foreground">
-                  Run scans automatically
+                <p className="font-medium">API Access</p>
+                <p className="text-sm text-gray-500">
+                  Enable API access for integrations
                 </p>
               </div>
-              <Switch checked={autoScan} onCheckedChange={setAutoScan} />
+              <Switch checked={apiAccess} onCheckedChange={setApiAccess} />
             </div>
 
+            <Separator />
+
+            <Button variant="outline" className="w-full">
+              Generate API Key
+            </Button>
           </CardContent>
         </Card>
 
-        {/* Account Security */}
         <Card>
           <CardHeader>
-            <CardTitle>Account Security</CardTitle>
+            <CardTitle>Account Management</CardTitle>
             <CardDescription>
-              Manage password and access
+              Manage your account settings
             </CardDescription>
           </CardHeader>
-
           <CardContent className="space-y-4">
 
             <Button variant="outline" className="w-full">
@@ -148,18 +140,16 @@ export default function Page() {
             </Button>
 
             <Button variant="outline" className="w-full">
-              Enable Two-Factor Authentication
+              Download My Data
             </Button>
 
-            <Button variant="outline" className="w-full">
-              Manage API Keys
+            <Button variant="destructive" className="w-full">
+              Delete Account
             </Button>
 
           </CardContent>
         </Card>
-
       </div>
-
     </div>
   )
 }

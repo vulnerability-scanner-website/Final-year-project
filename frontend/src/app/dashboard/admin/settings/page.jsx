@@ -156,7 +156,7 @@ export default function Page() {
               <div>
                 <p>Require Approval</p>
                 <p className="text-sm text-muted-foreground">
-                  Require approval for internship applications
+                  Require approval forapplications
                 </p>
               </div>
               <Switch

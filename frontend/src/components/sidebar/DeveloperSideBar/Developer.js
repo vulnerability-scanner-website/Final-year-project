@@ -9,6 +9,7 @@ import {
   LucideLogOut,
   User2Icon,
   Wallet,
+  Settings
 } from "lucide-react";
 
 export default function DeveloperSideBar() {
@@ -34,6 +35,11 @@ export default function DeveloperSideBar() {
       name: "Security Findings",
       href: "/dashboard/developer/security_findings",
       icon: LucideShield,
+    },
+    {
+      name: "settings",
+      href: "/dashboard/developer/settings",
+      icon: Settings,
     },
     {
       name: "Reports",
