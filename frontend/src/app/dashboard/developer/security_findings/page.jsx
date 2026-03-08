@@ -2,18 +2,10 @@
 
 import { useState } from "react";
 import DeveloperSideBar from "@/components/sidebar/DeveloperSideBar/Developer";
-import { Eye, Download, Trash2, Plus } from "lucide-react";
+import { Plus, Shield, Search, AlertTriangle, CheckCircle, Clock, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import TrackingTimeline, { TimelineItem } from "@/components/ui/order-history";
 import ViewScanDialog from "@/components/popup/ViewScanDialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Card,
   CardContent,
@@ -21,6 +13,54 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+
+const scan1History = [
+  {
+    id: 1,
+    status: "completed",
+    title: "Scan Initiated",
+    date: "15 Jan 2024, 08:45",
+    icon: <Search className="h-4 w-4 text-white" />,
+  },
+  {
+    id: 2,
+    status: "completed",
+    title: "Vulnerability Assessment",
+    date: "15 Jan 2024, 08:47",
+    icon: <Shield className="h-4 w-4 text-white" />,
+  },
+  {
+    id: 3,
+    status: "completed",
+    title: "Security Analysis Complete",
+    date: "15 Jan 2024, 08:52",
+    icon: <CheckCircle className="h-4 w-4 text-white" />,
+  },
+];
+
+const scan2History = [
+  {
+    id: 4,
+    status: "completed",
+    title: "Scan Initiated",
+    date: "15 Jan 2024, 09:15",
+    icon: <Search className="h-4 w-4 text-white" />,
+  },
+  {
+    id: 5,
+    status: "in-progress",
+    title: "Vulnerability Assessment",
+    date: "In Progress",
+    icon: <Clock className="h-4 w-4 text-primary" />,
+  },
+  {
+    id: 6,
+    status: "pending",
+    title: "Security Analysis",
+    date: "Pending",
+    icon: <ShieldCheck className="h-4 w-4 text-muted-foreground/50" />,
+  },
+];
 
 const scanData = [
   {
@@ -82,80 +122,32 @@ export default function ScanManagementPage() {
           </Button>
         </div>
 
-        {/* Card */}
-        <Card className="shadow-lg border-0 rounded-2xl overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-lg">Scan History</CardTitle>
-            <CardDescription>
-              A list of your recent automated security checks.
-            </CardDescription>
-          </CardHeader>
+        {/* Scan History Timeline */}
+        <div className="space-y-6">
+          <Card className="shadow-lg border-0 rounded-2xl overflow-hidden">
+            <CardHeader>
+              <CardTitle className="text-lg">mywebsite.com - Scan Complete</CardTitle>
+              <CardDescription>
+                Security scan completed successfully
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-10">
+              <TrackingTimeline items={scan1History} />
+            </CardContent>
+          </Card>
 
-          <CardContent className="px-10">
-            <Table>
-              <TableHeader className="bg-gray-100">
-                <TableRow>
-                  <TableHead>Target URL</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-center">Issues</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="mr-10">Duration</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {scanData.map((scan) => (
-                  <TableRow key={scan.id} className="hover:bg-gray-50">
-                    <TableCell>{scan.target}</TableCell>
-
-                    <TableCell>
-                      <Badge
-                        className={
-                          scan.status === "Completed"
-                            ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-                            : "bg-blue-100 text-blue-700 border border-blue-200"
-                        }
-                      >
-                        {scan.status}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell className="text-center">
-                      <span
-                        className={
-                          scan.issues === 0
-                            ? "text-emerald-600 font-semibold"
-                            : "text-red-600 font-semibold"
-                        }
-                      >
-                        {scan.issues}
-                      </span>
-                    </TableCell>
-
-                    <TableCell>{scan.date}</TableCell>
-                    <TableCell>{scan.duration}</TableCell>
-
-                    <TableCell className="text-right mr-6">
-                      <div className="flex justify-end flex-wrap">
-                        <Button
-                          variant="ghost"
-                          className=" bg-gray-400 hover:bg-sky-50 text-sky-600 w-full sm:w-auto cursor-pointer"
-                          onClick={() => {
-                            setSelectedScan(scan);
-                            setOpenDialog(true);
-                          }}
-                        >
-                          View Details
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+          <Card className="shadow-lg border-0 rounded-2xl overflow-hidden">
+            <CardHeader>
+              <CardTitle className="text-lg">api.mywebsite.com - Scan In Progress</CardTitle>
+              <CardDescription>
+                Security scan currently running
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-10">
+              <TrackingTimeline items={scan2History} />
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Popup Dialog */}
         <ViewScanDialog
