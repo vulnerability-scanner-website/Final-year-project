@@ -24,7 +24,7 @@ export default function PricingTable() {
       paymentStatus: "paid",
       startDate: "2024-01-15",
       endDate: "2024-02-15",
-      amount: "$99",
+      amount: "99",
     },
     {
       subscriptionId: "SUB002",
@@ -46,7 +46,7 @@ export default function PricingTable() {
       paymentStatus: "paid",
       startDate: "2024-01-10",
       endDate: "2024-02-10",
-      amount: "$299",
+      amount: " 299",
     },
     {
       subscriptionId: "SUB004",
@@ -57,7 +57,7 @@ export default function PricingTable() {
       paymentStatus: "pending",
       startDate: "2024-01-25",
       endDate: "2024-02-25",
-      amount: "$99",
+      amount: "99",
     },
     {
       subscriptionId: "SUB005",
@@ -68,7 +68,7 @@ export default function PricingTable() {
       paymentStatus: "paid",
       startDate: "2024-01-05",
       endDate: "2024-02-05",
-      amount: "$29",
+      amount: "29",
     },
   ]);
 
@@ -132,7 +132,7 @@ export default function PricingTable() {
           </CardHeader>
           <CardContent>
             <p className="text-4xl font-bold text-[#003366]">
-              ${activeRevenue.toFixed(2)}
+              ETB {activeRevenue.toFixed(2)}
             </p>
           </CardContent>
         </Card>
