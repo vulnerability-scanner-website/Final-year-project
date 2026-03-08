@@ -4,7 +4,7 @@ import { Sparkles as SparklesComp } from "@/components/ui/sparkles";
 import { TimelineContent } from "@/components/ui/timeline-animation";
 import {VerticalCutReveal} from "@/components/ui/vertical-cut-reveal";
 import { cn } from "@/lib/utils";
-
+import { CreditCardForm } from "@/components/ui/credit-card-form";
 import { motion } from "framer-motion";
 import { useRef, useState } from "react";
 
@@ -116,6 +116,8 @@ const PricingSwitch = ({ onSwitch }) => {
 
 export default function PricingSection4() {
   const [isYearly, setIsYearly] = useState(false);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const pricingRef = useRef(null);
 
   const revealVariants = {
@@ -135,8 +137,30 @@ export default function PricingSection4() {
     },
   };
 
+  const handleGetStarted = (plan) => {
+    setSelectedPlan(plan);
+    setShowPaymentForm(true);
+  };
+
   const togglePricingPeriod = (value) =>
     setIsYearly(Number.parseInt(value) === 1);
+
+  if (showPaymentForm) {
+    return (
+      <CreditCardForm
+        defaultHolder="Rahil Vahora"
+        maskMiddle
+        onChange={(state, validity) => {
+          // live form output here (analytics, preview, etc.)
+          // console.log("live", state, validity);
+        }}
+        onSubmit={(state, validity) => {
+          // send to your API
+          alert(JSON.stringify({ state, validity }, null, 2));
+        }}
+      />
+    );
+  }
 
   return (
     <div
@@ -271,7 +295,8 @@ export default function PricingSection4() {
 
               <CardContent className="pt-0">
                 <button
-                  className={`w-full mb-6 p-4 text-xl rounded-xl ${
+                  onClick={() => handleGetStarted(plan)}
+                  className={`w-full mb-6 p-4 text-xl rounded-xl cursor-pointer hover:opacity-90 transition-opacity ${
                     plan.popular
                       ? "bg-gradient-to-t from-blue-500 to-blue-600  shadow-lg shadow-blue-800 border border-blue-500 text-white"
                       : plan.buttonVariant === "outline"
