@@ -13,7 +13,7 @@ export default function Page() {
       senderEmail: 'admin@company.com',
       timestamp: '2 hours ago',
       message: 'Supervisor provided feedback on your evaluation.',
-      reactions: ['👍', '✅', '📝'],
+      reactions: ['😍', '❤️', '🔥', '⚡️', '👍'],
     },
     {
       avatarSrc: 'https://i.pravatar.cc/150?img=2',
@@ -22,7 +22,7 @@ export default function Page() {
       senderEmail: 'system@company.com',
       timestamp: '1 day ago',
       message: 'Final evaluation is due tomorrow at 11:59 PM',
-      reactions: ['⏰', '⚠️', '📅'],
+      reactions: ['😍', '❤️', '🔥', '⚡️', '👍'],
     },
     {
       avatarSrc: 'https://i.pravatar.cc/150?img=3',
@@ -31,7 +31,7 @@ export default function Page() {
       senderEmail: 'calendar@company.com',
       timestamp: '2 days ago',
       message: 'Department meeting scheduled for Friday at 2:00 PM',
-      reactions: ['📅', '👥', '🕐'],
+      reactions: ['😍', '❤️', '🔥', '⚡️', '👍'],
     },
     {
       avatarSrc: 'https://i.pravatar.cc/150?img=4',
@@ -40,7 +40,7 @@ export default function Page() {
       senderEmail: 'hr@company.com',
       timestamp: '3 days ago',
       message: 'A new department policy has been published.',
-      reactions: ['📢', '📋', '✨'],
+      reactions: ['😍', '❤️', '🔥', '⚡️', '👍'],
     },
     {
       avatarSrc: 'https://i.pravatar.cc/150?img=5',
@@ -49,7 +49,7 @@ export default function Page() {
       senderEmail: 'it@company.com',
       timestamp: '4 days ago',
       message: 'System maintenance scheduled this weekend.',
-      reactions: ['🔧', '💻', '⚙️'],
+      reactions: ['😍', '❤️', '🔥', '⚡️', '👍'],
     },
     {
       avatarSrc: 'https://i.pravatar.cc/150?img=6',
@@ -58,7 +58,7 @@ export default function Page() {
       senderEmail: 'notifications@company.com',
       timestamp: '5 days ago',
       message: 'Submit your weekly report before Friday.',
-      reactions: ['📝', '⏰', '✅'],
+      reactions: ['😍', '❤️', '🔥', '⚡️', '👍'],
     },
     {
       avatarSrc: 'https://i.pravatar.cc/150?img=7',
@@ -67,7 +67,7 @@ export default function Page() {
       senderEmail: 'security@company.com',
       timestamp: '6 days ago',
       message: 'New security vulnerabilities detected in your recent scan. Please review the findings.',
-      reactions: ['🔒', '⚠️', '🛡️'],
+      reactions: ['😍', '❤️', '🔥', '⚡️', '👍'],
     },
     {
       avatarSrc: 'https://i.pravatar.cc/150?img=8',
@@ -76,7 +76,7 @@ export default function Page() {
       senderEmail: 'team@company.com',
       timestamp: '1 week ago',
       message: 'Congratulations! Your team has successfully completed all security scans for this quarter.',
-      reactions: ['🎉', '🏆', '👏'],
+      reactions: ['😍', '❤️', '🔥', '⚡️', '👍'],
     },
     {
       avatarSrc: 'https://i.pravatar.cc/150?img=9',
@@ -85,7 +85,7 @@ export default function Page() {
       senderEmail: 'monitoring@company.com',
       timestamp: '1 week ago',
       message: 'System performance metrics show optimal results. All services running smoothly.',
-      reactions: ['📊', '✅', '🚀'],
+      reactions: ['😍', '❤️', '🔥', '⚡️', '👍'],
     },
     {
       avatarSrc: 'https://i.pravatar.cc/150?img=10',
@@ -94,7 +94,7 @@ export default function Page() {
       senderEmail: 'backup@company.com',
       timestamp: '2 weeks ago',
       message: 'Automated backup completed successfully. All data has been securely stored.',
-      reactions: ['💾', '✅', '🔐'],
+      reactions: ['😍', '❤️', '🔥', '⚡️', '👍'],
     },
     {
       avatarSrc: 'https://i.pravatar.cc/150?img=11',
@@ -103,7 +103,7 @@ export default function Page() {
       senderEmail: 'licensing@company.com',
       timestamp: '2 weeks ago',
       message: 'Your software license will expire in 30 days. Please renew to continue using all features.',
-      reactions: ['📜', '⏰', '💳'],
+      reactions: ['😍', '❤️', '🔥', '⚡️', '👍'],
     },
     {
       avatarSrc: 'https://i.pravatar.cc/150?img=12',
@@ -112,7 +112,7 @@ export default function Page() {
       senderEmail: 'training@company.com',
       timestamp: '3 weeks ago',
       message: 'New security training module is now available. Complete it before the end of the month.',
-      reactions: ['🎓', '📚', '✅'],
+      reactions: ['😍', '❤️', '🔥', '⚡️', '👍'],
     },
   ];
 
