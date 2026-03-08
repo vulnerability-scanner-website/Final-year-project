@@ -23,6 +23,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ShieldCheck, Bug, MoreVertical, Eye, Pause, Play, StopCircle, RotateCcw, Trash } from "lucide-react";
+import { DashboardHeader } from "@/components/header/header";
 import { bg } from "date-fns/locale";
 import AnalystSideBar from "@/components/sidebar/AnalystSideBar/Analyst";
 
@@ -133,9 +134,9 @@ export default function ScanManagement() {
   return (
     <div className="">
       <AnalystSideBar />
-      {/* Header */}
-   <div className="ml-64 p-6 space-y-8 min-h-screen bg-gray-50">
-      <Tabs defaultValue="active">
+      <div className="ml-64 p-6 space-y-8 min-h-screen bg-gray-50">
+        <DashboardHeader role="scanmanagement" />
+        <Tabs defaultValue="active">
         <Tabs defaultValue="active">
           <TabsList className="grid w-full grid-cols-2 max-w-md h-14 bg-[#e6eef5] p-1 rounded-lg">
             <TabsTrigger
