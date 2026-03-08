@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Card,
@@ -82,6 +83,45 @@ const getVulnCount = (scanId) =>
 
 export default function ScanManagement() {
   const router = useRouter();
+  const [activeScans, setActiveScans] = useState([]);
+
+  useEffect(() => {
+    loadScans();
+  }, []);
+
+  const loadScans = () => {
+    const scans = JSON.parse(localStorage.getItem('scans') || '[]');
+    if (scans.length > 0) {
+      setActiveScans(scans);
+    } else {
+      setActiveScans([
+        {
+          id: 1,
+          name: "Full Website Scan",
+          target: "https://example.com",
+          status: "Running",
+          progress: 65,
+          started: "10 mins ago",
+        },
+        {
+          id: 2,
+          name: "API Security Scan",
+          target: "https://api.example.com",
+          status: "Queued",
+          progress: 20,
+          started: "2 mins ago",
+        },
+        {
+          id: 3,
+          name: "Authentication Scan",
+          target: "https://example.com/login",
+          status: "Completed",
+          progress: 100,
+          started: "1 hour ago",
+        },
+      ]);
+    }
+  };
 
   const handleManageAction = (action, scanId) => {
     console.log(`Action: ${action} on scan ${scanId}`);
