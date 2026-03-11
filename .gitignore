@@ -35,3 +35,4 @@ postgres_data/
 *.tmp
 .cache/
 token.json
+token_response.json
