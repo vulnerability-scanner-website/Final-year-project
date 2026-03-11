@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: security-scanner-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: security_scanner
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build: ./backend
+    container_name: security-scanner-backend
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/security_scanner
+      JWT_SECRET: your-super-secret-key-change-this
+    volumes:
+      - scan_results:/scans
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Frontend
+  frontend:
+    build: ./frontend
+    container_name: security-scanner-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Scanner Service
+  scanner:
+    build: ./scanner
+    container_name: security-scanner-tools
+    volumes:
+      - scan_results:/scans
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # DVWA - Vulnerable Web App for Testing
+  dvwa:
+    image: vulnerables/web-dvwa
+    container_name: dvwa-target
+    ports:
+      - "8080:80"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # ZAP Scanner
+  zap:
+    image: zaproxy/zap-stable
+    container_name: security-scanner-zap
+    command: zap.sh -daemon -host 0.0.0.0 -port 8090 -config api.disablekey=true -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true
+    ports:
+      - "9090:8090"
+    volumes:
+      - scan_results:/zap/wrk
+    networks:
+      - app-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  scan_results:
+
+networks:
+  app-network:
+    driver: bridge

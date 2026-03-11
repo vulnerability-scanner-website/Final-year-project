@@ -1,0 +1,68 @@
+module.exports = async function (fastify, opts) {
+  // Get pricing plans (public)
+  fastify.get('/pricing', async (request, reply) => {
+    const client = await fastify.pg.connect();
+    try {
+      const result = await client.query('SELECT * FROM pricing ORDER BY price ASC');
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  });
+
+  // Create pricing plan (admin only)
+  fastify.post('/pricing', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+    if (request.user.role !== 'admin') {
+      return reply.code(403).send({ error: 'Forbidden' });
+    }
+    const { name, price, features } = request.body;
+    const client = await fastify.pg.connect();
+    try {
+      const result = await client.query(
+        'INSERT INTO pricing (name, price, features) VALUES ($1, $2, $3) RETURNING *',
+        [name, price, JSON.stringify(features)]
+      );
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  });
+
+  // Update pricing plan (admin only)
+  fastify.put('/pricing/:id', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+    if (request.user.role !== 'admin') {
+      return reply.code(403).send({ error: 'Forbidden' });
+    }
+    const { name, price, features } = request.body;
+    const client = await fastify.pg.connect();
+    try {
+      const result = await client.query(
+        'UPDATE pricing SET name = $1, price = $2, features = $3 WHERE id = $4 RETURNING *',
+        [name, price, JSON.stringify(features), request.params.id]
+      );
+      if (result.rows.length === 0) {
+        return reply.code(404).send({ error: 'Pricing plan not found' });
+      }
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  });
+
+  // Delete pricing plan (admin only)
+  fastify.delete('/pricing/:id', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+    if (request.user.role !== 'admin') {
+      return reply.code(403).send({ error: 'Forbidden' });
+    }
+    const client = await fastify.pg.connect();
+    try {
+      const result = await client.query('DELETE FROM pricing WHERE id = $1 RETURNING id', [request.params.id]);
+      if (result.rows.length === 0) {
+        return reply.code(404).send({ error: 'Pricing plan not found' });
+      }
+      return { success: true, message: 'Pricing plan deleted' };
+    } finally {
+      client.release();
+    }
+  });
+};
