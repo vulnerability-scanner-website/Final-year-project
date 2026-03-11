@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Shield, Search, AlertTriangle, CheckCircle, Clock, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TrackingTimeline, { TimelineItem } from "@/components/ui/order-history";
+import { scansAPI, connectWebSocket } from "@/lib/api";
 
 import ViewScanDialog from "@/components/popup/ViewScanDialog";
 import AnalystSideBar from "@/components/sidebar/AnalystSideBar/Analyst";
@@ -77,48 +78,46 @@ export default function ScanManagementPage() {
     },
   ];
 
-  const [scans, setScans] = useState([
-    {
-      id: 1,
-      target: "mywebsite.com",
-      status: "Completed",
-      issues: 2,
-      date: "2024-01-15",
-      duration: "2m 34s",
-    },
-    {
-      id: 2,
-      target: "api.mywebsite.com",
-      status: "Running",
-      issues: 0,
-      date: "2024-01-15",
-      duration: "1m 12s",
-    },
-  ]);
-
+  const [scans, setScans] = useState([]);
   const [selectedScan, setSelectedScan] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
-
   const [newScanOpen, setNewScanOpen] = useState(false);
   const [url, setUrl] = useState("");
 
-  /* ---------------- Start Scan ---------------- */
-
-  const handleStartScan = () => {
-    if (!url) return;
-
-    const newScan = {
-      id: scans.length + 1,
-      target: url,
-      status: "Running",
-      issues: 0,
-      date: new Date().toISOString().split("T")[0],
-      duration: "-",
+  useEffect(() => {
+    const fetchScans = async () => {
+      try {
+        const data = await scansAPI.getAll();
+        setScans(data);
+      } catch (err) {
+        console.error('Failed to fetch scans:', err);
+      }
     };
 
-    setScans([newScan, ...scans]);
-    setUrl("");
-    setNewScanOpen(false);
+    fetchScans();
+
+    const ws = connectWebSocket((data) => {
+      if (data.type === 'scan_started') {
+        setScans(prev => [data.data, ...prev]);
+      }
+    });
+
+    return () => ws.close();
+  }, []);
+
+  /* ---------------- Start Scan ---------------- */
+
+  const handleStartScan = async () => {
+    if (!url) return;
+
+    try {
+      const newScan = await scansAPI.create(url);
+      setScans([newScan, ...scans]);
+      setUrl("");
+      setNewScanOpen(false);
+    } catch (err) {
+      console.error('Failed to create scan:', err);
+    }
   };
 
   return (

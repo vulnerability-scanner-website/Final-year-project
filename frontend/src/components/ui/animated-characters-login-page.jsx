@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Mail, Sparkles } from "lucide-react";
+import { authAPI } from "@/lib/api";
 
 const Pupil = ({
   size = 12,
@@ -289,25 +290,19 @@ function LoginPage() {
     setError("");
     setIsLoading(true);
 
-    // Simulate API delay (quick)
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    // Mock authentication - validate against dummy credentials
-    if (email === "admin@gmail.com" && password === "1234") {
-      console.log("✅ Login successful!");
-      // Redirect to admin dashboard
-      window.location.href = "/dashboard/admin";
-    } else if (email === "analyst@gmail.com" && password === "5678") {
-      console.log("✅ Analyst login successful!");
-      // Redirect to analyst dashboard
-      window.location.href = "/dashboard/analyst";
-    } else if (email === "user@gmail.com" && password === "9012") {
-      console.log("✅ User login successful!");
-      // Redirect to user dashboard
-      window.location.href = "/dashboard/developer";
-    } else {
-      setError("Invalid email or password. Please try again.");
-      console.log("❌ Login failed");
+    try {
+      const data = await authAPI.login(email, password);
+      
+      // Redirect based on role
+      if (data.user.role === 'admin') {
+        window.location.href = '/dashboard/admin';
+      } else if (data.user.role === 'analyst') {
+        window.location.href = '/dashboard/analyst';
+      } else {
+        window.location.href = '/dashboard/developer';
+      }
+    } catch (err) {
+      setError(err.message || 'Login failed');
     }
 
     setIsLoading(false);

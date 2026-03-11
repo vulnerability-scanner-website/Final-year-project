@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Download } from 'lucide-react';
+import { reportsAPI } from '@/lib/api';
 
 // --- Helper Components ---
 
@@ -93,18 +94,40 @@ const FileItem = ({ file, onCancel }) => {
 
 // --- App Component ---
 export default function ReportsDownload() {
-  const allFiles = [
-    { id: 1, name: 'OWASP Top 10 Vulnerability Assessment Report.pdf', type: 'Weekly', size: 4.5, status: 'complete', progress: 100, subtype: 'Weekly Security Report' },
-    { id: 2, name: 'SQL Injection Attack Analysis Report.pdf', type: 'Critical', size: 2.3, status: 'complete', progress: 100, subtype: 'Critical Vulnerability Report' },
-    { id: 3, name: 'Cross-Site Scripting (XSS) Security Audit.pdf', type: 'Critical', size: 1.8, status: 'downloading', progress: 0, originalSubtype: 'Critical Security Audit', subtype: 'Downloading...' },
-    { id: 4, name: 'Monthly Penetration Testing Summary.pdf', type: 'Monthly', size: 6.2, status: 'complete', progress: 100, subtype: 'Monthly Security Report' },
-    { id: 5, name: 'Network Security Compliance Report.pdf', type: 'Weekly', size: 3.1, status: 'complete', progress: 100, subtype: 'Compliance Report' },
-  ];
-  
-  const [files, setFiles] = useState(allFiles);
-  const [filteredFiles, setFilteredFiles] = useState(allFiles);
+  const [files, setFiles] = useState([]);
+  const [filteredFiles, setFilteredFiles] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  // Fetch reports from API
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const data = await reportsAPI.getAll();
+        const formattedData = data.map(report => ({
+          ...report,
+          progress: 100,
+          originalSubtype: report.subtype
+        }));
+        setFiles(formattedData);
+        setFilteredFiles(formattedData);
+      } catch (err) {
+        console.error('Failed to fetch reports:', err);
+        // Fallback to mock data if API fails
+        const mockData = [
+          { id: 1, name: 'OWASP Top 10 Vulnerability Assessment Report.pdf', type: 'Weekly', size: 4.5, status: 'complete', subtype: 'Weekly Security Report', progress: 100, originalSubtype: 'Weekly Security Report' },
+          { id: 2, name: 'SQL Injection Attack Analysis Report.pdf', type: 'Critical', size: 2.3, status: 'complete', subtype: 'Critical Vulnerability Report', progress: 100, originalSubtype: 'Critical Vulnerability Report' },
+        ];
+        setFiles(mockData);
+        setFilteredFiles(mockData);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   // Filter files based on search and type
   useEffect(() => {

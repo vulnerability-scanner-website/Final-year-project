@@ -26,102 +26,56 @@ import { ShieldCheck, Bug, MoreVertical, Eye, Pause, Play, StopCircle, RotateCcw
 import { DashboardHeader } from "@/components/header/header";
 import { bg } from "date-fns/locale";
 
-/* ---------------- Mock Data ---------------- */
-
-const activeScans = [
-  {
-    id: 1,
-    name: "Full Website Scan",
-    target: "https://example.com",
-    status: "Running",
-    progress: 65,
-    started: "10 mins ago",
-  },
-  {
-    id: 2,
-    name: "API Security Scan",
-    target: "https://api.example.com",
-    status: "Queued",
-    progress: 20,
-    started: "2 mins ago",
-  },
-  {
-    id: 3,
-    name: "Authentication Scan",
-    target: "https://example.com/login",
-    status: "Completed",
-    progress: 100,
-    started: "1 hour ago",
-  },
-];
-
-const vulnerabilities = [
-  {
-    id: 1,
-    scanId: 1,
-    severity: "Critical",
-    title: "SQL Injection",
-  },
-  {
-    id: 2,
-    scanId: 1,
-    severity: "High",
-    title: "Stored XSS",
-  },
-  {
-    id: 3,
-    scanId: 2,
-    severity: "Medium",
-    title: "Open Redirect",
-  },
-];
-
-/* ---------------- Helpers ---------------- */
-
-const getVulnCount = (scanId) =>
-  vulnerabilities.filter((v) => v.scanId === scanId).length;
-
-/* ---------------- Component ---------------- */
-
 export default function ScanManagement() {
   const router = useRouter();
   const [activeScans, setActiveScans] = useState([]);
+  const [vulnerabilities, setVulnerabilities] = useState([]);
 
   useEffect(() => {
-    // Load scans from localStorage
-    const scans = JSON.parse(localStorage.getItem('scans') || '[]');
-    setActiveScans(scans.length > 0 ? scans : [
-      {
-        id: 1,
-        name: "Full Website Scan",
-        target: "https://example.com",
-        status: "Running",
-        progress: 65,
-        started: "10 mins ago",
-      },
-      {
-        id: 2,
-        name: "API Security Scan",
-        target: "https://api.example.com",
-        status: "Queued",
-        progress: 20,
-        started: "2 mins ago",
-      },
-      {
-        id: 3,
-        name: "Authentication Scan",
-        target: "https://example.com/login",
-        status: "Completed",
-        progress: 100,
-        started: "1 hour ago",
-      },
-    ]);
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        // Fetch scans
+        const scansRes = await fetch('http://localhost:5000/api/scans', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (scansRes.ok) {
+          const scans = await scansRes.json();
+          const formattedScans = scans.map(scan => ({
+            id: scan.id,
+            name: `Scan #${scan.id}`,
+            target: scan.target,
+            status: scan.status,
+            progress: scan.status === 'Completed' ? 100 : scan.status === 'Running' ? 50 : 0,
+            started: new Date(scan.created_at).toLocaleString(),
+            issues: scan.issues || 0
+          }));
+          setActiveScans(formattedScans);
+        }
+        
+        // Fetch vulnerabilities
+        const vulnRes = await fetch('http://localhost:5000/api/vulnerabilities', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (vulnRes.ok) {
+          const vulns = await vulnRes.json();
+          setVulnerabilities(vulns);
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      }
+    };
+    
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  const handleManageAction = (action, scanId) => {
-    console.log(`Action: ${action} on scan ${scanId}`);
-    // connect to API later
-  };
+  const getVulnCount = (scanId) =>
+    vulnerabilities.filter((v) => v.scan_id === scanId).length;
 
   return (
     <div className="ml-64 p-5 space-y-4">
@@ -216,7 +170,7 @@ export default function ScanManagement() {
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">Started: {scan.started}</span>
-                  <Badge variant="destructive">{getVulnCount(scan.id)} vulnerabilities</Badge>
+                  <Badge variant="destructive">{scan.issues} vulnerabilities</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -229,19 +183,22 @@ export default function ScanManagement() {
             <Card
               key={vuln.id}
               onClick={() =>
-                router.push(`/admin/scan_management/${vuln.scanId}`)
+                router.push(`/dashboard/admin/scan_management/${vuln.scan_id}`)
               }
               className="cursor-pointer hover:shadow-lg transition-shadow"
             >
               <CardHeader className="flex justify-between items-start">
                 <div>
                   <CardTitle>{vuln.title}</CardTitle>
-                  <CardDescription>Scan #{vuln.scanId}</CardDescription>
+                  <CardDescription>Scan #{vuln.scan_id} - {vuln.target}</CardDescription>
                 </div>
                 <Badge variant="destructive">{vuln.severity}</Badge>
               </CardHeader>
             </Card>
           ))}
+          {vulnerabilities.length === 0 && (
+            <Card><CardHeader><CardTitle>No vulnerabilities found</CardTitle></CardHeader></Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>
