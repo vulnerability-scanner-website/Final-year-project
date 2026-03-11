@@ -25,6 +25,7 @@ import { z } from 'zod';
 const FormSchema = z.object({
   scanName: z.string().min(1, 'Scan name is required').max(100, 'Scan name cannot exceed 100 characters'),
   targetUrl: z.string().url('Please enter a valid URL').min(1, 'Target URL is required'),
+  scanType: z.enum(['full', 'zap', 'nuclei', 'nikto']).default('zap'),
   description: z.string().max(500, 'Description cannot exceed 500 characters').optional(),
 });
 
@@ -36,45 +37,61 @@ export default function NewScanDialog({ open, onOpenChange }) {
     defaultValues: { 
       scanName: '', 
       targetUrl: '',
+      scanType: 'zap',
       description: ''
     },
     mode: 'onSubmit',
   });
 
-  function onSubmit(data) {
-    // Get existing scans from localStorage
-    const existingScans = JSON.parse(localStorage.getItem('scans') || '[]');
-    
-    // Create new scan object
-    const newScan = {
-      id: Date.now(),
-      name: data.scanName,
-      target: data.targetUrl,
-      description: data.description,
-      status: 'Running',
-      progress: 0,
-      started: 'Just now',
-      createdAt: new Date().toISOString()
-    };
-    
-    // Add to scans array
-    existingScans.push(newScan);
-    localStorage.setItem('scans', JSON.stringify(existingScans));
-    
-    toast.custom((t) => (
-      <Alert variant="mono" icon="primary" onClose={() => toast.dismiss(t)}>
-        <AlertIcon>
-          <RiCheckboxCircleFill />
-        </AlertIcon>
-        <AlertTitle>Scan "{data.scanName}" initiated successfully</AlertTitle>
-      </Alert>
-    ));
+  async function onSubmit(data) {
+    try {
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        toast.error('Please login first');
+        return;
+      }
+      
+      // Call backend API to start scan
+      const response = await fetch('http://localhost:5000/api/scans', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          target: data.targetUrl,
+          scanType: data.scanType
+        })
+      });
 
-    form.reset();
-    onOpenChange(false);
-    
-    // Trigger storage event for other components to update
-    window.dispatchEvent(new Event('storage'));
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to start scan');
+      }
+
+      const scan = await response.json();
+      console.log('Scan started:', scan);
+      
+      toast.custom((t) => (
+        <Alert variant="mono" icon="primary" onClose={() => toast.dismiss(t)}>
+          <AlertIcon>
+            <RiCheckboxCircleFill />
+          </AlertIcon>
+          <AlertTitle>Scan "{data.scanName}" initiated successfully (ID: {scan.id})</AlertTitle>
+        </Alert>
+      ));
+
+      form.reset();
+      onOpenChange(false);
+      
+      // Trigger refresh
+      window.dispatchEvent(new Event('storage'));
+    } catch (error) {
+      console.error('Scan error:', error);
+      toast.error('Failed to start scan: ' + error.message);
+    }
   }
 
   return (
@@ -110,6 +127,25 @@ export default function NewScanDialog({ open, onOpenChange }) {
                       <Input placeholder="https://example.com" {...field} />
                     </FormControl>
                     <FormDescription>Enter the URL you want to scan for vulnerabilities</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="scanType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Scan Type</FormLabel>
+                    <FormControl>
+                      <select {...field} className="w-full px-3 py-2 border rounded-md">
+                        <option value="zap">ZAP - OWASP ZAP (Recommended - Most Comprehensive)</option>
+                        <option value="nuclei">Nuclei (Fast Vulnerability Templates)</option>
+                        <option value="nikto">Nikto (Web Server Checks)</option>
+                        <option value="full">Full Scan (All Tools)</option>
+                      </select>
+                    </FormControl>
+                    <FormDescription>Choose the type of security scan to perform</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

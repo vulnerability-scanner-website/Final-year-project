@@ -2,16 +2,18 @@
 
 import { useState } from "react";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { authAPI } from "@/lib/api";
 
 export function SignupPage() {
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
+    role: "user",
     agreeToTerms: false,
   });
 
@@ -23,11 +25,27 @@ export function SignupPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Signup submitted:", formData);
-    // Redirect to login page after successful signup
-    window.location.href = "/auth/login";
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const data = await authAPI.register(formData.email, formData.password, formData.role);
+      
+      // Redirect based on role
+      if (data.user.role === 'admin') {
+        window.location.href = '/dashboard/admin';
+      } else if (data.user.role === 'analyst') {
+        window.location.href = '/dashboard/analyst';
+      } else {
+        window.location.href = '/dashboard/developer';
+      }
+    } catch (err) {
+      setError(err.message || 'Registration failed');
+    }
+
+    setIsLoading(false);
   };
 
   return (
@@ -35,15 +53,6 @@ export function SignupPage() {
       <div className="flex flex-col md:flex-row w-full h-full bg-white rounded-3xl shadow-2xl overflow-hidden">
         {/* Left Panel */}
         <div className="flex-1 relative overflow-hidden md:block hidden">
-          <div className="absolute top-6 left-6 z-10">
-            <button
-              onClick={() => navigate("/")}
-              className="w-10 h-10 bg-black/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/30 transition-all"
-            >
-              <ArrowLeft className="w-5 h-5 text-white" />
-            </button>
-          </div>
-
           <div className="absolute inset-0">
             <img
               src="https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=800&q=80"
@@ -69,6 +78,12 @@ export function SignupPage() {
               </button>
             </p>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Name Fields */}
@@ -189,9 +204,10 @@ export function SignupPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-black text-white py-3 px-4 rounded-xl font-medium hover:bg-gray-800 transition-colors"
+              disabled={isLoading}
+              className="w-full bg-black text-white py-3 px-4 rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account
+              {isLoading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
         </div>
