@@ -13,16 +13,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function AddUserDialog({ open, setOpen, onAddUser }) {
-  const [name, setName] = useState("");
-  const [role, setRole] = useState("User"); // Default to User
-  const [status, setStatus] = useState("Active");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("developer");
+  const [status, setStatus] = useState("active");
 
   const handleSubmit = () => {
-    if (!name || !role) return;
+    if (!email || !password || !role) return;
 
     const newUser = {
-      id: Date.now(),
-      name,
+      email,
+      password,
       role,
       status,
     };
@@ -30,10 +31,11 @@ export default function AddUserDialog({ open, setOpen, onAddUser }) {
     onAddUser(newUser);
 
     // Reset form
-    setName("");
-    setRole("User");
-    setStatus("Active");
-    setOpen(false); // close dialog after adding
+    setEmail("");
+    setPassword("");
+    setRole("developer");
+    setStatus("active");
+    setOpen(false);
   };
 
   return (
@@ -45,12 +47,24 @@ export default function AddUserDialog({ open, setOpen, onAddUser }) {
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
-              id="name"
-              placeholder="Enter user name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              id="email"
+              type="email"
+              placeholder="Enter user email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
@@ -62,9 +76,9 @@ export default function AddUserDialog({ open, setOpen, onAddUser }) {
               value={role}
               onChange={(e) => setRole(e.target.value)}
             >
-              <option value="Admin">Admin</option>
-              <option value="Security Analyst">Security Analyst</option>
-              <option value="User">Developer</option>
+              <option value="admin">Admin</option>
+              <option value="analyst">Analyst</option>
+              <option value="developer">Developer</option>
             </select>
           </div>
 
@@ -76,9 +90,9 @@ export default function AddUserDialog({ open, setOpen, onAddUser }) {
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             >
-              <option value="Active">Active</option>
-              <option value="Pending">Pending</option>
-              <option value="Inactive">Inactive</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="inactive">Inactive</option>
             </select>
           </div>
         </div>
@@ -94,7 +108,7 @@ export default function AddUserDialog({ open, setOpen, onAddUser }) {
           <Button 
             onClick={handleSubmit} 
             className="bg-[#003366] hover:bg-[#004080] text-white"
-            disabled={!name || !role}
+            disabled={!email || !password || !role}
           >
             Save User
           </Button>

@@ -13,18 +13,40 @@ class AuthController {
     if (!email || !password || !role) {
       return reply.code(400).send({ error: 'Missing required fields' });
     }
+
+    // Only allow developer or analyst roles for self-registration
+    if (!['developer', 'analyst'].includes(role)) {
+      return reply.code(400).send({ error: 'Invalid role. Only developer or analyst allowed for registration.' });
+    }
     
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
-      const user = await this.userModel.create(email, hashedPassword, role);
       
-      const token = this.fastify.jwt.sign({ 
-        id: user.id,
-        email: user.email, 
-        role: user.role 
-      });
-      
-      return { success: true, token, user };
+      // New users start with pending status
+      const client = await this.fastify.pg.connect();
+      try {
+        const result = await client.query(
+          'INSERT INTO users (email, password, role, status) VALUES ($1, $2, $3, $4) RETURNING id, email, role, status, created_at',
+          [email, hashedPassword, role, 'pending']
+        );
+        
+        const user = result.rows[0];
+        
+        const token = this.fastify.jwt.sign({ 
+          id: user.id,
+          email: user.email, 
+          role: user.role 
+        });
+        
+        return { 
+          success: true, 
+          token, 
+          user,
+          message: 'Registration successful. Your account is pending require admin approval.' 
+        };
+      } finally {
+        client.release();
+      }
     } catch (err) {
       if (err.code === '23505') {
         return reply.code(409).send({ error: 'Email already exists' });

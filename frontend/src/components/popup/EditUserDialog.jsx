@@ -10,27 +10,24 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default function EditUserDialog({ open, setOpen, user, onUpdate }) {
-  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [status, setStatus] = useState("");
   const [role, setRole] = useState("");
-  const [email, setEmail] = useState("");
 
   // When user changes, fill input fields
   useEffect(() => {
     if (user) {
-      setName(user.name || "");
-      setRole(user.role || "");
       setEmail(user.email || "");
-      setStatus(user.status|| "");
+      setRole(user.role || "");
+      setStatus(user.status || "");
     }
   }, [user]);
 
   const handleSubmit = () => {
     onUpdate({
       ...user,
-      name,
-      role,
       email,
+      role,
       status
     });
     setOpen(false);
@@ -45,42 +42,48 @@ export default function EditUserDialog({ open, setOpen, user, onUpdate }) {
           <DialogTitle>Edit User</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-2" >
-          {/* Name */}
-          <input
-            type="text"
-            placeholder="Full Name"
-            className="w-full border p-2 rounded-md outline-none focus:ring-2 focus:ring-[#003366]/30"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-
+        <div className="grid gap-4 py-4">
           {/* Email */}
-          <input
-            type="email"
-            placeholder="Email Address"
-            className="w-full border p-2 rounded-md outline-none focus:ring-2 focus:ring-[#003366]/30"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <div>
+            <label className="block text-sm font-medium mb-1">Email</label>
+            <input
+              type="email"
+              placeholder="Email Address"
+              className="w-full border p-2 rounded-md outline-none focus:ring-2 focus:ring-[#003366]/30"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
           {/* Role */}
-          <input
-            type="text"
-            placeholder="Role"
-            className="w-full border p-2 rounded-md outline-none focus:ring-2 focus:ring-[#003366]/30"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="status"
-            className="w-full border p-2 rounded-md outline-none focus:ring-2 focus:ring-[#003366]/30"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          />
+          <div>
+            <label className="block text-sm font-medium mb-1">Role</label>
+            <select
+              className="w-full border p-2 rounded-md outline-none focus:ring-2 focus:ring-[#003366]/30"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            >
+              <option value="admin">Admin</option>
+              <option value="analyst">Analyst</option>
+              <option value="developer">Developer</option>
+            </select>
+          </div>
 
-          <Button className="w-full" onClick={handleSubmit}>
+          {/* Status */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Status</label>
+            <select
+              className="w-full border p-2 rounded-md outline-none focus:ring-2 focus:ring-[#003366]/30"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+            >
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+
+          <Button className="w-full bg-[#003366] hover:bg-[#004080]" onClick={handleSubmit}>
             Update User
           </Button>
         </div>
