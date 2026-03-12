@@ -7,8 +7,11 @@ const { authenticate } = require('./middlewares/auth');
 fastify.register(require('@fastify/cors'), {
   origin: 'http://localhost:3000',
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 });
 
 fastify.addContentTypeParser('application/json', { parseAs: 'string' }, function (req, body, done) {
