@@ -7,8 +7,10 @@ const CookieConsent = ({
   className = "",
 }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const hasAccepted = localStorage.getItem("cookieConsent");
     if (!hasAccepted) {
       setIsVisible(true);
@@ -25,7 +27,7 @@ const CookieConsent = ({
     setIsVisible(false);
   };
 
-  if (!isVisible) return null;
+  if (!isMounted || !isVisible) return null;
 
   return (
     <div
