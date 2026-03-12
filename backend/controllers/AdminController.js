@@ -156,6 +156,10 @@ class AdminController {
 
     const client = await this.fastify.pg.connect();
     try {
+      // First, delete all related scans
+      await client.query('DELETE FROM scans WHERE user_id = $1', [userId]);
+      
+      // Then delete the user
       const result = await client.query(
         'DELETE FROM users WHERE id = $1 RETURNING id',
         [userId]
@@ -165,7 +169,10 @@ class AdminController {
         return reply.code(404).send({ error: 'User not found' });
       }
 
-      return { success: true, message: 'User deleted successfully' };
+      return { success: true, message: 'User and associated scans deleted successfully' };
+    } catch (err) {
+      console.error('Delete user error:', err);
+      return reply.code(500).send({ error: 'Failed to delete user' });
     } finally {
       client.release();
     }

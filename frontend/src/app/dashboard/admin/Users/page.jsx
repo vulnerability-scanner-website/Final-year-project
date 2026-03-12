@@ -109,10 +109,19 @@ export default function UsersDashboard() {
         },
         body: JSON.stringify({ status: updatedStatus }),
       });
-      if (res.ok) {
-        fetchUsers();
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('Status toggle failed:', errorData);
+        alert(`Failed to update status: ${errorData.error || 'Unknown error'}`);
+        return;
       }
-    } catch (err) { console.error(err); }
+      
+      fetchUsers();
+    } catch (err) { 
+      console.error('Network error:', err);
+      alert(`Network error: ${err.message}`);
+    }
   };
 
   const confirmDelete = async () => {
