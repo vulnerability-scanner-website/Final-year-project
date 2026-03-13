@@ -38,11 +38,11 @@ export default function ScanDetailsPage() {
     fetchData();
   }, [scanId]);
 
-  if (loading) return <div className="ml-64 p-6">Loading...</div>;
+  if (loading) return <div className="ml-32 p-6">Loading...</div>;
   if (!scan) return <div className="ml-64 p-6">Scan not found</div>;
 
   return (
-    <div className="ml-64 p-6 space-y-6">
+    <div className="ml-32 p-6 space-y-6">
       {/* Page Header */}
       <h1 className="text-3xl font-bold text-[#003366]">
         Scan Report – #{scanId}

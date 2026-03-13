@@ -33,7 +33,7 @@ class ScanModel {
     const client = await this.pg.connect();
     try {
       const result = await client.query(
-        'SELECT * FROM scans WHERE user_id = $1 ORDER BY created_at DESC',
+        'SELECT id, user_id, target, status, issues, duration, created_at FROM scans WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50',
         [userId]
       );
       return result.rows;

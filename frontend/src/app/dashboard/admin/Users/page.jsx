@@ -9,6 +9,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Users, UserCheck, Scan, Edit, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,17 +24,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Users, UserCheck, Scan, Edit, Trash2 } from "lucide-react";
 
-import AdminSideBar from "@/components/sidebar/AdminSideBar/Admin";
 import { DashboardHeader } from "@/components/header/header";
 import AddUserDialog from "@/components/popup/AddUserDialog";
 import EditUserDialog from "@/components/popup/EditUserDialog";
 
 export default function UsersDashboard() {
+
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -37,23 +38,23 @@ export default function UsersDashboard() {
   const [editOpen, setEditOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   const API_URL = "http://localhost:5000/api/admin/users";
-
-  // --- API Integrations ---
 
   const fetchUsers = async () => {
     try {
       const res = await fetch(API_URL, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
+
       const data = await res.json();
       setUsers(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Failed to fetch users:", error);
+    } catch (err) {
+      console.error(err);
       setUsers([]);
     }
   };
@@ -62,149 +63,145 @@ export default function UsersDashboard() {
     fetchUsers();
   }, []);
 
-  const handleAddUser = async (newUser) => {
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(newUser),
-      });
-      if (res.ok) {
-        fetchUsers();
-        setOpen(false);
-      }
-    } catch (err) { console.error(err); }
-  };
-
-  const handleUpdateUser = async (updatedUser) => {
-    try {
-      const res = await fetch(`${API_URL}/${updatedUser.id}`, {
-        method: "PUT",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(updatedUser),
-      });
-      if (res.ok) {
-        fetchUsers();
-        setEditOpen(false);
-      }
-    } catch (err) { console.error(err); }
-  };
-
-  const handleToggleStatus = async (userId) => {
-    const user = users.find((u) => u.id === userId);
-    const updatedStatus = user.status === "active" ? "inactive" : "active";
-    
+  const handleToggleStatus = async (userId, currentStatus) => {
+    const newStatus = currentStatus === "active" ? "inactive" : "active";
     try {
       const res = await fetch(`${API_URL}/${userId}/status`, {
         method: "PATCH",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ status: updatedStatus }),
+        body: JSON.stringify({ status: newStatus }),
       });
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error('Status toggle failed:', errorData);
-        alert(`Failed to update status: ${errorData.error || 'Unknown error'}`);
-        return;
+
+      if (res.ok) {
+        fetchUsers();
       }
-      
-      fetchUsers();
-    } catch (err) { 
-      console.error('Network error:', err);
-      alert(`Network error: ${err.message}`);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const confirmDelete = async () => {
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+
     try {
-      const res = await fetch(`${API_URL}/${selectedUser.id}`, {
+      const res = await fetch(`${API_URL}/${userToDelete}`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
+
       if (res.ok) {
         fetchUsers();
-        setDeleteOpen(false);
       }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDeleteOpen(false);
+      setUserToDelete(null);
+    }
   };
 
-  // --- UI Logic ---
-
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch = user.email.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "" || user.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const usersPerPage = 5;
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-
-  const handleEdit = (user) => {
+  const handleEditUser = (user) => {
     setSelectedUser(user);
     setEditOpen(true);
   };
 
-  const handleDeleteClick = (user) => {
-    setSelectedUser(user);
+  const openDeleteDialog = (userId) => {
+    setUserToDelete(userId);
     setDeleteOpen(true);
   };
 
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch = user.email
+      .toLowerCase()
+      .includes(search.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "" || user.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  const usersPerPage = 5;
+
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+
+  const currentUsers = filteredUsers.slice(
+    indexOfFirstUser,
+    indexOfLastUser
+  );
+
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <AdminSideBar />
-      <div className="flex-1 ml-64">
-        <DashboardHeader role="usermanagement" onActionClick={() => setOpen(true)} />
+    <div className="min-h-screen bg-gray-100">
+      <div className="w-full">
+        <DashboardHeader
+          role="usermanagement"
+          onActionClick={() => setOpen(true)}
+        />
 
-        <AddUserDialog open={open} setOpen={setOpen} onAddUser={handleAddUser} />
-        {selectedUser && (
-          <EditUserDialog open={editOpen} setOpen={setEditOpen} user={selectedUser} onUpdate={handleUpdateUser} />
-        )}
+        <main className="space-y-6">
 
-        <main className="my-6 ">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <Card className="border-yellow-400 border">
-              <CardContent className="p-5 flex justify-between items-center">
-                <div><p className="text-sm text-gray-500">Total Users</p><p className="text-3xl font-bold">{users.length}</p></div>
-                <Users className="w-6 h-6 text-[#003366]" />
+          {/* Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <Card>
+              <CardContent className="flex justify-between items-center p-5">
+                <div>
+                  <p className="text-sm text-gray-500">Total Users</p>
+                  <p className="text-2xl font-bold">{users.length}</p>
+                </div>
+                <Users className="text-[#003366]" />
               </CardContent>
             </Card>
-            <Card className="border-yellow-400 border">
-              <CardContent className="p-6 flex justify-between items-center">
-                <div><p className="text-sm text-gray-500">Active Users</p><p className="text-3xl font-bold">{users.filter(u => u.status === "active").length}</p></div>
-                <UserCheck className="w-6 h-6 text-green-600" />
+
+            <Card>
+              <CardContent className="flex justify-between items-center p-5">
+                <div>
+                  <p className="text-sm text-gray-500">Active Users</p>
+                  <p className="text-2xl font-bold">
+                    {users.filter((u) => u.status === "active").length}
+                  </p>
+                </div>
+                <UserCheck className="text-green-600" />
               </CardContent>
             </Card>
-            <Card className="border-yellow-400 border">
-              <CardContent className="p-6 flex justify-between items-center">
-                <div><p className="text-sm text-gray-500">Inactive Users</p><p className="text-3xl font-bold">{users.filter(u => u.status === "inactive").length}</p></div>
-                <Scan className="w-6 h-6 text-purple-600" />
+
+            <Card>
+              <CardContent className="flex justify-between items-center p-5">
+                <div>
+                  <p className="text-sm text-gray-500">Inactive Users</p>
+                  <p className="text-2xl font-bold">
+                    {users.filter((u) => u.status === "inactive").length}
+                  </p>
+                </div>
+                <Scan className="text-purple-600" />
               </CardContent>
             </Card>
+
           </div>
 
-          <Card className="shadow-md mb-6">
-            <CardContent className="flex flex-col md:flex-row gap-3 p-2">
-              <input 
-                type="text" placeholder="Search by name..." className="w-full border p-2 rounded-md outline-none" 
-                value={search} onChange={(e) => setSearch(e.target.value)} 
+          {/* Search */}
+          <Card>
+            <CardContent className="flex flex-col md:flex-row gap-3 p-4">
+              <input
+                type="text"
+                placeholder="Search by email..."
+                className="border p-2 rounded w-full"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
               />
-              <select 
-                className="w-full md:w-64 border p-2 rounded-md outline-none bg-white" 
-                value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+
+              <select
+                className="border p-2 rounded md:w-64"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <option value="">All Status</option>
                 <option value="active">Active</option>
@@ -214,74 +211,148 @@ export default function UsersDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-md overflow-hidden px-8">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>UserId</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentUsers.map((user, index) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{(indexOfFirstUser + index + 1).toString().padStart(2, "0")}</TableCell>
-                    <TableCell className="font-medium">{user.email}</TableCell>
-                    <TableCell>{user.role}</TableCell>
-                    <TableCell>
-                      <span className={`px-4 py-1 rounded-full text-xs font-medium ${
-                        user.status === "active" ? "bg-green-100 text-green-800" : 
-                        user.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-800"
-                      }`}>{user.status}</span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Button variant="ghost" size="sm" onClick={() => handleEdit(user)}>
-                          <Edit className="w-4 h-4 text-[#003366]" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(user)}>
-                          <Trash2 className="w-4 h-4 text-red-600" />
-                        </Button>
-                        <Switch 
-                          checked={user.status === "active"} 
-                          onCheckedChange={() => handleToggleStatus(user.id)}
-                          disabled={user.status === "pending"}
-                        />
-                      </div>
-                    </TableCell>
+          {/* Table */}
+          <Card>
+            <div className="w-full overflow-x-auto">
+              <Table>
+
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+
+                <TableBody>
+                  {currentUsers.map((user, index) => (
+
+                    <TableRow key={user.id}>
+
+                      <TableCell>
+                        {(indexOfFirstUser + index + 1)
+                          .toString()
+                          .padStart(2, "0")}
+                      </TableCell>
+
+                      <TableCell className="break-all">
+                        {user.email}
+                      </TableCell>
+
+                      <TableCell>{user.role}</TableCell>
+
+                      <TableCell>
+                        <span className={`px-3 py-1 rounded-full text-xs ${
+                          user.status === "active" 
+                            ? "bg-green-100 text-green-700" 
+                            : "bg-red-100 text-red-700"
+                        }`}>
+                          {user.status}
+                        </span>
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="flex flex-wrap gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            onClick={() => handleEditUser(user)}
+                          >
+                            <Edit size={16} />
+                          </Button>
+
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            onClick={() => openDeleteDialog(user.id)}
+                          >
+                            <Trash2 size={16} className="text-red-600" />
+                          </Button>
+
+                          <Switch 
+                            checked={user.status === "active"}
+                            onCheckedChange={() => handleToggleStatus(user.id, user.status)}
+                          />
+                        </div>
+                      </TableCell>
+
+                    </TableRow>
+
+                  ))}
+                </TableBody>
+
+              </Table>
+            </div>
           </Card>
 
-          <div className="flex justify-center items-center mt-4">
-            <div className="flex gap-2">
-              <Button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>Prev</Button>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <Button key={i} variant={currentPage === i + 1 ? "default" : "outline"} onClick={() => setCurrentPage(i + 1)}>{i + 1}</Button>
-              ))}
-              <Button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>Next</Button>
-            </div>
+          {/* Pagination */}
+          <div className="flex justify-center gap-2 flex-wrap">
+            <Button
+              size="sm"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
+              Prev
+            </Button>
+
+            {Array.from({ length: totalPages }, (_, i) => (
+              <Button
+                size="sm"
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                variant={currentPage === i + 1 ? "default" : "outline"}
+              >
+                {i + 1}
+              </Button>
+            ))}
+
+            <Button
+              size="sm"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
+              Next
+            </Button>
           </div>
 
-          <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>Delete <span className="font-bold text-red-600">{selectedUser?.email}</span>?</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmDelete} className="bg-red-600">Delete</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </main>
       </div>
+
+      <AddUserDialog 
+        open={open} 
+        onOpenChange={setOpen}
+        onUserAdded={fetchUsers}
+      />
+
+      <EditUserDialog 
+        open={editOpen} 
+        onOpenChange={setEditOpen}
+        user={selectedUser}
+        onUserUpdated={fetchUsers}
+      />
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the user
+              and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteUser}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
