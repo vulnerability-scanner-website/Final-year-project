@@ -126,18 +126,16 @@ export default function Page() {
   };
 
   return (
-    <div className="flex min-h-screen bg-muted/40">
-      <AdminSideBar />
-
-      <div className="flex-1 ml-64 p-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Notifications</h1>
-          <p className="text-muted-foreground mt-1">
+    <div className="w-full">
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">Notifications</h1>
+          <p className="text-muted-foreground mt-1 text-sm md:text-base">
             Stay updated with important information
           </p>
         </div>
         
-        <div className="space-y-4 w-full max-w-full">
+        <div className="space-y-3 md:space-y-4 w-full">
           {notifications.map((notification, index) => (
             <EmailClientCard
               key={index}
@@ -151,8 +149,8 @@ export default function Page() {
               onReactionClick={handleReaction}
               onActionClick={handleAction}
               actions={[
-                <Send key="send" className="w-4 h-4" />,
-                <Trash key="trash" className="w-4 h-4" />,
+                <Send key="send" className="w-3 h-3 md:w-4 md:h-4" />,
+                <Trash key="trash" className="w-3 h-3 md:w-4 md:h-4" />,
               ]}
             />
           ))}

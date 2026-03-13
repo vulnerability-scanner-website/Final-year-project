@@ -1,4 +1,8 @@
-const fastify = require('fastify')({ logger: true });
+const fastify = require('fastify')({
+  logger: false, // Disable logging for better performance
+  disableRequestLogging: true,
+  requestIdLogLabel: false
+});
 const path = require('path');
 const { initDatabase } = require('./config/database');
 const { authenticate } = require('./middlewares/auth');
@@ -35,9 +39,12 @@ fastify.register(require('@fastify/rate-limit'), {
 
 fastify.register(require('@fastify/multipart'));
 
-// Register PostgreSQL
+// Register PostgreSQL with connection pooling
 fastify.register(require('@fastify/postgres'), {
-  connectionString: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/security_scanner'
+  connectionString: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/security_scanner',
+  max: 20, // Maximum pool size
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000
 });
 
 // Register WebSocket

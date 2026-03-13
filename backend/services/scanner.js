@@ -9,39 +9,21 @@ class ScannerService {
     this.zapUrl = 'http://security-scanner-zap:8090';
   }
 
-  async clearZapSession() {
-    /**
-     * Clear ZAP's session data to prevent unbounded disk growth.
-     * Equivalent to starting a fresh ZAP session.
-     */
-    try {
-      await axios.get(`${this.zapUrl}/JSON/core/action/newSession`, {
-        params: { name: '' }
-      });
-      console.log('ZAP session cleared');
-    } catch (error) {
-      console.warn('Failed to clear ZAP session:', error.message);
-    }
-  }
-
   async runZap(target, scanId, progressCallback) {
     try {
-      // Clear ZAP data BEFORE starting the scan
-      await this.clearZapSession();
-      
       if (progressCallback) progressCallback(10, 'Starting ZAP spider scan...');
       
       // Configure ZAP for faster scanning
       await axios.get(`${this.zapUrl}/JSON/spider/action/setOptionMaxDepth/`, {
-        params: { Integer: 3 }
+        params: { Integer: 3 } // Limit spider depth
       });
       await axios.get(`${this.zapUrl}/JSON/spider/action/setOptionMaxChildren/`, {
-        params: { Integer: 10 }
+        params: { Integer: 10 } // Limit children per node
       });
       await axios.get(`${this.zapUrl}/JSON/spider/action/setOptionMaxDuration/`, {
-        params: { Integer: 2 }
+        params: { Integer: 2 } // Max 2 minutes for spider
       });
-
+      
       // Start spider scan
       const spiderRes = await axios.get(`${this.zapUrl}/JSON/spider/action/scan/`, {
         params: { url: target }
@@ -63,39 +45,40 @@ class ScannerService {
       
       // Configure active scan for speed
       await axios.get(`${this.zapUrl}/JSON/ascan/action/setOptionMaxRuleDurationInMins/`, {
-        params: { Integer: 1 }
+        params: { Integer: 1 } // Max 1 min per rule
       });
       await axios.get(`${this.zapUrl}/JSON/ascan/action/setOptionMaxScanDurationInMins/`, {
-        params: { Integer: 5 }
+        params: { Integer: 5 } // Max 5 minutes total
       });
-
+      await axios.get(`${this.zapUrl}/JSON/ascan/action/setOptionThreadPerHost/`, {
+        params: { Integer: 4 } // Increase threads
+      });
+      
       // Start active scan
       const scanRes = await axios.get(`${this.zapUrl}/JSON/ascan/action/scan/`, {
         params: { url: target }
       });
       const scanIdZap = scanRes.data.scan;
 
-      // Wait for active scan to complete
+      // Wait for active scan to complete (check every 2 seconds)
       let scanStatus = 0;
       while (scanStatus < 100) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
         const statusRes = await axios.get(`${this.zapUrl}/JSON/ascan/view/status/`, {
           params: { scanId: scanIdZap }
         });
         scanStatus = parseInt(statusRes.data.status);
-        if (progressCallback) progressCallback(40 + (scanStatus * 0.6), `Active scan: ${scanStatus}%`);
+        if (progressCallback) progressCallback(40 + (scanStatus * 0.5), `Active scan: ${scanStatus}%`);
       }
 
-      if (progressCallback) progressCallback(100, 'Scan completed, retrieving results...');
-
+      if (progressCallback) progressCallback(90, 'Collecting results...');
+      
       // Get alerts
       const alertsRes = await axios.get(`${this.zapUrl}/JSON/core/view/alerts/`, {
         params: { baseurl: target }
       });
 
-      // Clear ZAP session AFTER scan to free memory
-      await this.clearZapSession();
-
+      if (progressCallback) progressCallback(100, 'Scan completed');
       return { success: true, alerts: alertsRes.data.alerts };
     } catch (error) {
       console.error('ZAP error:', error.message);
@@ -106,7 +89,7 @@ class ScannerService {
 
   async runNuclei(target, scanId) {
     const outputFile = `/scans/nuclei_${scanId}.json`;
-    const cmd = `docker exec ${this.scannerContainer} sh -c "nuclei -u '${target}' -jsonl -o ${outputFile} -silent -nc"`;
+    const cmd = `docker exec ${this.scannerContainer} sh -c "nuclei -u '${target}' -jsonl -o ${outputFile} -silent -nc -c 50 -rate-limit 150"`;
     
     try {
       await execAsync(cmd);
@@ -119,7 +102,7 @@ class ScannerService {
 
   async runNikto(target, scanId) {
     const outputFile = `/scans/nikto_${scanId}.json`;
-    const cmd = `docker exec ${this.scannerContainer} perl /opt/nikto/program/nikto.pl -h ${target} -Format json -output ${outputFile}`;
+    const cmd = `docker exec ${this.scannerContainer} perl /opt/nikto/program/nikto.pl -h ${target} -Format json -output ${outputFile} -Tuning 123bde -maxtime 3m`;
     
     try {
       await execAsync(cmd);
@@ -146,22 +129,17 @@ class ScannerService {
   async runFullScan(target, scanId) {
     const results = {
       nuclei: null,
-      nikto: null,
-      subfinder: null,
-      zap: null
+      nikto: null
     };
 
-    try {
-      const url = new URL(target);
-      const domain = url.hostname;
-      results.subfinder = await this.runSubfinder(domain, scanId);
-    } catch (e) {
-      console.error('Subfinder skipped:', e.message);
-    }
+    // Run Nuclei and Nikto in parallel for speed
+    const [nucleiResult, niktoResult] = await Promise.all([
+      this.runNuclei(target, scanId),
+      this.runNikto(target, scanId)
+    ]);
 
-    results.zap = await this.runZap(target, scanId);
-    results.nuclei = await this.runNuclei(target, scanId);
-    results.nikto = await this.runNikto(target, scanId);
+    results.nuclei = nucleiResult;
+    results.nikto = niktoResult;
 
     return results;
   }

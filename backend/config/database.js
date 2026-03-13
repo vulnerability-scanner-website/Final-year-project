@@ -39,6 +39,10 @@ const initDatabase = async (client) => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE INDEX IF NOT EXISTS idx_scans_user_id ON scans(user_id);
+      CREATE INDEX IF NOT EXISTS idx_scans_status ON scans(status);
+      CREATE INDEX IF NOT EXISTS idx_scans_created_at ON scans(created_at DESC);
+
       CREATE TABLE IF NOT EXISTS reports (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id),
@@ -91,6 +95,10 @@ const initDatabase = async (client) => {
           ALTER TABLE vulnerabilities ADD COLUMN scanner_type VARCHAR(50);
         END IF;
       END $$;
+
+      CREATE INDEX IF NOT EXISTS idx_vulnerabilities_scan_id ON vulnerabilities(scan_id);
+      CREATE INDEX IF NOT EXISTS idx_vulnerabilities_severity ON vulnerabilities(severity);
+      CREATE INDEX IF NOT EXISTS idx_vulnerabilities_created_at ON vulnerabilities(created_at DESC);
 
       CREATE TABLE IF NOT EXISTS notifications (
         id SERIAL PRIMARY KEY,

@@ -10,6 +10,11 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    turbo: {
+      resolveAlias: {},
+    },
+  },
 };
 
 export default nextConfig;
