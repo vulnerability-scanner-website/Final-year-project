@@ -4,30 +4,8 @@ const { initDatabase } = require('./config/database');
 const { authenticate } = require('./middlewares/auth');
 
 // Register plugins
-// CORS configuration for Railway deployment
-const allowedOrigins = [
-  'http://localhost:3000',
-  process.env.FRONTEND_URL,
-  /\.railway\.app$/,  // Allow all Railway domains
-  /\.up\.railway\.app$/  // Allow all Railway up domains
-].filter(Boolean);
-
 fastify.register(require('@fastify/cors'), {
-  origin: (origin, cb) => {
-    if (!origin) return cb(null, true); // Allow requests with no origin (mobile apps, curl, etc.)
-    
-    const allowed = allowedOrigins.some(allowedOrigin => {
-      if (typeof allowedOrigin === 'string') {
-        return origin === allowedOrigin;
-      }
-      if (allowedOrigin instanceof RegExp) {
-        return allowedOrigin.test(origin);
-      }
-      return false;
-    });
-    
-    cb(null, allowed);
-  },
+  origin: 'http://localhost:3000',
   credentials: true
 });
 
@@ -104,15 +82,9 @@ fastify.register(async function (fastify) {
 // Start server
 const start = async () => {
   try {
-    const PORT = process.env.PORT || 5000;
-    const HOST = process.env.HOST || '0.0.0.0';
-    
-    await fastify.ready(); // Wait for all plugins and routes to be registered
-    await fastify.listen({ port: PORT, host: HOST });
-    console.log(`🚀 Backend server running on http://${HOST}:${PORT}`);
-    console.log(`🔌 WebSocket available at ws://${HOST}:${PORT}/ws`);
-    console.log('📁 Routes registered manually');
-    console.log(fastify.printRoutes()); // Print all registered routes
+    await fastify.listen({ port: 5000, host: '0.0.0.0' });
+    console.log('🚀 Backend server running on http://localhost:5000');
+    console.log('🔌 WebSocket available at ws://localhost:5000/ws');
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
