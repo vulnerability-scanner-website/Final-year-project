@@ -24,10 +24,23 @@ class ScannerService {
     }
   }
 
-  async runZap(target, scanId) {
+  async runZap(target, scanId, progressCallback) {
     try {
       // Clear ZAP data BEFORE starting the scan
       await this.clearZapSession();
+      
+      if (progressCallback) progressCallback(10, 'Starting ZAP spider scan...');
+      
+      // Configure ZAP for faster scanning
+      await axios.get(`${this.zapUrl}/JSON/spider/action/setOptionMaxDepth/`, {
+        params: { Integer: 3 }
+      });
+      await axios.get(`${this.zapUrl}/JSON/spider/action/setOptionMaxChildren/`, {
+        params: { Integer: 10 }
+      });
+      await axios.get(`${this.zapUrl}/JSON/spider/action/setOptionMaxDuration/`, {
+        params: { Integer: 2 }
+      });
 
       // Start spider scan
       const spiderRes = await axios.get(`${this.zapUrl}/JSON/spider/action/scan/`, {
@@ -35,15 +48,26 @@ class ScannerService {
       });
       const spiderId = spiderRes.data.scan;
 
-      // Wait for spider to complete
+      // Wait for spider to complete (check every 1 second)
       let spiderStatus = 0;
       while (spiderStatus < 100) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         const statusRes = await axios.get(`${this.zapUrl}/JSON/spider/view/status/`, {
           params: { scanId: spiderId }
         });
         spiderStatus = parseInt(statusRes.data.status);
+        if (progressCallback) progressCallback(10 + (spiderStatus * 0.3), `Spider scan: ${spiderStatus}%`);
       }
+
+      if (progressCallback) progressCallback(40, 'Starting active scan...');
+      
+      // Configure active scan for speed
+      await axios.get(`${this.zapUrl}/JSON/ascan/action/setOptionMaxRuleDurationInMins/`, {
+        params: { Integer: 1 }
+      });
+      await axios.get(`${this.zapUrl}/JSON/ascan/action/setOptionMaxScanDurationInMins/`, {
+        params: { Integer: 5 }
+      });
 
       // Start active scan
       const scanRes = await axios.get(`${this.zapUrl}/JSON/ascan/action/scan/`, {
@@ -54,12 +78,15 @@ class ScannerService {
       // Wait for active scan to complete
       let scanStatus = 0;
       while (scanStatus < 100) {
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         const statusRes = await axios.get(`${this.zapUrl}/JSON/ascan/view/status/`, {
           params: { scanId: scanIdZap }
         });
         scanStatus = parseInt(statusRes.data.status);
+        if (progressCallback) progressCallback(40 + (scanStatus * 0.6), `Active scan: ${scanStatus}%`);
       }
+
+      if (progressCallback) progressCallback(100, 'Scan completed, retrieving results...');
 
       // Get alerts
       const alertsRes = await axios.get(`${this.zapUrl}/JSON/core/view/alerts/`, {
@@ -72,6 +99,7 @@ class ScannerService {
       return { success: true, alerts: alertsRes.data.alerts };
     } catch (error) {
       console.error('ZAP error:', error.message);
+      if (progressCallback) progressCallback(0, `Error: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
