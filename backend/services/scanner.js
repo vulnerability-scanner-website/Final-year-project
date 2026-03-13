@@ -9,8 +9,26 @@ class ScannerService {
     this.zapUrl = 'http://security-scanner-zap:8090';
   }
 
+  async clearZapSession() {
+    /**
+     * Clear ZAP's session data to prevent unbounded disk growth.
+     * Equivalent to starting a fresh ZAP session.
+     */
+    try {
+      await axios.get(`${this.zapUrl}/JSON/core/action/newSession`, {
+        params: { name: '' }
+      });
+      console.log('ZAP session cleared');
+    } catch (error) {
+      console.warn('Failed to clear ZAP session:', error.message);
+    }
+  }
+
   async runZap(target, scanId) {
     try {
+      // Clear ZAP data BEFORE starting the scan
+      await this.clearZapSession();
+
       // Start spider scan
       const spiderRes = await axios.get(`${this.zapUrl}/JSON/spider/action/scan/`, {
         params: { url: target }
@@ -47,6 +65,9 @@ class ScannerService {
       const alertsRes = await axios.get(`${this.zapUrl}/JSON/core/view/alerts/`, {
         params: { baseurl: target }
       });
+
+      // Clear ZAP session AFTER scan to free memory
+      await this.clearZapSession();
 
       return { success: true, alerts: alertsRes.data.alerts };
     } catch (error) {
@@ -98,7 +119,8 @@ class ScannerService {
     const results = {
       nuclei: null,
       nikto: null,
-      subfinder: null
+      subfinder: null,
+      zap: null
     };
 
     try {
@@ -109,6 +131,7 @@ class ScannerService {
       console.error('Subfinder skipped:', e.message);
     }
 
+    results.zap = await this.runZap(target, scanId);
     results.nuclei = await this.runNuclei(target, scanId);
     results.nikto = await this.runNikto(target, scanId);
 
