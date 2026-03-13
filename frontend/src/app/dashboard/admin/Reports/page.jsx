@@ -45,42 +45,42 @@ const reports = [
 
 export default function Page() {
   return (
-    <div className="ml-64 p-6 space-y-6">
+    <div className="space-y-4 w-full">
       <DashboardHeader role="reports" />
 
       {/* ---------------- Summary Cards ---------------- */}
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Total Reports</CardTitle>
-            <FileText className="h-5 w-5 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
+            <CardTitle className="text-sm md:text-base">Total Reports</CardTitle>
+            <FileText className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">38</div>
-            <p className="text-sm text-muted-foreground">Generated this year</p>
+          <CardContent className="p-4 md:p-6 pt-0">
+            <div className="text-xl md:text-2xl font-bold">38</div>
+            <p className="text-xs md:text-sm text-muted-foreground">Generated this year</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Critical Reports</CardTitle>
-            <Badge variant="destructive">High Risk</Badge>
+          <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
+            <CardTitle className="text-sm md:text-base">Critical Reports</CardTitle>
+            <Badge variant="destructive" className="text-xs">High Risk</Badge>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">7</div>
-            <p className="text-sm text-muted-foreground">Requires review</p>
+          <CardContent className="p-4 md:p-6 pt-0">
+            <div className="text-xl md:text-2xl font-bold">7</div>
+            <p className="text-xs md:text-sm text-muted-foreground">Requires review</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Scheduled Reports</CardTitle>
-            <Calendar className="h-5 w-5 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
+            <CardTitle className="text-sm md:text-base">Scheduled Reports</CardTitle>
+            <Calendar className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-sm text-muted-foreground">
+          <CardContent className="p-4 md:p-6 pt-0">
+            <div className="text-xl md:text-2xl font-bold">12</div>
+            <p className="text-xs md:text-sm text-muted-foreground">
               Automated recurring reports
             </p>
           </CardContent>
@@ -89,13 +89,13 @@ export default function Page() {
 
       {/* Generated Reports */}
       <Card>
-        <CardHeader>
-          <CardTitle>Generated Reports</CardTitle>
-          <CardDescription>
+        <CardHeader className="p-4 md:p-6">
+          <CardTitle className="text-base md:text-lg">Generated Reports</CardTitle>
+          <CardDescription className="text-xs md:text-sm">
             Download your security reports
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 md:p-6">
           <ReportsDownload />
         </CardContent>
       </Card>

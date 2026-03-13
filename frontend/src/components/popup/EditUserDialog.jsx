@@ -9,12 +9,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-export default function EditUserDialog({ open, setOpen, user, onUpdate }) {
+export default function EditUserDialog({ open, onOpenChange, user, onUserUpdated }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("");
   const [role, setRole] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // When user changes, fill input fields
   useEffect(() => {
     if (user) {
       setEmail(user.email || "");
@@ -23,27 +23,45 @@ export default function EditUserDialog({ open, setOpen, user, onUpdate }) {
     }
   }, [user]);
 
-  const handleSubmit = () => {
-    onUpdate({
-      ...user,
-      email,
-      role,
-      status
-    });
-    setOpen(false);
+  const handleSubmit = async () => {
+    if (!user || !email || !role) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:5000/api/admin/users/${user.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ email, role, status }),
+      });
+
+      if (res.ok) {
+        onOpenChange(false);
+        onUserUpdated();
+      } else {
+        const error = await res.json();
+        alert(error.error || "Failed to update user");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update user");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!user) return null;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit User</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
-          {/* Email */}
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
             <input
@@ -55,7 +73,6 @@ export default function EditUserDialog({ open, setOpen, user, onUpdate }) {
             />
           </div>
 
-          {/* Role */}
           <div>
             <label className="block text-sm font-medium mb-1">Role</label>
             <select
@@ -69,7 +86,6 @@ export default function EditUserDialog({ open, setOpen, user, onUpdate }) {
             </select>
           </div>
 
-          {/* Status */}
           <div>
             <label className="block text-sm font-medium mb-1">Status</label>
             <select
@@ -83,8 +99,12 @@ export default function EditUserDialog({ open, setOpen, user, onUpdate }) {
             </select>
           </div>
 
-          <Button className="w-full bg-[#003366] hover:bg-[#004080]" onClick={handleSubmit}>
-            Update User
+          <Button 
+            className="w-full bg-[#003366] hover:bg-[#004080]" 
+            onClick={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? "Updating..." : "Update User"}
           </Button>
         </div>
       </DialogContent>

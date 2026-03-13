@@ -12,34 +12,48 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function AddUserDialog({ open, setOpen, onAddUser }) {
+export default function AddUserDialog({ open, onOpenChange, onUserAdded }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("developer");
   const [status, setStatus] = useState("active");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!email || !password || !role) return;
 
-    const newUser = {
-      email,
-      password,
-      role,
-      status,
-    };
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/admin/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ email, password, role, status }),
+      });
 
-    onAddUser(newUser);
-
-    // Reset form
-    setEmail("");
-    setPassword("");
-    setRole("developer");
-    setStatus("active");
-    setOpen(false);
+      if (res.ok) {
+        setEmail("");
+        setPassword("");
+        setRole("developer");
+        setStatus("active");
+        onOpenChange(false);
+        onUserAdded();
+      } else {
+        const error = await res.json();
+        alert(error.error || "Failed to add user");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add user");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add New User</DialogTitle>
@@ -101,16 +115,16 @@ export default function AddUserDialog({ open, setOpen, onAddUser }) {
           <Button 
             type="button"
             variant="outline" 
-            onClick={() => setOpen(false)}
+            onClick={() => onOpenChange(false)}
           >
             Cancel
           </Button>
           <Button 
             onClick={handleSubmit} 
             className="bg-[#003366] hover:bg-[#004080] text-white"
-            disabled={!email || !password || !role}
+            disabled={!email || !password || !role || loading}
           >
-            Save User
+            {loading ? "Saving..." : "Save User"}
           </Button>
         </DialogFooter>
       </DialogContent>
