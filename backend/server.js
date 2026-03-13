@@ -88,11 +88,10 @@ fastify.register(async function (fastify) {
 // Start server
 const start = async () => {
   try {
-    await fastify.ready(); // Wait for all plugins and routes to be registered
     await fastify.listen({ port: 5000, host: '0.0.0.0' });
-    console.log(' Backend server running on http://localhost:5000');
-    console.log('WebSocket available at ws://localhost:5000/ws');
-    console.log('Routes registered manually');
+    console.log('🚀 Backend server running on http://localhost:5000');
+    console.log('🔌 WebSocket available at ws://localhost:5000/ws');
+    console.log('📋 Routes registered manually');
     console.log(fastify.printRoutes()); // Print all registered routes
   } catch (err) {
     fastify.log.error(err);
