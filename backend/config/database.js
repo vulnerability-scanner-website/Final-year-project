@@ -61,8 +61,40 @@ const initDatabase = async (client) => {
         severity VARCHAR(50) NOT NULL,
         status VARCHAR(50) DEFAULT 'Open',
         description TEXT,
+        affected_url VARCHAR(500),
+        affected_parameter VARCHAR(255),
+        evidence TEXT,
+        remediation TEXT,
+        cwe_id VARCHAR(50),
+        cvss_score DECIMAL(3,1),
+        scanner_type VARCHAR(50),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+      
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vulnerabilities' AND column_name='affected_url') THEN
+          ALTER TABLE vulnerabilities ADD COLUMN affected_url VARCHAR(500);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vulnerabilities' AND column_name='affected_parameter') THEN
+          ALTER TABLE vulnerabilities ADD COLUMN affected_parameter VARCHAR(255);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vulnerabilities' AND column_name='evidence') THEN
+          ALTER TABLE vulnerabilities ADD COLUMN evidence TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vulnerabilities' AND column_name='remediation') THEN
+          ALTER TABLE vulnerabilities ADD COLUMN remediation TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vulnerabilities' AND column_name='cwe_id') THEN
+          ALTER TABLE vulnerabilities ADD COLUMN cwe_id VARCHAR(50);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vulnerabilities' AND column_name='cvss_score') THEN
+          ALTER TABLE vulnerabilities ADD COLUMN cvss_score DECIMAL(3,1);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vulnerabilities' AND column_name='scanner_type') THEN
+          ALTER TABLE vulnerabilities ADD COLUMN scanner_type VARCHAR(50);
+        END IF;
+      END $$;
 
       CREATE INDEX IF NOT EXISTS idx_vulnerabilities_scan_id ON vulnerabilities(scan_id);
       CREATE INDEX IF NOT EXISTS idx_vulnerabilities_severity ON vulnerabilities(severity);

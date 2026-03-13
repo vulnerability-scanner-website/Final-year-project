@@ -87,38 +87,68 @@ class ScanController {
 
           let vulnCount = 0;
 
-          // Parse ZAP results
+          // Parse ZAP results with deduplication
           if (scanResults.zap?.alerts && scanResults.zap.success) {
+            const vulnMap = new Map();
+            
             for (const alert of scanResults.zap.alerts) {
+              const title = alert.alert.substring(0, 255);
               const severity = alert.risk?.toLowerCase() || 'info';
-              await this.vulnerabilityModel.create(
-                scan.id,
-                alert.alert.substring(0, 255),
-                severity,
-                alert.description?.substring(0, 1000)
-              );
-              vulnCount++;
+              const key = `${title}|${severity}`;
+              
+              // Only save if we haven't seen this vuln type before
+              if (!vulnMap.has(key)) {
+                vulnMap.set(key, true);
+                await this.vulnerabilityModel.create(
+                  scan.id,
+                  title,
+                  severity,
+                  alert.description?.substring(0, 1000),
+                  alert.url?.substring(0, 500),
+                  alert.param?.substring(0, 255),
+                  alert.evidence?.substring(0, 1000),
+                  alert.solution?.substring(0, 1000),
+                  alert.cweid?.toString(),
+                  parseFloat(alert.riskdesc?.match(/\d+\.\d+/)?.[0]) || null,
+                  'ZAP'
+                );
+                vulnCount++;
+              }
             }
           }
 
-          // Parse Nuclei results
+          // Parse Nuclei results with deduplication
           if (scanResults.nuclei?.outputFile && scanResults.nuclei.success) {
             try {
               const output = await fs.readFile(scanResults.nuclei.outputFile, 'utf-8');
               const lines = output.trim().split('\n').filter(l => l.trim());
+              const vulnMap = new Map();
               
               for (const line of lines) {
                 try {
                   const vuln = JSON.parse(line);
-                  const title = vuln.info?.name || vuln['template-id'] || 'Unknown';
+                  const title = (vuln.info?.name || vuln['template-id'] || 'Unknown').substring(0, 255);
                   const severity = vuln.info?.severity || 'info';
+                  const key = `${title}|${severity}`;
                   
-                  await this.vulnerabilityModel.create(
-                    scan.id,
-                    title.substring(0, 255),
-                    severity
-                  );
-                  vulnCount++;
+                  // Only save if we haven't seen this vuln type before
+                  if (!vulnMap.has(key)) {
+                    vulnMap.set(key, true);
+                    await this.vulnerabilityModel.create(
+                      scan.id,
+                      title,
+                      severity,
+                      vuln.info?.description?.substring(0, 1000),
+                      vuln.matched_at?.substring(0, 500),
+                      null,
+                      vuln.extracted_results?.join(', ')?.substring(0, 1000),
+                      vuln.info?.remediation?.substring(0, 1000),
+                      vuln.info?.cwe_id?.toString(),
+                      parseFloat(vuln.info?.cvss_score) || null,
+                      'Nuclei'
+                    );
+                    vulnCount++;
+                  }
                 } catch (parseError) {
                   console.error('Failed to parse vulnerability:', parseError.message);
                 }
