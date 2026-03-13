@@ -6,7 +6,12 @@ const { authenticate } = require('./middlewares/auth');
 // Register plugins
 fastify.register(require('@fastify/cors'), {
   origin: 'http://localhost:3000',
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 });
 
 fastify.addContentTypeParser('application/json', { parseAs: 'string' }, function (req, body, done) {
@@ -58,6 +63,7 @@ fastify.get('/health', async (request, reply) => {
 
 // Manually register routes
 fastify.register(require('./routes/auth'), { prefix: '/api/auth' });
+fastify.register(require('./routes/admin'), { prefix: '/api' });
 fastify.register(require('./routes/scans'), { prefix: '/api' });
 fastify.register(require('./routes/vulnerabilities'), { prefix: '/api' });
 fastify.register(require('./routes/users'), { prefix: '/api' });
@@ -85,6 +91,8 @@ const start = async () => {
     await fastify.listen({ port: 5000, host: '0.0.0.0' });
     console.log('🚀 Backend server running on http://localhost:5000');
     console.log('🔌 WebSocket available at ws://localhost:5000/ws');
+    console.log('📋 Routes registered manually');
+    console.log(fastify.printRoutes()); // Print all registered routes
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

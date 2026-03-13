@@ -6,8 +6,33 @@ module.exports = async function (fastify, opts) {
     }
     const client = await fastify.pg.connect();
     try {
-      const result = await client.query('SELECT id, email, role, created_at FROM users ORDER BY created_at DESC');
+      const result = await client.query('SELECT id, email, role, status, created_at FROM users ORDER BY created_at DESC');
       return result.rows;
+    } finally {
+      client.release();
+    }
+  });
+
+  // Create new user (admin only)
+  fastify.post('/users', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+    if (request.user.role !== 'admin') {
+      return reply.code(403).send({ error: 'Forbidden' });
+    }
+    const { email, password, role, status } = request.body;
+    const bcrypt = require('bcrypt');
+    const client = await fastify.pg.connect();
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const result = await client.query(
+        'INSERT INTO users (email, password, role, status) VALUES ($1, $2, $3, $4) RETURNING id, email, role, status, created_at',
+        [email, hashedPassword, role || 'user', status || 'active']
+      );
+      return result.rows[0];
+    } catch (err) {
+      if (err.code === '23505') {
+        return reply.code(409).send({ error: 'Email already exists' });
+      }
+      throw err;
     } finally {
       client.release();
     }
@@ -38,7 +63,7 @@ module.exports = async function (fastify, opts) {
     }
     const client = await fastify.pg.connect();
     try {
-      const result = await client.query('SELECT id, email, role, created_at FROM users WHERE id = $1', [request.params.id]);
+      const result = await client.query('SELECT id, email, role, status, created_at FROM users WHERE id = $1', [request.params.id]);
       if (result.rows.length === 0) {
         return reply.code(404).send({ error: 'User not found' });
       }
@@ -53,12 +78,12 @@ module.exports = async function (fastify, opts) {
     if (request.user.role !== 'admin') {
       return reply.code(403).send({ error: 'Forbidden' });
     }
-    const { email, role } = request.body;
+    const { email, role, status } = request.body;
     const client = await fastify.pg.connect();
     try {
       const result = await client.query(
-        'UPDATE users SET email = $1, role = $2 WHERE id = $3 RETURNING id, email, role',
-        [email, role, request.params.id]
+        'UPDATE users SET email = $1, role = $2, status = $3 WHERE id = $4 RETURNING id, email, role, status',
+        [email, role, status, request.params.id]
       );
       if (result.rows.length === 0) {
         return reply.code(404).send({ error: 'User not found' });

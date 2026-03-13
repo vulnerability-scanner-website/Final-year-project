@@ -13,7 +13,7 @@ export function SignupPage() {
     lastName: "",
     email: "",
     password: "",
-    role: "user",
+    role: "developer",
     agreeToTerms: false,
   });
 
@@ -33,14 +33,11 @@ export function SignupPage() {
     try {
       const data = await authAPI.register(formData.email, formData.password, formData.role);
       
-      // Redirect based on role
-      if (data.user.role === 'admin') {
-        window.location.href = '/dashboard/admin';
-      } else if (data.user.role === 'analyst') {
-        window.location.href = '/dashboard/analyst';
-      } else {
-        window.location.href = '/dashboard/developer';
-      }
+      // Show success message for pending approval
+      alert(data.message || 'Registration successful! Your account is pending admin approval.');
+      
+      // Redirect to login
+      window.location.href = '/auth/login';
     } catch (err) {
       setError(err.message || 'Registration failed');
     }
@@ -144,6 +141,27 @@ export function SignupPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                 required
               />
+            </div>
+
+            {/* Role Field */}
+            <div>
+              <label
+                htmlFor="role"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Role
+              </label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                required
+              >
+                <option value="developer">Developer</option>
+                <option value="analyst">Analyst</option>
+              </select>
             </div>
 
             {/* Password Field */}

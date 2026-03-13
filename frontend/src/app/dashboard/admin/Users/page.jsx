@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -30,65 +30,132 @@ import AddUserDialog from "@/components/popup/AddUserDialog";
 import EditUserDialog from "@/components/popup/EditUserDialog";
 
 export default function UsersDashboard() {
-  const [users, setUsers] = useState([
-    { id: 1, name: "John Doe", role: "Admin", status: "Active" },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      role: "Security Analyst",
-      status: "Active",
-    },
-    { id: 3, name: "Michael Chen", role: "User", status: "Pending" },
-    { id: 4, name: "Emily Brown", role: "Security Analyst", status: "Active" },
-    { id: 5, name: "David Wilson", role: "User", status: "Inactive" },
-    { id: 6, name: "Lisa Anderson", role: "Admin", status: "Active" },
-    { id: 7, name: "James Martinez", role: "User", status: "Active" },
-  ]);
-
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const handleToggleStatus = (userId) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === userId
-          ? {
-              ...user,
-              status: user.status === "Active" ? "Inactive" : "Active",
-            }
-          : user,
-      ),
-    );
+  const API_URL = "http://localhost:5000/api/admin/users";
+
+  // --- API Integrations ---
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch(API_URL, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await res.json();
+      setUsers(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+      setUsers([]);
+    }
   };
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleAddUser = async (newUser) => {
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(newUser),
+      });
+      if (res.ok) {
+        fetchUsers();
+        setOpen(false);
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  const handleUpdateUser = async (updatedUser) => {
+    try {
+      const res = await fetch(`${API_URL}/${updatedUser.id}`, {
+        method: "PUT",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(updatedUser),
+      });
+      if (res.ok) {
+        fetchUsers();
+        setEditOpen(false);
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  const handleToggleStatus = async (userId) => {
+    const user = users.find((u) => u.id === userId);
+    const updatedStatus = user.status === "active" ? "inactive" : "active";
+    
+    try {
+      const res = await fetch(`${API_URL}/${userId}/status`, {
+        method: "PATCH",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ status: updatedStatus }),
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('Status toggle failed:', errorData);
+        alert(`Failed to update status: ${errorData.error || 'Unknown error'}`);
+        return;
+      }
+      
+      fetchUsers();
+    } catch (err) { 
+      console.error('Network error:', err);
+      alert(`Network error: ${err.message}`);
+    }
+  };
+
+  const confirmDelete = async () => {
+    try {
+      const res = await fetch(`${API_URL}/${selectedUser.id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (res.ok) {
+        fetchUsers();
+        setDeleteOpen(false);
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  // --- UI Logic ---
+
   const filteredUsers = users.filter((user) => {
-    const matchesSearch = user.name
-      .toLowerCase()
-      .includes(search.toLowerCase());
-
+    const matchesSearch = user.email.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "" || user.status === statusFilter;
-
     return matchesSearch && matchesStatus;
   });
 
-  const handleAddUser = (newUser) => {
-    setUsers((prev) => [...prev, newUser]);
-    setOpen(false);
-  };
+  const usersPerPage = 5;
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
   const handleEdit = (user) => {
     setSelectedUser(user);
     setEditOpen(true);
-  };
-
-  const handleUpdateUser = (updatedUser) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)),
-    );
   };
 
   const handleDeleteClick = (user) => {
@@ -96,73 +163,34 @@ export default function UsersDashboard() {
     setDeleteOpen(true);
   };
 
-  const confirmDelete = () => {
-    setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
-    setDeleteOpen(false);
-  };
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 5;
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-
   return (
     <div className="flex min-h-screen bg-gray-100">
       <AdminSideBar />
-
       <div className="flex-1 ml-64">
-        <DashboardHeader
-          role="usermanagement"
-          onActionClick={() => setOpen(true)}
-        />
+        <DashboardHeader role="usermanagement" onActionClick={() => setOpen(true)} />
 
-        <AddUserDialog
-          open={open}
-          setOpen={setOpen}
-          onAddUser={handleAddUser}
-        />
-        <EditUserDialog
-          open={editOpen}
-          setOpen={setEditOpen}
-          user={selectedUser}
-          onUpdate={handleUpdateUser}
-        />
+        <AddUserDialog open={open} setOpen={setOpen} onAddUser={handleAddUser} />
+        {selectedUser && (
+          <EditUserDialog open={editOpen} setOpen={setEditOpen} user={selectedUser} onUpdate={handleUpdateUser} />
+        )}
 
         <main className="my-6 ">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6  ">
-            <Card className="shadow-md shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border-yellow-400 border">
-              <CardContent className="p-5 flex justify-between items-center ">
-                <div>
-                  <p className="text-sm text-gray-500">Total Users</p>
-                  <p className="text-3xl font-bold">{users.length}</p>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Card className="border-yellow-400 border">
+              <CardContent className="p-5 flex justify-between items-center">
+                <div><p className="text-sm text-gray-500">Total Users</p><p className="text-3xl font-bold">{users.length}</p></div>
                 <Users className="w-6 h-6 text-[#003366]" />
               </CardContent>
             </Card>
-
-            <Card className="shadow-md shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border-yellow-400 border">
+            <Card className="border-yellow-400 border">
               <CardContent className="p-6 flex justify-between items-center">
-                <div>
-                  <p className="text-sm text-gray-500">Active Users</p>
-                  <p className="text-3xl font-bold">
-                    {users.filter((u) => u.status === "Active").length}
-                  </p>
-                </div>
+                <div><p className="text-sm text-gray-500">Active Users</p><p className="text-3xl font-bold">{users.filter(u => u.status === "active").length}</p></div>
                 <UserCheck className="w-6 h-6 text-green-600" />
               </CardContent>
             </Card>
-
-            <Card className="shadow-md shadow-sm hover:border-yellow-400 border shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border-yellow-400 border">
+            <Card className="border-yellow-400 border">
               <CardContent className="p-6 flex justify-between items-center">
-                <div>
-                  <p className="text-sm text-gray-500">Inactive Users</p>
-                  <p className="text-3xl font-bold">
-                    {users.filter((u) => u.status === "Inactive").length}
-                  </p>
-                </div>
+                <div><p className="text-sm text-gray-500">Inactive Users</p><p className="text-3xl font-bold">{users.filter(u => u.status === "inactive").length}</p></div>
                 <Scan className="w-6 h-6 text-purple-600" />
               </CardContent>
             </Card>
@@ -170,140 +198,73 @@ export default function UsersDashboard() {
 
           <Card className="shadow-md mb-6">
             <CardContent className="flex flex-col md:flex-row gap-3 p-2">
-              <input
-                type="text"
-                placeholder="Search by name..."
-                className="w-full border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 pl-4 rounded-md outline-none transition"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+              <input 
+                type="text" placeholder="Search by name..." className="w-full border p-2 rounded-md outline-none" 
+                value={search} onChange={(e) => setSearch(e.target.value)} 
               />
-
-              <select
-                className="w-full md:w-64 border border-gray-300 focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/20 px-4 py-2 rounded-md outline-none transition text-[#003366] bg-white"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+              <select 
+                className="w-full md:w-64 border p-2 rounded-md outline-none bg-white" 
+                value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <option value="">All Status</option>
-                <option value="Active">Active</option>
-                <option value="Pending">Pending</option>
-                <option value="Inactive">Inactive</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="inactive">Inactive</option>
               </select>
             </CardContent>
           </Card>
 
-          {/* ================= USERS TABLE ================= */}
           <Card className="shadow-md overflow-hidden px-8">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="py-4">
-                    <TableHead>UserId</TableHead>
-                    <TableHead>UserName</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>UserId</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {currentUsers.map((user, index) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{(indexOfFirstUser + index + 1).toString().padStart(2, "0")}</TableCell>
+                    <TableCell className="font-medium">{user.email}</TableCell>
+                    <TableCell>{user.role}</TableCell>
+                    <TableCell>
+                      <span className={`px-4 py-1 rounded-full text-xs font-medium ${
+                        user.status === "active" ? "bg-green-100 text-green-800" : 
+                        user.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-800"
+                      }`}>{user.status}</span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Button variant="ghost" size="sm" onClick={() => handleEdit(user)}>
+                          <Edit className="w-4 h-4 text-[#003366]" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(user)}>
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </Button>
+                        <Switch 
+                          checked={user.status === "active"} 
+                          onCheckedChange={() => handleToggleStatus(user.id)}
+                          disabled={user.status === "pending"}
+                        />
+                      </div>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-
-                <TableBody>
-                  {currentUsers.map((user, index) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        {(index + 1).toString().padStart(2, "0")}
-                      </TableCell>
-
-                      <TableCell className="font-medium">{user.name}</TableCell>
-
-                      <TableCell>{user.role}</TableCell>
-
-                      <TableCell>
-                        <span
-                          className={`px-4 py-1 rounded-full text-xs font-medium ${
-                            user.status === "Active"
-                              ? "bg-green-100 text-green-800"
-                              : user.status === "Pending"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {user.status}
-                        </span>
-                      </TableCell>
-
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Button
-                            className="cursor-pointer"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(user)}
-                          >
-                            <Edit className="w-4 h-4 text-[#003366] " />
-                          </Button>
-
-                          <Button
-                            className="cursor-pointer"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteClick(user)}
-                          >
-                            <Trash2 className="w-4 h-4 text-red-600" />
-                          </Button>
-
-                          <Switch
-                            checked={user.status === "Active"}
-                            onCheckedChange={() => handleToggleStatus(user.id)}
-                            disabled={user.status === "Pending"}
-                            className="cursor-pointer data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-yellow-950"
-                          />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-
-                  {filteredUsers.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-6">
-                        No users found.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+              </TableBody>
+            </Table>
           </Card>
 
-          <div className="flex justify-center items-center mt-4 px-4">
-
+          <div className="flex justify-center items-center mt-4">
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-              >
-                Previous
-              </Button>
-
+              <Button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>Prev</Button>
               {Array.from({ length: totalPages }, (_, i) => (
-                <Button
-                  key={i}
-                  size="sm"
-                  variant={currentPage === i + 1 ? "default" : "outline"}
-                  onClick={() => setCurrentPage(i + 1)}
-                >
-                  {i + 1}
-                </Button>
+                <Button key={i} variant={currentPage === i + 1 ? "default" : "outline"} onClick={() => setCurrentPage(i + 1)}>{i + 1}</Button>
               ))}
-
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-              >
-                Next
-              </Button>
+              <Button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>Next</Button>
             </div>
           </div>
 
@@ -311,23 +272,11 @@ export default function UsersDashboard() {
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete{" "}
-                  <span className="font-semibold text-red-600">
-                    {selectedUser?.name}
-                  </span>
-                  .
-                </AlertDialogDescription>
+                <AlertDialogDescription>Delete <span className="font-bold text-red-600">{selectedUser?.email}</span>?</AlertDialogDescription>
               </AlertDialogHeader>
-
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={confirmDelete}
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  Delete
-                </AlertDialogAction>
+                <AlertDialogAction onClick={confirmDelete} className="bg-red-600">Delete</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

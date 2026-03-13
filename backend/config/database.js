@@ -9,9 +9,25 @@ const initDatabase = async (client) => {
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         role VARCHAR(50) NOT NULL,
+        status VARCHAR(20) DEFAULT 'active',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+    `);
 
+    // Migration: Add status column if it doesn't exist
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name='users' AND column_name='status'
+        ) THEN
+          ALTER TABLE users ADD COLUMN status VARCHAR(20) DEFAULT 'active';
+        END IF;
+      END $$;
+    `);
+
+    await client.query(`
       CREATE TABLE IF NOT EXISTS scans (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id),
