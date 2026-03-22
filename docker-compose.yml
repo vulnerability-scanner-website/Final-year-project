@@ -26,10 +26,13 @@ services:
     build: ./backend
     container_name: security-scanner-backend
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/security_scanner
       JWT_SECRET: your-super-secret-key-change-this
+      SAVE_SCANS_TO_DB: "false"  # Don't save scans to database
+      TEMPORARY_SCAN_MODE: "true"  # Only keep results in memory
+      COLAB_URL: https://unbriefed-nonangling-tristan.ngrok-free.dev
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -37,6 +40,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       postgres:
+        condition: service_healthy
+      zap:
         condition: service_healthy
     networks:
       - app-network
@@ -49,7 +54,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:5000
+      NEXT_PUBLIC_API_URL: http://localhost:5001
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -80,6 +85,16 @@ services:
       - app-network
     restart: unless-stopped
 
+  # Custom Vulnerable App (100+ vulnerabilities)
+  vulnerable-app:
+    build: ./vulnerable-app
+    container_name: vulnerable-test-app
+    ports:
+      - "8888:80"
+    networks:
+      - app-network
+    restart: unless-stopped
+
   # ZAP Scanner
   zap:
     image: zaproxy/zap-stable
@@ -91,6 +106,11 @@ services:
       - scan_results:/zap/wrk
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/JSON/core/view/version/"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
     restart: unless-stopped
 
 volumes:

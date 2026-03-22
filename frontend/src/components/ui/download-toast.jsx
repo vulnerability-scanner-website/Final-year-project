@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Download } from 'lucide-react';
-import { reportsAPI } from '@/lib/api';
+import jsPDF from 'jspdf';
 
 // --- Helper Components ---
 
@@ -46,16 +46,12 @@ const ProgressBar = ({ progress }) => (
 );
 
 // Action buttons (Download/Cancel)
-const ActionButton = ({ status, onCancel }) => {
-  if (status === 'downloading') {
-    return (
-      <button onClick={onCancel} className="text-slate-500 dark:text-slate-400 font-semibold text-sm hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-200">
-        Cancel
-      </button>
-    );
-  }
+const ActionButton = ({ file, onDownload }) => {
   return (
-    <button className="flex items-center text-blue-600 dark:text-blue-500 font-semibold text-sm hover:text-blue-800 dark:hover:text-blue-400 transition-colors duration-200">
+    <button 
+      onClick={() => onDownload(file)}
+      className="flex items-center text-blue-600 dark:text-blue-500 font-semibold text-sm hover:text-blue-800 dark:hover:text-blue-400 transition-colors duration-200"
+    >
       <Download className="h-4 w-4 mr-1" />
       Download
     </button>
@@ -63,7 +59,7 @@ const ActionButton = ({ status, onCancel }) => {
 };
 
 // --- Main File Item Component ---
-const FileItem = ({ file, onCancel }) => {
+const FileItem = ({ file, onDownload }) => {
   const { name, subtype, size, status, progress } = file;
   const displaySize = size < 1 ? `${(size * 1000).toFixed(0)} KB` : `${size} MB`;
 
@@ -85,7 +81,7 @@ const FileItem = ({ file, onCancel }) => {
           {displaySize}
         </div>
         <div className="flex-shrink-0 w-24 text-right">
-          <ActionButton status={status} onCancel={() => onCancel(file.id)} />
+          <ActionButton file={file} onDownload={onDownload} />
         </div>
       </div>
     </div>
@@ -104,23 +100,31 @@ export default function ReportsDownload() {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const data = await reportsAPI.getAll();
-        const formattedData = data.map(report => ({
-          ...report,
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5001/api/scans', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        
+        const formattedData = data.map((scan) => ({
+          id: scan.id,
+          name: `${scan.target} - ${new Date(scan.created_at).toLocaleDateString()}.pdf`,
+          type: scan.status === 'Completed' ? 'Completed' : 'Processing',
+          size: (Math.random() * 5 + 1).toFixed(1),
+          status: 'complete',
+          subtype: `${scan.issues} vulnerabilities found`,
           progress: 100,
-          originalSubtype: report.subtype
+          originalSubtype: `${scan.issues} vulnerabilities found`,
+          scanId: scan.id,
+          target: scan.target,
+          created_at: scan.created_at
         }));
         setFiles(formattedData);
         setFilteredFiles(formattedData);
       } catch (err) {
         console.error('Failed to fetch reports:', err);
-        // Fallback to mock data if API fails
-        const mockData = [
-          { id: 1, name: 'OWASP Top 10 Vulnerability Assessment Report.pdf', type: 'Weekly', size: 4.5, status: 'complete', subtype: 'Weekly Security Report', progress: 100, originalSubtype: 'Weekly Security Report' },
-          { id: 2, name: 'SQL Injection Attack Analysis Report.pdf', type: 'Critical', size: 2.3, status: 'complete', subtype: 'Critical Vulnerability Report', progress: 100, originalSubtype: 'Critical Vulnerability Report' },
-        ];
-        setFiles(mockData);
-        setFilteredFiles(mockData);
+        setFiles([]);
+        setFilteredFiles([]);
       } finally {
         setLoading(false);
       }
@@ -147,29 +151,132 @@ export default function ReportsDownload() {
     setFilteredFiles(filtered);
   }, [files, searchTerm, selectedType]);
 
-  // Effect for download simulation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFiles(currentFiles =>
-        currentFiles.map(file => {
-          if (file.status === 'downloading' && file.progress < 100) {
-            const increment = Math.random() * 8;
-            const newProgress = Math.min(file.progress + increment, 100);
-            if (newProgress >= 100) {
-              return { ...file, progress: 100, status: 'complete', subtype: file.originalSubtype };
-            }
-            return { ...file, progress: newProgress };
-          }
-          return file;
-        }));
-    }, 200);
-    return () => clearInterval(interval);
-  }, []);
+  // Handle PDF download
+  const handleDownload = async (file) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5001/api/scans/${file.scanId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const scan = await response.json();
 
-  const handleCancel = (fileId) => {
-    setFiles(currentFiles =>
-      currentFiles.map(file =>
-        file.id === fileId ? { ...file, status: 'complete', progress: 100, subtype: 'Cancelled' } : file));
+      // Generate PDF
+      const doc = new jsPDF();
+      let y = 10;
+
+      doc.setFontSize(18);
+      doc.text('Security Scan Report', 10, y);
+      y += 10;
+
+      doc.setFontSize(12);
+      doc.text(`Target: ${scan.target}`, 10, y);
+      y += 7;
+      doc.text(`Status: ${scan.status}`, 10, y);
+      y += 7;
+      doc.text(`Date: ${new Date(scan.created_at).toLocaleString()}`, 10, y);
+      y += 7;
+      doc.text(`Total Issues: ${scan.vulnerabilities?.length || 0}`, 10, y);
+      y += 10;
+
+      doc.setFontSize(14);
+      doc.text('Vulnerabilities:', 10, y);
+      y += 8;
+
+      if (scan.vulnerabilities && scan.vulnerabilities.length > 0) {
+        scan.vulnerabilities.forEach((vuln, index) => {
+          doc.setFontSize(11);
+          doc.text(`${index + 1}. ${vuln.title}`, 10, y);
+          y += 6;
+
+          doc.setFontSize(10);
+          doc.text(`Severity: ${vuln.severity || 'Unknown'}`, 15, y);
+          y += 5;
+
+          if (vuln.description) {
+            doc.text(
+              doc.splitTextToSize(`Description: ${vuln.description}`, 180),
+              15,
+              y
+            );
+            y += 8;
+          }
+
+          if (vuln.url) {
+            doc.text(
+              doc.splitTextToSize(`URL: ${vuln.url}`, 180),
+              15,
+              y
+            );
+            y += 8;
+          }
+
+          if (vuln.param) {
+            doc.text(
+              doc.splitTextToSize(`Parameter: ${vuln.param}`, 180),
+              15,
+              y
+            );
+            y += 8;
+          }
+
+          if (vuln.evidence) {
+            doc.text(
+              doc.splitTextToSize(`Evidence: ${vuln.evidence}`, 180),
+              15,
+              y
+            );
+            y += 8;
+          }
+
+          if (vuln.solution) {
+            doc.text(
+              doc.splitTextToSize(`Fix: ${vuln.solution}`, 180),
+              15,
+              y
+            );
+            y += 8;
+          }
+
+          if (vuln.cwe) {
+            doc.text(`CWE: CWE-${vuln.cwe}`, 15, y);
+            y += 5;
+          }
+
+          if (vuln.reference) {
+            doc.text(
+              doc.splitTextToSize(`Reference: ${vuln.reference}`, 180),
+              15,
+              y
+            );
+            y += 8;
+          }
+
+          if (vuln.ai_type) {
+            doc.text(`AI Classification: ${vuln.ai_type} (${Math.round(vuln.ai_confidence * 100)}%)`, 15, y);
+            y += 5;
+          }
+
+          if (vuln.source) {
+            doc.text(`Scanner: ${vuln.source}`, 15, y);
+            y += 5;
+          }
+
+          y += 5;
+
+          if (y > 260) {
+            doc.addPage();
+            y = 10;
+          }
+        });
+      } else {
+        doc.text('No vulnerabilities found.', 10, y);
+      }
+
+      doc.save(file.name);
+    } catch (err) {
+      console.error('Failed to download report:', err);
+      alert('Failed to download report');
+    }
   };
 
   return (
@@ -193,17 +300,19 @@ export default function ReportsDownload() {
             className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
           >
             <option value="">All Types</option>
-            <option value="Weekly">Weekly</option>
-            <option value="Monthly">Monthly</option>
-            <option value="Critical">Critical</option>
+            <option value="Completed">Completed</option>
+            <option value="Processing">Processing</option>
           </select>
         </div>
         
         <div>
-          {filteredFiles.map(file => (
-            <FileItem key={file.id} file={file} onCancel={handleCancel} />
-          ))}
-          {filteredFiles.length === 0 && (
+          {loading ? (
+            <p className="text-center text-slate-500 dark:text-slate-400 py-8">Loading reports...</p>
+          ) : filteredFiles.length > 0 ? (
+            filteredFiles.map(file => (
+              <FileItem key={file.id} file={file} onDownload={handleDownload} />
+            ))
+          ) : (
             <p className="text-center text-slate-500 dark:text-slate-400 py-8">No reports found matching your criteria.</p>
           )}
         </div>

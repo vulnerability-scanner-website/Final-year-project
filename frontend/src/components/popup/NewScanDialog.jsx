@@ -22,6 +22,8 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
 const FormSchema = z.object({
   scanName: z.string().min(1, 'Scan name is required').max(100, 'Scan name cannot exceed 100 characters'),
   targetUrl: z.string().url('Please enter a valid URL').min(1, 'Target URL is required'),
@@ -54,7 +56,7 @@ export default function NewScanDialog({ open, onOpenChange }) {
       }
       
       // Call backend API to start scan
-      const response = await fetch('http://localhost:5000/api/scans', {
+      const response = await fetch(`${API_URL}/api/scans`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
