@@ -1,7 +1,12 @@
 const ScanController = require('../controllers/ScanController');
+const MemoryScanController = require('../controllers/MemoryScanController');
+const scanStorage = require('../config/scan-storage');
 
 module.exports = async function (fastify, opts) {
-  const scanController = new ScanController(fastify);
+  // Use memory controller if temporary mode is enabled
+  const scanController = scanStorage.TEMPORARY_SCAN_MODE 
+    ? new MemoryScanController(fastify)
+    : new ScanController(fastify);
 
   fastify.get('/scans', { onRequest: [fastify.authenticate] }, async (request, reply) => {
     return scanController.getAll(request, reply);

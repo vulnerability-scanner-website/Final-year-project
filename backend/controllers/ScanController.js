@@ -1,17 +1,21 @@
 const ScanModel = require('../models/Scan');
 const VulnerabilityModel = require('../models/Vulnerability');
 const scannerService = require('../services/scanner');
+const AIClassifier = require('../services/aiClassifier');
 const fs = require('fs').promises;
+const scanStorage = require('../config/scan-storage');
 
 // Store active scan progress and control
 const scanProgress = new Map();
 const scanControl = new Map(); // Store abort controllers
+const scanResults = new Map(); // Store scan results in memory
 
 class ScanController {
   constructor(fastify) {
     this.fastify = fastify;
     this.scanModel = new ScanModel(fastify.pg);
     this.vulnerabilityModel = new VulnerabilityModel(fastify.pg);
+    this.aiClassifier = new AIClassifier(process.env.COLAB_URL);
   }
 
   async getProgress(request, reply) {
@@ -22,6 +26,21 @@ class ScanController {
 
   async getAll(request, reply) {
     try {
+      if (scanStorage.TEMPORARY_SCAN_MODE) {
+        // Return in-memory scans only
+        const scans = [];
+        for (const [scanId, result] of scanResults.entries()) {
+          scans.push({
+            id: scanId,
+            target: result.target,
+            status: result.status,
+            created_at: result.created_at,
+            issues: result.vulnerabilities?.length || 0
+          });
+        }
+        return scans;
+      }
+      
       const scans = await this.scanModel.findByUserId(request.user.id);
       return scans;
     } catch (error) {
@@ -32,6 +51,17 @@ class ScanController {
 
   async getById(request, reply) {
     try {
+      const scanId = parseInt(request.params.id);
+      
+      if (scanStorage.TEMPORARY_SCAN_MODE) {
+        // Return from memory
+        const scan = scanResults.get(scanId);
+        if (!scan) {
+          return reply.code(404).send({ error: 'Scan not found or expired' });
+        }
+        return scan;
+      }
+      
       const scan = await this.scanModel.findById(request.params.id, request.user.id);
       
       if (!scan) {
@@ -87,67 +117,80 @@ class ScanController {
 
           let vulnCount = 0;
 
-          // Parse ZAP results with deduplication
+          // Parse ZAP results
           if (scanResults.zap?.alerts && scanResults.zap.success) {
-            const vulnMap = new Map();
-            
             for (const alert of scanResults.zap.alerts) {
               const title = alert.alert.substring(0, 255);
               const severity = alert.risk?.toLowerCase() || 'info';
-              const key = `${title}|${severity}`;
               
-              // Only save if we haven't seen this vuln type before
-              if (!vulnMap.has(key)) {
-                vulnMap.set(key, true);
-                await this.vulnerabilityModel.create(
-                  scan.id,
-                  title,
-                  severity,
-                  alert.description?.substring(0, 1000),
-                  alert.url?.substring(0, 500),
-                  alert.param?.substring(0, 255),
-                  alert.evidence?.substring(0, 1000),
-                  alert.solution?.substring(0, 1000),
-                  alert.cweid?.toString(),
-                  parseFloat(alert.riskdesc?.match(/\d+\.\d+/)?.[0]) || null,
-                  'ZAP'
-                );
-                vulnCount++;
+              const vuln = await this.vulnerabilityModel.create(
+                scan.id,
+                title,
+                severity,
+                alert.description?.substring(0, 1000),
+                alert.url?.substring(0, 500),
+                alert.param?.substring(0, 255),
+                alert.evidence?.substring(0, 1000),
+                alert.solution?.substring(0, 1000),
+                alert.cweid?.toString(),
+                parseFloat(alert.riskdesc?.match(/\d+\.\d+/)?.[0]) || null,
+                'ZAP'
+              );
+              vulnCount++;
+              
+              // Classify with AI (non-blocking)
+              if (this.aiClassifier) {
+                this.aiClassifier.classifyVulnerability(
+                  `${title}: ${alert.description || ''}`
+                ).then(aiResult => {
+                  if (aiResult) {
+                    this.vulnerabilityModel.updateWithAI(vuln.id, aiResult).catch(err => 
+                      console.error('Failed to update AI classification:', err.message)
+                    );
+                  }
+                }).catch(err => console.error('AI classification error:', err.message));
               }
             }
           }
 
-          // Parse Nuclei results with deduplication
+          // Parse Nuclei results
           if (scanResults.nuclei?.outputFile && scanResults.nuclei.success) {
             try {
               const output = await fs.readFile(scanResults.nuclei.outputFile, 'utf-8');
               const lines = output.trim().split('\n').filter(l => l.trim());
-              const vulnMap = new Map();
               
               for (const line of lines) {
                 try {
                   const vuln = JSON.parse(line);
                   const title = (vuln.info?.name || vuln['template-id'] || 'Unknown').substring(0, 255);
                   const severity = vuln.info?.severity || 'info';
-                  const key = `${title}|${severity}`;
                   
-                  // Only save if we haven't seen this vuln type before
-                  if (!vulnMap.has(key)) {
-                    vulnMap.set(key, true);
-                    await this.vulnerabilityModel.create(
-                      scan.id,
-                      title,
-                      severity,
-                      vuln.info?.description?.substring(0, 1000),
-                      vuln.matched_at?.substring(0, 500),
-                      null,
-                      vuln.extracted_results?.join(', ')?.substring(0, 1000),
-                      vuln.info?.remediation?.substring(0, 1000),
-                      vuln.info?.cwe_id?.toString(),
-                      parseFloat(vuln.info?.cvss_score) || null,
-                      'Nuclei'
-                    );
-                    vulnCount++;
+                  const vulnRecord = await this.vulnerabilityModel.create(
+                    scan.id,
+                    title,
+                    severity,
+                    vuln.info?.description?.substring(0, 1000),
+                    vuln.matched_at?.substring(0, 500),
+                    null,
+                    vuln.extracted_results?.join(', ')?.substring(0, 1000),
+                    vuln.info?.remediation?.substring(0, 1000),
+                    vuln.info?.cwe_id?.toString(),
+                    parseFloat(vuln.info?.cvss_score) || null,
+                    'Nuclei'
+                  );
+                  vulnCount++;
+                  
+                  // Classify with AI (non-blocking)
+                  if (this.aiClassifier) {
+                    this.aiClassifier.classifyVulnerability(
+                      `${title}: ${vuln.info?.description || ''}`
+                    ).then(aiResult => {
+                      if (aiResult) {
+                        this.vulnerabilityModel.updateWithAI(vulnRecord.id, aiResult).catch(err => 
+                          console.error('Failed to update AI classification:', err.message)
+                        );
+                      }
+                    }).catch(err => console.error('AI classification error:', err.message));
                   }
                 } catch (parseError) {
                   console.error('Failed to parse vulnerability:', parseError.message);

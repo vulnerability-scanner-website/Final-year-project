@@ -41,11 +41,11 @@ export default function UsersDashboard() {
   const [userToDelete, setUserToDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const API_URL = "http://localhost:5000/api/admin/users";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch(API_URL, {
+      const res = await fetch(`${API_URL}/api/admin/users`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -66,7 +66,7 @@ export default function UsersDashboard() {
   const handleToggleStatus = async (userId, currentStatus) => {
     const newStatus = currentStatus === "active" ? "inactive" : "active";
     try {
-      const res = await fetch(`${API_URL}/${userId}/status`, {
+      const res = await fetch(`${API_URL}/api/admin/users/${userId}/status`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export default function UsersDashboard() {
     if (!userToDelete) return;
 
     try {
-      const res = await fetch(`${API_URL}/${userToDelete}`, {
+      const res = await fetch(`${API_URL}/api/admin/users/${userToDelete}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
