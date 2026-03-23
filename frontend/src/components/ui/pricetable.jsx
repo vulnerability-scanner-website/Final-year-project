@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 
 export default function PricingTable() {
   const [subscriptions, setSubscriptions] = useState([]);

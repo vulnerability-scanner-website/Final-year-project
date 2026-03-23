@@ -148,7 +148,7 @@ export default function PricingSection4() {
       }
 
       // First get plan id from backend by matching name
-      const plansRes = await fetch('http://localhost:5000/api/pricing');
+      const plansRes = await fetch('/api/pricing');
       const backendPlans = await plansRes.json();
       const matchedPlan = backendPlans.find(
         (p) => p.name.toLowerCase() === plan.name.toLowerCase()
@@ -159,7 +159,7 @@ export default function PricingSection4() {
         return;
       }
 
-      const res = await fetch('http://localhost:5000/api/payments/initiate', {
+      const res = await fetch('/api/payments/initiate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
