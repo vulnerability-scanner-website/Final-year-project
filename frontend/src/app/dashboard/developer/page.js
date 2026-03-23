@@ -62,7 +62,7 @@ export default function Page() {
   const checkSubscription = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/payments/subscription', {
+      const res = await fetch('/api/payments/subscription', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();

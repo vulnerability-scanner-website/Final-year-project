@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
   reactCompiler: true,
   images: {
     remotePatterns: [
@@ -14,6 +13,14 @@ const nextConfig = {
     turbo: {
       resolveAlias: {},
     },
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://backend:5000/api/:path*',
+      },
+    ];
   },
 };
 
