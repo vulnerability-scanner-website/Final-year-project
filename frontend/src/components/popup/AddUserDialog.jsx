@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
 export default function AddUserDialog({ open, onOpenChange, onUserAdded }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +26,7 @@ export default function AddUserDialog({ open, onOpenChange, onUserAdded }) {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/admin/users", {
+      const res = await fetch(`${API_URL}/api/admin/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

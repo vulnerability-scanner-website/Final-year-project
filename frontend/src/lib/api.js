@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
 // Get token from localStorage
 const getToken = () => {
@@ -92,7 +92,8 @@ export const reportsAPI = {
 
 // WebSocket connection
 export const connectWebSocket = (onMessage) => {
-  const ws = new WebSocket('ws://localhost:5000/ws');
+  const wsUrl = API_URL.replace('http://', 'ws://').replace('https://', 'wss://');
+  const ws = new WebSocket(`${wsUrl}/ws`);
   
   ws.onopen = () => {
     console.log('WebSocket connected');

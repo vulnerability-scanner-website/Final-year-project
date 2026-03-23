@@ -26,6 +26,8 @@ import { ShieldCheck, Bug, MoreVertical, Eye, Pause, Play, StopCircle, RotateCcw
 import { DashboardHeader } from "@/components/header/header";
 import { bg } from "date-fns/locale";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
 export default function ScanManagement() {
   const router = useRouter();
   const [activeScans, setActiveScans] = useState([]);
@@ -42,7 +44,7 @@ export default function ScanManagement() {
       for (const scan of runningScans) {
         try {
           const token = localStorage.getItem('token');
-          const progressRes = await fetch(`http://localhost:5000/api/scans/${scan.id}/progress`, {
+          const progressRes = await fetch(`${API_URL}/api/scans/${scan.id}/progress`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           
@@ -71,7 +73,7 @@ export default function ScanManagement() {
         const token = localStorage.getItem('token');
         
         // Fetch scans
-        const scansRes = await fetch('http://localhost:5000/api/scans', {
+        const scansRes = await fetch(`${API_URL}/api/scans`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -96,7 +98,7 @@ export default function ScanManagement() {
         }
         
         // Fetch vulnerabilities
-        const vulnRes = await fetch('http://localhost:5000/api/vulnerabilities', {
+        const vulnRes = await fetch(`${API_URL}/api/vulnerabilities`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -122,7 +124,7 @@ export default function ScanManagement() {
     
     try {
       if (action === 'delete') {
-        const res = await fetch(`http://localhost:5000/api/scans/${scanId}`, {
+        const res = await fetch(`${API_URL}/api/scans/${scanId}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -130,7 +132,7 @@ export default function ScanManagement() {
           setActiveScans(prev => prev.filter(s => s.id !== scanId));
         }
       } else if (action === 'pause') {
-        const res = await fetch(`http://localhost:5000/api/scans/${scanId}/pause`, {
+        const res = await fetch(`${API_URL}/api/scans/${scanId}/pause`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -140,7 +142,7 @@ export default function ScanManagement() {
           ));
         }
       } else if (action === 'resume') {
-        const res = await fetch(`http://localhost:5000/api/scans/${scanId}/resume`, {
+        const res = await fetch(`${API_URL}/api/scans/${scanId}/resume`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -150,7 +152,7 @@ export default function ScanManagement() {
           ));
         }
       } else if (action === 'stop') {
-        const res = await fetch(`http://localhost:5000/api/scans/${scanId}/stop`, {
+        const res = await fetch(`${API_URL}/api/scans/${scanId}/stop`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -160,7 +162,7 @@ export default function ScanManagement() {
           ));
         }
       } else if (action === 'rerun') {
-        const res = await fetch(`http://localhost:5000/api/scans/${scanId}/rerun`, {
+        const res = await fetch(`${API_URL}/api/scans/${scanId}/rerun`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });

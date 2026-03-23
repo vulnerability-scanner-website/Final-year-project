@@ -94,6 +94,15 @@ const initDatabase = async (client) => {
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vulnerabilities' AND column_name='scanner_type') THEN
           ALTER TABLE vulnerabilities ADD COLUMN scanner_type VARCHAR(50);
         END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vulnerabilities' AND column_name='ai_type') THEN
+          ALTER TABLE vulnerabilities ADD COLUMN ai_type VARCHAR(255);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vulnerabilities' AND column_name='ai_confidence') THEN
+          ALTER TABLE vulnerabilities ADD COLUMN ai_confidence DECIMAL(3,2);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='vulnerabilities' AND column_name='ai_results') THEN
+          ALTER TABLE vulnerabilities ADD COLUMN ai_results JSONB;
+        END IF;
       END $$;
 
       CREATE INDEX IF NOT EXISTS idx_vulnerabilities_scan_id ON vulnerabilities(scan_id);

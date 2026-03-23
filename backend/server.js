@@ -6,6 +6,7 @@ const fastify = require('fastify')({
 const path = require('path');
 const { initDatabase } = require('./config/database');
 const { authenticate } = require('./middlewares/auth');
+const CleanupService = require('./services/cleanup');
 
 // Register plugins
 fastify.register(require('@fastify/cors'), {
@@ -58,6 +59,10 @@ fastify.addHook('onReady', async function () {
   } finally {
     client.release();
   }
+  
+  // Start cleanup service
+  const cleanupService = new CleanupService(fastify);
+  await cleanupService.start();
 });
 
 // Authentication decorator

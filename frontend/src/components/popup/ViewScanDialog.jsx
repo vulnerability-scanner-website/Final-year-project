@@ -15,10 +15,9 @@ import jsPDF from "jspdf";
 export default function ViewScanDialog({ open, onOpenChange, scan }) {
   if (!scan) return null;
 
-  // ✅ Generate PDF
+  // Generate PDF with all vulnerability details
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-
     let y = 10;
 
     doc.setFontSize(18);
@@ -43,28 +42,71 @@ export default function ViewScanDialog({ open, onOpenChange, scan }) {
 
     if (scan.vulnerabilities && scan.vulnerabilities.length > 0) {
       scan.vulnerabilities.forEach((vuln, index) => {
-        doc.setFontSize(12);
+        doc.setFontSize(11);
         doc.text(`${index + 1}. ${vuln.title}`, 10, y);
         y += 6;
 
-        doc.text(`Severity: ${vuln.severity}`, 15, y);
-        y += 6;
+        doc.setFontSize(10);
+        doc.text(`Severity: ${vuln.severity || 'Unknown'}`, 15, y);
+        y += 5;
 
-        doc.text(
-          doc.splitTextToSize(`Description: ${vuln.description}`, 180),
-          15,
-          y
-        );
-        y += 10;
+        if (vuln.description) {
+          doc.text(
+            doc.splitTextToSize(`Description: ${vuln.description}`, 180),
+            15,
+            y
+          );
+          y += 8;
+        }
 
-        doc.text(
-          doc.splitTextToSize(`Fix: ${vuln.fix}`, 180),
-          15,
-          y
-        );
-        y += 12;
+        if (vuln.url || vuln.affected_url) {
+          doc.text(
+            doc.splitTextToSize(`URL: ${vuln.url || vuln.affected_url}`, 180),
+            15,
+            y
+          );
+          y += 8;
+        }
 
-        // Add new page if content is too long
+        if (vuln.param || vuln.affected_parameter) {
+          doc.text(
+            doc.splitTextToSize(`Parameter: ${vuln.param || vuln.affected_parameter}`, 180),
+            15,
+            y
+          );
+          y += 8;
+        }
+
+        if (vuln.evidence) {
+          doc.text(
+            doc.splitTextToSize(`Evidence: ${vuln.evidence}`, 180),
+            15,
+            y
+          );
+          y += 8;
+        }
+
+        if (vuln.solution || vuln.remediation) {
+          doc.text(
+            doc.splitTextToSize(`Fix: ${vuln.solution || vuln.remediation}`, 180),
+            15,
+            y
+          );
+          y += 8;
+        }
+
+        if (vuln.cwe || vuln.cwe_id) {
+          doc.text(`CWE: CWE-${vuln.cwe || vuln.cwe_id}`, 15, y);
+          y += 5;
+        }
+
+        if (vuln.source) {
+          doc.text(`Scanner: ${vuln.source}`, 15, y);
+          y += 5;
+        }
+
+        y += 5;
+
         if (y > 260) {
           doc.addPage();
           y = 10;
@@ -82,7 +124,7 @@ export default function ViewScanDialog({ open, onOpenChange, scan }) {
       <DialogContent
         className="
           w-[95%] 
-          max-w-3xl 
+          max-w-4xl 
           max-h-[90vh] 
           overflow-hidden 
           rounded-2xl
@@ -92,11 +134,10 @@ export default function ViewScanDialog({ open, onOpenChange, scan }) {
           <DialogTitle className="text-xl font-semibold flex justify-between items-center">
             Scan Details
 
-            {/* PDF Download Button */}
             <Button
               size="sm"
               onClick={handleDownloadPDF}
-              className="bg-sky-600 bg-gray-500 cursor-pointer"
+              className="bg-sky-600 hover:bg-sky-700 cursor-pointer"
             >
               <Download className="h-4 w-4 mr-2" />
               Download PDF
@@ -104,13 +145,11 @@ export default function ViewScanDialog({ open, onOpenChange, scan }) {
           </DialogTitle>
 
           <DialogDescription>
-            Vulnerability report for this target.
+            Comprehensive vulnerability report for this target.
           </DialogDescription>
         </DialogHeader>
 
-        {/* Scrollable Content */}
         <div className="mt-4 space-y-6 overflow-y-auto pr-2 max-h-[65vh]">
-
           {/* Basic Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -144,46 +183,155 @@ export default function ViewScanDialog({ open, onOpenChange, scan }) {
             </div>
           </div>
 
-         
+          {/* Vulnerabilities */}
           <div>
             <h3 className="text-lg font-semibold mb-4">
               Vulnerabilities Found ({scan.issues})
             </h3>
 
-            {scan.vulnerabilities &&
-            scan.vulnerabilities.length > 0 ? (
+            {scan.vulnerabilities && scan.vulnerabilities.length > 0 ? (
               <div className="space-y-4">
-                {scan.vulnerabilities.map((vuln) => (
+                {scan.vulnerabilities.map((vuln, index) => (
                   <div
-                    key={vuln.id}
-                    className="border rounded-xl p-4 bg-gray-50 shadow-sm"
+                    key={vuln.id || index}
+                    className="border rounded-xl p-4 bg-gray-50 shadow-sm hover:shadow-md transition-shadow"
                   >
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-2">
-                      <p className="font-semibold">{vuln.title}</p>
+                    {/* Header with Title and Badges */}
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
+                      <div className="flex-1">
+                        <p className="font-bold text-lg text-gray-900">
+                          {vuln.title}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Vulnerability #{index + 1}
+                        </p>
+                      </div>
 
-                      <Badge
-                        className={
-                          vuln.severity === "High"
-                            ? "bg-red-100 text-red-700 border border-red-200"
-                            : vuln.severity === "Medium"
-                            ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
-                            : "bg-green-100 text-green-700 border border-green-200"
-                        }
-                      >
-                        {vuln.severity}
-                      </Badge>
+                      <div className="flex gap-2 flex-wrap">
+                        <Badge
+                          className={
+                            vuln.severity?.toLowerCase() === "critical"
+                              ? "bg-red-600 text-white"
+                              : vuln.severity?.toLowerCase() === "high"
+                              ? "bg-red-500 text-white"
+                              : vuln.severity?.toLowerCase() === "medium"
+                              ? "bg-yellow-500 text-white"
+                              : vuln.severity?.toLowerCase() === "low"
+                              ? "bg-blue-500 text-white"
+                              : "bg-gray-500 text-white"
+                          }
+                        >
+                          {vuln.severity || "Unknown"}
+                        </Badge>
+
+                        {vuln.source && (
+                          <Badge className="bg-indigo-100 text-indigo-700 border border-indigo-200">
+                            📡 {vuln.source}
+                          </Badge>
+                        )}
+
+                        {vuln.ai_type && (
+                          <Badge className="bg-purple-100 text-purple-700 border border-purple-200">
+                            🤖 {vuln.ai_type} (
+                            {Math.round(vuln.ai_confidence * 100)}%)
+                          </Badge>
+                        )}
+                      </div>
                     </div>
 
-                    <p className="text-sm text-gray-600 mb-3">
-                      {vuln.description}
-                    </p>
+                    {/* Description */}
+                    {vuln.description && (
+                      <div className="mb-3 pb-3 border-b">
+                        <p className="text-xs font-semibold text-gray-700 mb-1">
+                          Description
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {vuln.description}
+                        </p>
+                      </div>
+                    )}
 
-                    <div className="bg-white p-3 rounded-md border text-sm">
-                      <span className="font-semibold text-gray-700">
-                        How to Fix:
-                      </span>{" "}
-                      {vuln.fix}
-                    </div>
+                    {/* Affected URL */}
+                    {(vuln.url || vuln.affected_url) && (
+                      <div className="mb-3 pb-3 border-b">
+                        <p className="text-xs font-semibold text-gray-700 mb-1">
+                          Affected URL
+                        </p>
+                        <p className="text-sm text-blue-600 break-all font-mono bg-blue-50 p-2 rounded">
+                          {vuln.url || vuln.affected_url}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Affected Parameter */}
+                    {(vuln.param || vuln.affected_parameter) && (
+                      <div className="mb-3 pb-3 border-b">
+                        <p className="text-xs font-semibold text-gray-700 mb-1">
+                          Affected Parameter
+                        </p>
+                        <p className="text-sm text-orange-600 font-mono bg-orange-50 p-2 rounded">
+                          {vuln.param || vuln.affected_parameter}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Evidence/Proof */}
+                    {(vuln.evidence || vuln.extracted_results) && (
+                      <div className="mb-3 pb-3 border-b">
+                        <p className="text-xs font-semibold text-gray-700 mb-1">
+                          Evidence/Proof
+                        </p>
+                        <div className="text-sm bg-red-50 p-2 rounded border border-red-200 font-mono text-red-700 max-h-24 overflow-y-auto">
+                          {vuln.evidence || vuln.extracted_results}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Solution/Remediation */}
+                    {(vuln.solution || vuln.remediation) && (
+                      <div className="mb-3 pb-3 border-b">
+                        <p className="text-xs font-semibold text-gray-700 mb-1">
+                          How to Fix
+                        </p>
+                        <p className="text-sm text-green-700 bg-green-50 p-2 rounded">
+                          {vuln.solution || vuln.remediation}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* CWE ID */}
+                    {(vuln.cwe || vuln.cwe_id) && (
+                      <div className="mb-3 pb-3 border-b">
+                        <p className="text-xs font-semibold text-gray-700 mb-1">
+                          CWE ID
+                        </p>
+                        <p className="text-sm text-purple-600 font-mono">
+                          CWE-{vuln.cwe || vuln.cwe_id}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* CVSS Score */}
+                    {(vuln.cvss_score || vuln.riskdesc) && (
+                      <div className="mb-3 pb-3 border-b">
+                        <p className="text-xs font-semibold text-gray-700 mb-1">
+                          CVSS Score
+                        </p>
+                        <p className="text-sm text-gray-600 font-mono">
+                          {vuln.cvss_score || vuln.riskdesc}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Scanner Type */}
+                    {vuln.source && (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-700 mb-1">
+                          Scanner
+                        </p>
+                        <p className="text-sm text-gray-600">{vuln.source}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -193,7 +341,6 @@ export default function ViewScanDialog({ open, onOpenChange, scan }) {
               </p>
             )}
           </div>
-
         </div>
       </DialogContent>
     </Dialog>

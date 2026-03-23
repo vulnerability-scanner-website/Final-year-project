@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
 export default function EditUserDialog({ open, onOpenChange, user, onUserUpdated }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("");
@@ -28,7 +30,7 @@ export default function EditUserDialog({ open, onOpenChange, user, onUserUpdated
 
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/users/${user.id}`, {
+      const res = await fetch(`${API_URL}/api/admin/users/${user.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
