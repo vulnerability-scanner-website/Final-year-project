@@ -1,5 +1,5 @@
 const fastify = require('fastify')({
-  logger: false, // Disable logging for better performance
+  logger: false, 
   disableRequestLogging: true,
   requestIdLogLabel: false
 });

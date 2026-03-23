@@ -155,27 +155,16 @@ export default function ScanDetailsPage() {
   if (!scan) return <div className="ml-64 p-6">Scan not found</div>;
 
   return (
-    <div className="ml-32 p-6 space-y-6">
-      {/* Page Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-[#003366]">
-            Scan Report – #{scanId}
-          </h1>
-          <p className="text-sm text-gray-600 mt-2">
-            Review vulnerabilities found during this scan and assess risk.
-          </p>
-        </div>
-        <Button
-          onClick={handleDownloadPDF}
-          className="bg-sky-600 hover:bg-sky-700"
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Download PDF
-        </Button>
-      </div>
+    <div className="ml-32 py-6 space-y-6">
+    
+      <h1 className="text-3xl font-bold text-[#003366]">
+        Scan Report – #{scanId}
+      </h1>
+      <p className="text-sm text-gray-600">
+        Review vulnerabilities found during this scan and assess risk.
+      </p>
 
-      {/* Scan Overview */}
+     
       <Card className="hover:shadow-lg transition-all duration-300 hover:bg-blue-50 border border-transparent">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-[#003366]">

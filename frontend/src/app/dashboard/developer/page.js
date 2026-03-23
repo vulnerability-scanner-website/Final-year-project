@@ -8,6 +8,7 @@ import DeveloperSideBar from "@/components/sidebar/DeveloperSideBar/Developer";
 import { CardStack } from "@/components/ui/card-stack";
 import { FeatureCard } from "@/components/ui/feature-card";
 import NewScanDialog from "@/components/popup/NewScanDialog";
+import SubscriptionBanner from "@/components/SubscriptionBanner";
 
 const ScanItem = ({
   icon,
@@ -45,6 +46,7 @@ const ScanItem = ({
 export default function Page() {
   const [recentScans, setRecentScans] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const [stats, setStats] = useState({
     totalScans: 23,
     inProgress: 3,
@@ -54,7 +56,21 @@ export default function Page() {
 
   useEffect(() => {
     loadScans();
+    checkSubscription();
   }, []);
+
+  const checkSubscription = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/payments/subscription', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setIsSubscribed(data.status === 'active');
+    } catch {
+      setIsSubscribed(false);
+    }
+  };
 
   const loadScans = () => {
     const scans = JSON.parse(localStorage.getItem('scans') || '[]');
@@ -87,11 +103,19 @@ export default function Page() {
             </p>
           </div>
 
-          <Button className="gap-2" onClick={() => setOpenDialog(true)}>
+          <Button
+            className="gap-2"
+            onClick={() => isSubscribed && setOpenDialog(true)}
+            disabled={!isSubscribed}
+            title={!isSubscribed ? 'Subscribe to a plan to start scanning' : ''}
+          >
             <Plus size={16} />
             New Scan
           </Button>
         </div>
+
+        {/* Subscription Status */}
+        <SubscriptionBanner role="developer" />
 
         {/* Stats Cards */}
         <div className="w-full overflow-hidden">
@@ -188,7 +212,7 @@ export default function Page() {
             )}
           </div>
         </FeatureCard>
-        <NewScanDialog open={openDialog} onOpenChange={(open) => { setOpenDialog(open); if (!open) { setTimeout(loadScans, 100); } }} />
+        <NewScanDialog open={openDialog} onOpenChange={(open) => { setOpenDialog(open); if (!open) { setTimeout(loadScans, 100); } }} role="developer" />
       </div>
     </>
   );

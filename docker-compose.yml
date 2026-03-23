@@ -30,9 +30,7 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/security_scanner
       JWT_SECRET: your-super-secret-key-change-this
-      SAVE_SCANS_TO_DB: "false"  # Don't save scans to database
-      TEMPORARY_SCAN_MODE: "true"  # Only keep results in memory
-      COLAB_URL: https://unbriefed-nonangling-tristan.ngrok-free.dev
+      CHAPA_SECRET_KEY: CHASECK_TEST-WkIFYnNAoscOkZGTknnxP7hhPA4J2nTX
     volumes:
       - ./backend:/app
       - /app/node_modules

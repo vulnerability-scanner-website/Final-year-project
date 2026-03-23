@@ -21,6 +21,7 @@ import { RiCheckboxCircleFill } from '@remixicon/react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { useRouter } from 'next/navigation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
@@ -31,8 +32,9 @@ const FormSchema = z.object({
   description: z.string().max(500, 'Description cannot exceed 500 characters').optional(),
 });
 
-export default function NewScanDialog({ open, onOpenChange }) {
+export default function NewScanDialog({ open, onOpenChange, role }) {
   const direction = useDirection();
+  const router = useRouter();
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -44,6 +46,12 @@ export default function NewScanDialog({ open, onOpenChange }) {
     },
     mode: 'onSubmit',
   });
+
+  // Check subscription before opening dialog
+  const handleOpenChange = async (isOpen) => {
+    if (!isOpen) { onOpenChange(false); return; }
+    onOpenChange(true);
+  };
 
   async function onSubmit(data) {
     try {
@@ -97,7 +105,7 @@ export default function NewScanDialog({ open, onOpenChange }) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md" dir={direction}>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
