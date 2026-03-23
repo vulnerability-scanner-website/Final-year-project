@@ -100,21 +100,23 @@ export default function AdminSideBar() {
             const isActive = pathname === link.href;
 
             return (
-              <Link
+               <Link
                 key={link.name}
                 href={link.href}
-                onClick={() => isMobile && setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium
-                ${
-                  link.color
-                    ? link.color
-                    : isActive
-                    ? "bg-[#003366] text-yellow-100"
-                    : "hover:bg-orange-500 hover:text-white"
-                }`}
+                onClick={() => setIsOpen(false)}
+                className={`
+                  flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium
+                  ${
+                    link.color
+                      ? link.color
+                      : isActive
+                        ? "bg-[#003366] text-white shadow-lg"
+                        : "text-gray-700 hover:bg-gradient-to-r hover:from-orange-400 hover:to-yellow-400 hover:text-white shadow-sm"
+                  }
+                `}
               >
                 {link.icon}
-                <span className="truncate">{link.name}</span>
+                <span>{link.name}</span>
               </Link>
             );
           })}

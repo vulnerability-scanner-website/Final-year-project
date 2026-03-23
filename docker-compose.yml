@@ -30,6 +30,7 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/security_scanner
       JWT_SECRET: your-super-secret-key-change-this
+      CHAPA_SECRET_KEY: CHASECK_TEST-WkIFYnNAoscOkZGTknnxP7hhPA4J2nTX
     volumes:
       - ./backend:/app
       - /app/node_modules

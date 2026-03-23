@@ -721,7 +721,7 @@ fastify.post('/api/pricing', { onRequest: [fastify.authenticate] }, async (reque
   }
 });
 
-// Update pricing plan (admin only)
+
 fastify.put('/api/pricing/:id', { onRequest: [fastify.authenticate] }, async (request, reply) => {
   if (request.user.role !== 'admin') {
     return reply.code(403).send({ error: 'Forbidden' });
@@ -775,8 +775,8 @@ fastify.register(async function (fastify) {
 const start = async () => {
   try {
     await fastify.listen({ port: 5000, host: '0.0.0.0' });
-    console.log('🚀 Backend server running on http://localhost:5000');
-    console.log('🔌 WebSocket available at ws://localhost:5000/ws');
+    console.log('Backend server running on http://localhost:5000');
+    console.log('WebSocket available at ws://localhost:5000/ws');
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

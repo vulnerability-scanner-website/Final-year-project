@@ -116,8 +116,8 @@ const PricingSwitch = ({ onSwitch }) => {
 
 export default function PricingSection4() {
   const [isYearly, setIsYearly] = useState(false);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [loading, setLoading] = useState(false);
   const pricingRef = useRef(null);
 
   const revealVariants = {
@@ -137,30 +137,53 @@ export default function PricingSection4() {
     },
   };
 
-  const handleGetStarted = (plan) => {
+  const handleGetStarted = async (plan) => {
     setSelectedPlan(plan);
-    setShowPaymentForm(true);
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/auth/login';
+        return;
+      }
+
+      // First get plan id from backend by matching name
+      const plansRes = await fetch('http://localhost:5000/api/pricing');
+      const backendPlans = await plansRes.json();
+      const matchedPlan = backendPlans.find(
+        (p) => p.name.toLowerCase() === plan.name.toLowerCase()
+      );
+
+      if (!matchedPlan) {
+        alert('Plan not found. Please contact admin.');
+        return;
+      }
+
+      const res = await fetch('http://localhost:5000/api/payments/initiate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ plan_id: matchedPlan.id }),
+      });
+
+      const data = await res.json();
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        alert(data.error || 'Failed to initiate payment');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Payment initiation failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const togglePricingPeriod = (value) =>
     setIsYearly(Number.parseInt(value) === 1);
-
-  if (showPaymentForm) {
-    return (
-      <CreditCardForm
-        defaultHolder="Rahil Vahora"
-        maskMiddle
-        onChange={(state, validity) => {
-          // live form output here (analytics, preview, etc.)
-          // console.log("live", state, validity);
-        }}
-        onSubmit={(state, validity) => {
-          // send to your API
-          alert(JSON.stringify({ state, validity }, null, 2));
-        }}
-      />
-    );
-  }
 
   return (
     <div
@@ -304,7 +327,7 @@ export default function PricingSection4() {
                         : ""
                   }`}
                 >
-                  {plan.buttonText}
+                  {plan.buttonText}{loading && selectedPlan?.name === plan.name ? '...' : ''}
                 </button>
 
                 <div className="space-y-3 pt-4 border-t border-neutral-700">

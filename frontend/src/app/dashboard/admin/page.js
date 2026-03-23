@@ -21,11 +21,11 @@ import { SeverityDistribution } from "@/components/SeverityDistribution/Severity
 
 export default function Page() {
   return (
-    <div className="space-y-4 md:space-y-6 ">
+    <div className="space-y-4 w-full">
       <DashboardHeader role={"admin"} />
       
-      {/* Stats Cards Section */}
-      <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
+      {/* Stats Cards Section - Wrapped */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
         <StatsCard
           title="Total Scans"
           value="128"
@@ -62,13 +62,13 @@ export default function Page() {
       </div>
 
       {/* Quick Action Cards for Admin */}
-      <div className="">
-        <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4 flex items-center gap-2">
+      <div className="mt-6 md:mt-8 w-full">
+        <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
           <Zap className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
           Quick Actions
         </h3>
         
-        <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full">
           {/* User Management Card */}
           <div className="group bg-white rounded-xl shadow-lg p-4 md:p-5 hover:shadow-xl transition-all duration-300 border-l-4 border-blue-500 hover:-translate-y-1 cursor-pointer w-full">
             <div className="flex items-center justify-between mb-3">
