@@ -3,11 +3,14 @@
 import { useState } from "react";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { authAPI } from "@/lib/api";
+import { Toast } from "@/components/ui/toast";
 
 export function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -33,11 +36,14 @@ export function SignupPage() {
     try {
       const data = await authAPI.register(formData.email, formData.password, formData.role);
       
-      // Show success message for pending approval
-      alert(data.message || 'Registration successful! Your account is pending admin approval.');
+      // Show success toast
+      setToastMessage(data.message || 'Registration successful! Your account is pending admin approval.');
+      setShowToast(true);
       
-      // Redirect to login
-      window.location.href = '/auth/login';
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        window.location.href = '/auth/login';
+      }, 2000);
     } catch (err) {
       setError(err.message || 'Registration failed');
     }
@@ -46,7 +52,15 @@ export function SignupPage() {
   };
 
   return (
-    <div className="w-full h-full min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex items-center justify-center p-4">
+    <>
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          onClose={() => setShowToast(false)}
+          duration={2000}
+        />
+      )}
+      <div className="w-full h-full min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex items-center justify-center p-4">
       <div className="flex flex-col md:flex-row w-full h-full bg-white rounded-3xl shadow-2xl overflow-hidden">
         {/* Left Panel */}
         <div className="flex-1 relative overflow-hidden md:block hidden">
@@ -230,6 +244,7 @@ export function SignupPage() {
           </form>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

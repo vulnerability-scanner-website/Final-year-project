@@ -8,7 +8,7 @@ export default function Page() {
   return (
     <>
       <AnalystSideBar />
-      <div className="ml-64">
+      <div className="md:ml-64 min-h-screen overflow-x-hidden">
         <PricingSection4 />
       </div>
     </>
