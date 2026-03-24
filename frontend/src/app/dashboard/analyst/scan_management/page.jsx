@@ -23,9 +23,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ShieldCheck, Bug, MoreVertical, Eye, Pause, Play, StopCircle, RotateCcw, Trash } from "lucide-react";
-import { DashboardHeader } from "@/components/header/header";
-import { bg } from "date-fns/locale";
-import AnalystSideBar from "@/components/sidebar/AnalystSideBar/Analyst";
+
 
 /* ---------------- Mock Data ---------------- */
 
@@ -132,9 +130,7 @@ export default function ScanManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-[#101010] text-white w-full">
-      <DashboardHeader role="scanmanagement" />
-      <div className="px-4 pb-6 pt-4">
+    <div className="w-full min-h-screen bg-[#101010] text-white">
         <Tabs defaultValue="active">
           <TabsList className="grid w-full grid-cols-2 max-w-md h-12 bg-[#1a1a1a] border border-white/10 p-1 rounded-lg">
             <TabsTrigger value="active" className="h-full text-sm font-semibold px-6 rounded-md text-white/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-orange-500 data-[state=active]:text-black data-[state=active]:font-bold transition">
@@ -212,7 +208,6 @@ export default function ScanManagement() {
             ))}
           </TabsContent>
         </Tabs>
-      </div>
     </div>
   );
 }
