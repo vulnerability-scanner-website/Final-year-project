@@ -50,7 +50,7 @@ const ActionButton = ({ file, onDownload }) => {
   return (
     <button 
       onClick={() => onDownload(file)}
-      className="flex items-center text-blue-600 dark:text-blue-500 font-semibold text-sm hover:text-blue-800 dark:hover:text-blue-400 transition-colors duration-200"
+      className="flex items-center text-yellow-400 font-semibold text-sm hover:text-yellow-300 transition-colors duration-200"
     >
       <Download className="h-4 w-4 mr-1" />
       Download
@@ -68,16 +68,16 @@ const FileItem = ({ file, onDownload }) => {
       <div className="flex items-center flex-grow min-w-0">
         <FileIcon />
         <div className="flex-grow min-w-0">
-          <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">{name}</p>
+          <p className="font-semibold text-white truncate">{name}</p>
           {status === 'downloading' ? (
             <ProgressBar progress={progress} />
           ) : (
-            <p className="text-sm text-slate-500 dark:text-slate-400">{subtype}</p>
+            <p className="text-sm text-white/40">{subtype}</p>
           )}
         </div>
       </div>
       <div className="flex items-center justify-end w-full sm:w-auto mt-2 sm:mt-0 pl-[72px] sm:pl-0">
-        <div className="flex-shrink-0 w-20 text-right text-sm font-medium text-slate-500 dark:text-slate-400">
+        <div className="flex-shrink-0 w-20 text-right text-sm font-medium text-white/40">
           {displaySize}
         </div>
         <div className="flex-shrink-0 w-24 text-right">
@@ -280,10 +280,9 @@ export default function ReportsDownload() {
   };
 
   return (
-    <div className="relative bg-slate-50 dark:bg-slate-900 min-h-screen w-full flex items-center justify-center font-sans transition-colors duration-300 py-8">
-      <GridBackground />
-      <div className="relative w-full max-w-4xl mx-4 sm:mx-auto bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-4 sm:p-8">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 px-2 sm:px-0">Generated Reports</h1>
+    <div className="relative bg-[#101010] w-full font-sans py-4">
+      <div className="relative w-full bg-[#1a1a1a] border border-white/10 rounded-2xl p-4 sm:p-8">
+        <h1 className="text-2xl font-bold text-white mb-4 px-2 sm:px-0">Generated Reports</h1>
         
         {/* Search and Filter Controls */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -292,12 +291,12 @@ export default function ReportsDownload() {
             placeholder="Search reports..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+            className="flex-1 px-4 py-2 rounded-lg bg-[#101010] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-yellow-500 transition"
           />
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+            className="px-4 py-2 rounded-lg bg-[#101010] border border-white/10 text-white focus:outline-none focus:border-yellow-500 transition"
           >
             <option value="">All Types</option>
             <option value="Completed">Completed</option>
@@ -307,13 +306,13 @@ export default function ReportsDownload() {
         
         <div>
           {loading ? (
-            <p className="text-center text-slate-500 dark:text-slate-400 py-8">Loading reports...</p>
+            <p className="text-center text-white/40 py-8">Loading reports...</p>
           ) : filteredFiles.length > 0 ? (
             filteredFiles.map(file => (
               <FileItem key={file.id} file={file} onDownload={handleDownload} />
             ))
           ) : (
-            <p className="text-center text-slate-500 dark:text-slate-400 py-8">No reports found matching your criteria.</p>
+            <p className="text-center text-white/40 py-8">No reports found matching your criteria.</p>
           )}
         </div>
       </div>

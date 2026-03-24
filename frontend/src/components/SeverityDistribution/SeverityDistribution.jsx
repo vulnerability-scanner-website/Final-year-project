@@ -26,9 +26,9 @@ const COLORS = ["#dc2626", "#ea580c", "#ca8a04", "#16a34a"]
 
 export function SeverityDistribution() {
   return (
-    <Card>
+    <Card className="bg-[#1a1a1a] border border-white/10 text-white">
       <CardHeader>
-        <CardTitle>Severity Distribution</CardTitle>
+        <CardTitle className="text-white">Severity Distribution</CardTitle>
       </CardHeader>
 
       <CardContent>
@@ -46,7 +46,7 @@ export function SeverityDistribution() {
                   <Cell key={index} fill={COLORS[index]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #ffffff20', color: '#fff' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
