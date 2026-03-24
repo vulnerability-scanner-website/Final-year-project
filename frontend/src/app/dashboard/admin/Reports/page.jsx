@@ -45,60 +45,53 @@ const reports = [
 
 export default function Page() {
   return (
-    <div className="space-y-4 w-full">
+    <div className="min-h-screen bg-[#101010] text-white space-y-4 w-full">
       <DashboardHeader role="reports" />
 
+      <div className="px-4 pb-6 space-y-4">
       {/* ---------------- Summary Cards ---------------- */}
-
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
-            <CardTitle className="text-sm md:text-base">Total Reports</CardTitle>
-            <FileText className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="p-4 md:p-6 pt-0">
-            <div className="text-xl md:text-2xl font-bold">38</div>
-            <p className="text-xs md:text-sm text-muted-foreground">Generated this year</p>
-          </CardContent>
-        </Card>
+        <div className="bg-[#1a1a1a] border border-yellow-500/20 rounded-xl p-5 flex justify-between items-center">
+          <div>
+            <p className="text-sm text-yellow-400/70">Total Reports</p>
+            <p className="text-3xl font-bold text-yellow-400">38</p>
+            <p className="text-xs text-white/30 mt-1">Generated this year</p>
+          </div>
+          <div className="w-12 h-12 bg-yellow-500/10 rounded-full flex items-center justify-center">
+            <FileText className="text-yellow-400" size={22} />
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
-            <CardTitle className="text-sm md:text-base">Critical Reports</CardTitle>
-            <Badge variant="destructive" className="text-xs">High Risk</Badge>
-          </CardHeader>
-          <CardContent className="p-4 md:p-6 pt-0">
-            <div className="text-xl md:text-2xl font-bold">7</div>
-            <p className="text-xs md:text-sm text-muted-foreground">Requires review</p>
-          </CardContent>
-        </Card>
+        <div className="bg-[#1a1a1a] border border-red-500/20 rounded-xl p-5 flex justify-between items-center">
+          <div>
+            <p className="text-sm text-red-400/70">Critical Reports</p>
+            <p className="text-3xl font-bold text-red-400">7</p>
+            <p className="text-xs text-white/30 mt-1">Requires review</p>
+          </div>
+          <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center">
+            <span className="text-xs font-bold text-red-400 border border-red-500/20 px-2 py-0.5 rounded-full">High Risk</span>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
-            <CardTitle className="text-sm md:text-base">Scheduled Reports</CardTitle>
-            <Calendar className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="p-4 md:p-6 pt-0">
-            <div className="text-xl md:text-2xl font-bold">12</div>
-            <p className="text-xs md:text-sm text-muted-foreground">
-              Automated recurring reports
-            </p>
-          </CardContent>
-        </Card>
+        <div className="bg-[#1a1a1a] border border-orange-500/20 rounded-xl p-5 flex justify-between items-center">
+          <div>
+            <p className="text-sm text-orange-400/70">Scheduled Reports</p>
+            <p className="text-3xl font-bold text-orange-400">12</p>
+            <p className="text-xs text-white/30 mt-1">Automated recurring reports</p>
+          </div>
+          <div className="w-12 h-12 bg-orange-500/10 rounded-full flex items-center justify-center">
+            <Calendar className="text-orange-400" size={22} />
+          </div>
+        </div>
       </div>
 
       {/* Generated Reports */}
-      <Card>
-        <CardHeader className="p-4 md:p-6">
-          <CardTitle className="text-base md:text-lg">Generated Reports</CardTitle>
-          <CardDescription className="text-xs md:text-sm">
-            Download your security reports
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-4 md:p-6">
-          <ReportsDownload />
-        </CardContent>
-      </Card>
+      <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-4 md:p-6">
+        <h3 className="text-base md:text-lg font-semibold text-white mb-1">Generated Reports</h3>
+        <p className="text-xs text-white/40 mb-4">Download your security reports</p>
+        <ReportsDownload />
+      </div>
+      </div>
     </div>
   );
 }

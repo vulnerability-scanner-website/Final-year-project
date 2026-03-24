@@ -12,7 +12,6 @@ import {
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Users, UserCheck, Scan, Edit, Trash2 } from "lucide-react";
 import {
   AlertDialog,
@@ -139,214 +138,217 @@ export default function UsersDashboard() {
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-[#101010] text-white">
       <div className="w-full">
         <DashboardHeader
+          className="border-b border-yellow-400/70 mb-4 px-4 py-4 flex items-center justify-between"
           role="usermanagement"
           onActionClick={() => setOpen(true)}
         />
 
-        <main className="space-y-6">
+        <main className="space-y-6 p-4">
 
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-            <Card>
-              <CardContent className="flex justify-between items-center p-5">
-                <div>
-                  <p className="text-sm text-gray-500">Total Users</p>
-                  <p className="text-2xl font-bold">{users.length}</p>
-                </div>
-                <Users className="text-[#003366]" />
-              </CardContent>
-            </Card>
+            <div className="bg-[#1a1a1a] border border-yellow-500/20 rounded-xl p-5 flex justify-between items-center">
+              <div>
+                <p className="text-sm text-yellow-400/70">Total Users</p>
+                <p className="text-3xl font-bold text-yellow-400">{users.length}</p>
+              </div>
+              <div className="w-12 h-12 bg-yellow-500/10 rounded-full flex items-center justify-center">
+                <Users className="text-yellow-400" size={22} />
+              </div>
+            </div>
 
-            <Card>
-              <CardContent className="flex justify-between items-center p-5">
-                <div>
-                  <p className="text-sm text-gray-500">Active Users</p>
-                  <p className="text-2xl font-bold">
-                    {users.filter((u) => u.status === "active").length}
-                  </p>
-                </div>
-                <UserCheck className="text-green-600" />
-              </CardContent>
-            </Card>
+            <div className="bg-[#1a1a1a] border border-orange-500/20 rounded-xl p-5 flex justify-between items-center">
+              <div>
+                <p className="text-sm text-orange-400/70">Active Users</p>
+                <p className="text-3xl font-bold text-orange-400">
+                  {users.filter((u) => u.status === "active").length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-orange-500/10 rounded-full flex items-center justify-center">
+                <UserCheck className="text-orange-400" size={22} />
+              </div>
+            </div>
 
-            <Card>
-              <CardContent className="flex justify-between items-center p-5">
-                <div>
-                  <p className="text-sm text-gray-500">Inactive Users</p>
-                  <p className="text-2xl font-bold">
-                    {users.filter((u) => u.status === "inactive").length}
-                  </p>
-                </div>
-                <Scan className="text-purple-600" />
-              </CardContent>
-            </Card>
+            <div className="bg-[#1a1a1a] border border-yellow-500/20 rounded-xl p-5 flex justify-between items-center">
+              <div>
+                <p className="text-sm text-yellow-400/70">Inactive Users</p>
+                <p className="text-3xl font-bold text-white">
+                  {users.filter((u) => u.status === "inactive").length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center">
+                <Scan className="text-white/50" size={22} />
+              </div>
+            </div>
 
           </div>
 
           {/* Search */}
-          <Card>
-            <CardContent className="flex flex-col md:flex-row gap-3 p-4">
-              <input
-                type="text"
-                placeholder="Search by email..."
-                className="border p-2 rounded w-full"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-
-              <select
-                className="border p-2 rounded md:w-64"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="">All Status</option>
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </CardContent>
-          </Card>
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-4 flex flex-col md:flex-row gap-3">
+            <input
+              type="text"
+              placeholder="Search by email..."
+              className="bg-[#101010] border border-white/10 text-white placeholder-white/30 p-2 rounded-lg w-full focus:outline-none focus:border-yellow-500 transition"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <select
+              className="bg-[#101010] border border-white/10 text-white p-2 rounded-lg md:w-64 focus:outline-none focus:border-yellow-500 transition"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
 
           {/* Table */}
-          <Card>
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-xl overflow-hidden">
             <div className="w-full overflow-x-auto">
               <Table>
-
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+                  <TableRow className="border-b border-white/10 hover:bg-transparent">
+                    <TableHead className="text-yellow-400 font-semibold">ID</TableHead>
+                    <TableHead className="text-yellow-400 font-semibold">Email</TableHead>
+                    <TableHead className="text-yellow-400 font-semibold">Role</TableHead>
+                    <TableHead className="text-yellow-400 font-semibold">Status</TableHead>
+                    <TableHead className="text-yellow-400 font-semibold">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
 
                 <TableBody>
                   {currentUsers.map((user, index) => (
+                    <TableRow key={user.id} className="border-b border-white/5 hover:bg-white/5 transition">
 
-                    <TableRow key={user.id}>
-
-                      <TableCell>
-                        {(indexOfFirstUser + index + 1)
-                          .toString()
-                          .padStart(2, "0")}
+                      <TableCell className="text-white/50 font-mono text-sm">
+                        {(indexOfFirstUser + index + 1).toString().padStart(2, "0")}
                       </TableCell>
 
-                      <TableCell className="break-all">
+                      <TableCell className="text-white break-all">
                         {user.email}
                       </TableCell>
 
-                      <TableCell>{user.role}</TableCell>
+                      <TableCell>
+                        <span className="text-orange-400 font-medium capitalize">{user.role}</span>
+                      </TableCell>
 
                       <TableCell>
-                        <span className={`px-3 py-1 rounded-full text-xs ${
-                          user.status === "active" 
-                            ? "bg-green-100 text-green-700" 
-                            : "bg-red-100 text-red-700"
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          user.status === "active"
+                            ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                            : user.status === "pending"
+                            ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
+                            : "bg-red-500/10 text-red-400 border border-red-500/20"
                         }`}>
                           {user.status}
                         </span>
                       </TableCell>
 
                       <TableCell>
-                        <div className="flex flex-wrap gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
+                        <div className="flex flex-wrap gap-2 items-center">
+                          <button
                             onClick={() => handleEditUser(user)}
+                            className="p-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 transition"
                           >
-                            <Edit size={16} />
-                          </Button>
+                            <Edit size={15} />
+                          </button>
 
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
+                          <button
                             onClick={() => openDeleteDialog(user.id)}
+                            className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition"
                           >
-                            <Trash2 size={16} className="text-red-600" />
-                          </Button>
+                            <Trash2 size={15} />
+                          </button>
 
-                          <Switch 
-                            checked={user.status === "active"}
-                            onCheckedChange={() => handleToggleStatus(user.id, user.status)}
-                          />
+                          <button
+                            onClick={() => handleToggleStatus(user.id, user.status)}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                              user.status === "active" ? "bg-orange-500" : "bg-white/20"
+                            }`}
+                          >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                              user.status === "active" ? "translate-x-6" : "translate-x-1"
+                            }`} />
+                          </button>
                         </div>
                       </TableCell>
 
                     </TableRow>
-
                   ))}
                 </TableBody>
-
               </Table>
             </div>
-          </Card>
+          </div>
 
           {/* Pagination */}
           <div className="flex justify-center gap-2 flex-wrap">
-            <Button
-              size="sm"
+            <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => p - 1)}
+              className="px-4 py-2 rounded-lg bg-[#1a1a1a] border border-white/10 text-white/70 hover:border-yellow-500 hover:text-yellow-400 disabled:opacity-30 disabled:cursor-not-allowed transition text-sm"
             >
               Prev
-            </Button>
+            </button>
 
             {Array.from({ length: totalPages }, (_, i) => (
-              <Button
-                size="sm"
+              <button
                 key={i}
                 onClick={() => setCurrentPage(i + 1)}
-                variant={currentPage === i + 1 ? "default" : "outline"}
+                className={`px-4 py-2 rounded-lg border text-sm transition ${
+                  currentPage === i + 1
+                    ? "bg-yellow-500 border-yellow-500 text-black font-bold"
+                    : "bg-[#1a1a1a] border-white/10 text-white/70 hover:border-yellow-500 hover:text-yellow-400"
+                }`}
               >
                 {i + 1}
-              </Button>
+              </button>
             ))}
 
-            <Button
-              size="sm"
+            <button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => p + 1)}
+              className="px-4 py-2 rounded-lg bg-[#1a1a1a] border border-white/10 text-white/70 hover:border-yellow-500 hover:text-yellow-400 disabled:opacity-30 disabled:cursor-not-allowed transition text-sm"
             >
               Next
-            </Button>
+            </button>
           </div>
 
         </main>
       </div>
 
-      <AddUserDialog 
-        open={open} 
+      <AddUserDialog
+        open={open}
         onOpenChange={setOpen}
         onUserAdded={fetchUsers}
       />
 
-      <EditUserDialog 
-        open={editOpen} 
+      <EditUserDialog
+        open={editOpen}
         onOpenChange={setEditOpen}
         user={selectedUser}
         onUserUpdated={fetchUsers}
       />
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-[#1a1a1a] border border-white/10 text-white">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-yellow-400">Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/60">
               This action cannot be undone. This will permanently delete the user
               and all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10">Cancel</AlertDialogCancel>
+            <AlertDialogAction
               onClick={handleDeleteUser}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               Delete
             </AlertDialogAction>
