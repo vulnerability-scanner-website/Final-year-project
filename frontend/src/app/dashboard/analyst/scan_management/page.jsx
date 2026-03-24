@@ -132,126 +132,86 @@ export default function ScanManagement() {
   };
 
   return (
-    <div className="">
-      <AnalystSideBar />
-      <div className="ml-64 p-6 space-y-8 min-h-screen bg-gray-50">
-        <DashboardHeader role="scanmanagement" />
+    <div className="min-h-screen bg-[#101010] text-white w-full">
+      <DashboardHeader role="scanmanagement" />
+      <div className="px-4 pb-6 pt-4">
         <Tabs defaultValue="active">
-        <Tabs defaultValue="active">
-          <TabsList className="grid w-full grid-cols-2 max-w-md h-14 bg-[#e6eef5] p-1 rounded-lg">
-            <TabsTrigger
-              value="active"
-              className="h-full text-lg font-semibold px-6 rounded-md
-               data-[state=active]:bg-[#003366]
-               data-[state=active]:text-white
-               transition"
-            >
+          <TabsList className="grid w-full grid-cols-2 max-w-md h-12 bg-[#1a1a1a] border border-white/10 p-1 rounded-lg">
+            <TabsTrigger value="active" className="h-full text-sm font-semibold px-6 rounded-md text-white/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-orange-500 data-[state=active]:text-black data-[state=active]:font-bold transition">
               Active Scans
             </TabsTrigger>
-
-            <TabsTrigger
-              value="vulnerabilities"
-              className="h-full text-lg font-semibold px-6 rounded-md
-               data-[state=active]:bg-[#003366]
-               data-[state=active]:text-white
-               transition"
-            >
+            <TabsTrigger value="vulnerabilities" className="h-full text-sm font-semibold px-6 rounded-md text-white/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-orange-500 data-[state=active]:text-black data-[state=active]:font-bold transition">
               Vulnerabilities
             </TabsTrigger>
           </TabsList>
-        </Tabs>
 
-        {/* ---------------- Active Scans ---------------- */}
-        <TabsContent value="active" className="mt-6 space-y-6">
-          {activeScans.map((scan) => (
-            <Card key={scan.id} className="w-full max-w-5xl">
-              <CardHeader className="border-0 min-h-auto py-5">
-                <CardTitle className="flex items-center gap-2.5">
-                  <ShieldCheck className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-semibold text-foreground">{scan.name}</span>
-                </CardTitle>
-                <CardToolbar>
+          <TabsContent value="active" className="mt-6 space-y-4">
+            {activeScans.map((scan) => (
+              <div key={scan.id} className="bg-[#1a1a1a] border border-white/10 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-yellow-400" />
+                    <span className="text-sm font-semibold text-white">{scan.name}</span>
+                  </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="dim" size="sm" mode="icon" className="-me-1.5">
-                        <MoreVertical />
-                      </Button>
+                      <button className="p-1.5 rounded-lg text-white/40 hover:text-yellow-400 hover:bg-yellow-500/10 transition">
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" side="bottom">
-                      <DropdownMenuItem onClick={() => router.push(`/dashboard/admin/scan_management/${scan.id}`)}>
-                        <Eye />
-                        View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleManageAction('pause', scan.id)}>
-                        <Pause />
-                        Pause Scan
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleManageAction('resume', scan.id)}>
-                        <Play />
-                        Resume Scan
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleManageAction('stop', scan.id)}>
-                        <StopCircle />
-                        Stop Scan
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleManageAction('rerun', scan.id)}>
-                        <RotateCcw />
-                        Re-run Scan
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleManageAction('delete', scan.id)}>
-                        <Trash />
-                        Delete Scan
-                      </DropdownMenuItem>
+                    <DropdownMenuContent align="end" side="bottom" className="bg-[#1a1a1a] border border-white/10 text-white">
+                      <DropdownMenuItem className="hover:bg-yellow-500/10 hover:text-yellow-400 cursor-pointer" onClick={() => router.push(`/dashboard/analyst/scan_management/${scan.id}`)}><Eye className="w-4 h-4" />View Details</DropdownMenuItem>
+                      <DropdownMenuItem className="hover:bg-yellow-500/10 hover:text-yellow-400 cursor-pointer" onClick={() => handleManageAction('pause', scan.id)}><Pause className="w-4 h-4" />Pause Scan</DropdownMenuItem>
+                      <DropdownMenuItem className="hover:bg-yellow-500/10 hover:text-yellow-400 cursor-pointer" onClick={() => handleManageAction('resume', scan.id)}><Play className="w-4 h-4" />Resume Scan</DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-white/10" />
+                      <DropdownMenuItem className="hover:bg-orange-500/10 hover:text-orange-400 cursor-pointer" onClick={() => handleManageAction('stop', scan.id)}><StopCircle className="w-4 h-4" />Stop Scan</DropdownMenuItem>
+                      <DropdownMenuItem className="hover:bg-orange-500/10 hover:text-orange-400 cursor-pointer" onClick={() => handleManageAction('rerun', scan.id)}><RotateCcw className="w-4 h-4" />Re-run Scan</DropdownMenuItem>
+                      <DropdownMenuItem className="hover:bg-red-500/10 hover:text-red-400 cursor-pointer" onClick={() => handleManageAction('delete', scan.id)}><Trash className="w-4 h-4" />Delete Scan</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </CardToolbar>
-              </CardHeader>
-              <CardContent className="space-y-2.5">
-                <div className="flex grow gap-1">
+                </div>
+                <div className="flex w-full gap-0.5 overflow-hidden mb-2">
                   {[...Array(100)].map((_, i) => (
-                    <span
-                      key={i}
-                      className={`inline-block w-3 h-4 rounded-sm border transition-colors ${
-                        i < scan.progress ? 'bg-primary border-primary' : 'bg-muted border-muted'
-                      }`}
-                    />
+                    <span key={i} className={`inline-block w-3 h-4 rounded-sm border flex-shrink-0 transition-colors ${
+                      i < scan.progress ? 'bg-yellow-500 border-yellow-500' : 'bg-white/5 border-white/10'
+                    }`} />
                   ))}
                 </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
+                <div className="flex items-center justify-between text-xs text-white/40">
                   <span>{scan.target}</span>
-                  <span className="font-semibold text-foreground">{scan.progress}% complete</span>
+                  <span className="font-semibold text-yellow-400">{scan.progress}% complete</span>
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Started: {scan.started}</span>
-                  <Badge variant="destructive">{getVulnCount(scan.id)} vulnerabilities</Badge>
+                <div className="flex items-center justify-between text-xs mt-1">
+                  <span className="text-white/40">Started: {scan.started}</span>
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">{getVulnCount(scan.id)} vulnerabilities</span>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
+              </div>
+            ))}
+          </TabsContent>
 
-        {/* ---------------- Vulnerabilities ---------------- */}
-        <TabsContent value="vulnerabilities" className="mt-6 space-y-4">
-          {vulnerabilities.map((vuln) => (
-            <Card
-              key={vuln.id}
-              onClick={() =>
-                router.push(`/admin/scan_management/${vuln.scanId}`)
-              }
-              className="cursor-pointer hover:shadow-lg transition-shadow"
-            >
-              <CardHeader className="flex justify-between items-start">
-                <div>
-                  <CardTitle>{vuln.title}</CardTitle>
-                  <CardDescription>Scan #{vuln.scanId}</CardDescription>
+          <TabsContent value="vulnerabilities" className="mt-6 space-y-4">
+            {vulnerabilities.map((vuln) => (
+              <div key={vuln.id} onClick={() => router.push(`/dashboard/analyst/scan_management/${vuln.scanId}`)}
+                className="bg-[#1a1a1a] border border-white/10 rounded-xl p-4 cursor-pointer hover:border-yellow-500/30 transition-all">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Bug className="h-4 w-4 text-red-400" />
+                      <span className="font-semibold text-white">{vuln.title}</span>
+                    </div>
+                    <p className="text-xs text-white/40 mt-1">Scan #{vuln.scanId}</p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    vuln.severity === 'Critical' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                    vuln.severity === 'High' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' :
+                    vuln.severity === 'Medium' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
+                    'bg-white/5 text-white/50 border border-white/10'
+                  }`}>{vuln.severity}</span>
                 </div>
-                <Badge variant="destructive">{vuln.severity}</Badge>
-              </CardHeader>
-            </Card>
-          ))}
-        </TabsContent>
-      </Tabs>
+              </div>
+            ))}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
