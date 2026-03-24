@@ -46,7 +46,7 @@ export default function SubscriptionBanner({ role }) {
           onClick={() => router.push(pricePath)}
           className="bg-[#003366] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#004080] transition"
         >
-          View Plans
+        Start free trial
         </button>
       </div>
     );
