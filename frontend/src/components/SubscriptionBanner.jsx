@@ -34,19 +34,19 @@ export default function SubscriptionBanner({ role }) {
   // No subscription
   if (subscription.status === "none" || !subscription.plan_name) {
     return (
-      <div className="flex items-center justify-between bg-gray-100 border border-gray-300 rounded-lg px-5 py-4">
+      <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-5 py-4">
         <div className="flex items-center gap-3">
-          <CreditCard className="text-gray-500 h-5 w-5" />
+          <CreditCard className="text-white/40 h-5 w-5" />
           <div>
-            <p className="font-semibold text-gray-700">No Active Subscription</p>
-            <p className="text-sm text-gray-500">Subscribe to a plan to unlock all features.</p>
+            <p className="font-semibold text-white">No Active Subscription</p>
+            <p className="text-sm text-white/40">Subscribe to a plan to unlock all features.</p>
           </div>
         </div>
         <button
           onClick={() => router.push(pricePath)}
-          className="bg-[#003366] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#004080] transition"
+          className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg text-sm transition"
         >
-        Start free trial
+          Start free trial
         </button>
       </div>
     );
@@ -55,21 +55,17 @@ export default function SubscriptionBanner({ role }) {
   // Pending approval
   if (subscription.status === "pending") {
     return (
-      <div className="flex items-center justify-between bg-yellow-50 border border-yellow-300 rounded-lg px-5 py-4">
+      <div className="flex items-center justify-between bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-5 py-4">
         <div className="flex items-center gap-3">
-          <Clock className="text-yellow-500 h-5 w-5" />
+          <Clock className="text-yellow-400 h-5 w-5" />
           <div>
-            <p className="font-semibold text-yellow-800">
-              Subscription Pending Approval
-            </p>
-            <p className="text-sm text-yellow-600">
+            <p className="font-semibold text-yellow-400">Subscription Pending Approval</p>
+            <p className="text-sm text-yellow-400/70">
               Your <span className="font-bold">{subscription.plan_name}</span> plan payment was received. Waiting for admin to activate your account.
             </p>
           </div>
         </div>
-        <span className="bg-yellow-200 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">
-          Pending
-        </span>
+        <span className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-xs font-semibold px-3 py-1 rounded-full">Pending</span>
       </div>
     );
   }
@@ -77,41 +73,35 @@ export default function SubscriptionBanner({ role }) {
   // Active
   if (subscription.status === "active") {
     return (
-      <div className="flex items-center justify-between bg-green-50 border border-green-300 rounded-lg px-5 py-4">
+      <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-lg px-5 py-4">
         <div className="flex items-center gap-3">
-          <CheckCircle className="text-green-500 h-5 w-5" />
+          <CheckCircle className="text-green-400 h-5 w-5" />
           <div>
-            <p className="font-semibold text-green-800">
-              {subscription.plan_name} Plan — Active
-            </p>
-            <p className="text-sm text-green-600">
+            <p className="font-semibold text-green-400">{subscription.plan_name} Plan — Active</p>
+            <p className="text-sm text-green-400/70">
               Your subscription is active. Expires:{" "}
-              {subscription.end_date
-                ? new Date(subscription.end_date).toLocaleDateString()
-                : "—"}
+              {subscription.end_date ? new Date(subscription.end_date).toLocaleDateString() : "—"}
             </p>
           </div>
         </div>
-        <span className="bg-green-200 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">
-          Active
-        </span>
+        <span className="bg-green-500/10 text-green-400 border border-green-500/20 text-xs font-semibold px-3 py-1 rounded-full">Active</span>
       </div>
     );
   }
 
   // Inactive / failed
   return (
-    <div className="flex items-center justify-between bg-red-50 border border-red-300 rounded-lg px-5 py-4">
+    <div className="flex items-center justify-between bg-red-500/10 border border-red-500/20 rounded-lg px-5 py-4">
       <div className="flex items-center gap-3">
-        <XCircle className="text-red-500 h-5 w-5" />
+        <XCircle className="text-red-400 h-5 w-5" />
         <div>
-          <p className="font-semibold text-red-800">Subscription Inactive</p>
-          <p className="text-sm text-red-600">Your subscription is not active. Please subscribe to continue.</p>
+          <p className="font-semibold text-red-400">Subscription Inactive</p>
+          <p className="text-sm text-red-400/70">Your subscription is not active. Please subscribe to continue.</p>
         </div>
       </div>
       <button
         onClick={() => router.push(pricePath)}
-        className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 transition"
+        className="bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 px-4 py-2 rounded-lg text-sm transition"
       >
         Renew
       </button>

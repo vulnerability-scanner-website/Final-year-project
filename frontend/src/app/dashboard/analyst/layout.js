@@ -5,7 +5,7 @@ export default function AnalystLayout({ children }) {
     <div className="flex min-h-screen">
       <AnalystSideBar />
 
-      <main className="flex-1 p-10 bg-gray-100">
+      <main className="flex-1 bg-[#101010] min-h-screen overflow-x-hidden">
         {children}
       </main>
     </div>

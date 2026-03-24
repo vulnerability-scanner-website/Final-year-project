@@ -57,63 +57,50 @@ export default function DeveloperSideBar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-3 bg-[#003366] text-white rounded-lg shadow-2xl hover:bg-[#004488] transition-colors"
+        className="md:hidden fixed top-4 left-4 z-50 p-3 bg-[#1a1a1a] text-yellow-400 border border-yellow-500/30 rounded-lg shadow-lg"
         aria-label="Toggle menu"
       >
-        {isOpen ? <X size={28} /> : <Menu size={28} />}
+        {isOpen ? <X size={26} /> : <Menu size={26} />}
       </button>
 
       {/* Overlay */}
       {isOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        w-64 bg-white border-r shadow-sm min-h-screen fixed left-0 top-0 flex flex-col z-40
+        bg-[#101010] border-r border-white/10 shadow-xl flex flex-col z-40
+        fixed top-0 left-0 h-screen w-64
         transition-transform duration-300 ease-in-out
-        ${
-          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        }
+        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        {/* Close button inside sidebar for mobile */}
-        <div className="md:hidden flex justify-end p-4">
-          <button
-            onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            aria-label="Close menu"
-          >
-            <X size={24} className="text-gray-600" />
-          </button>
-        </div>
-
-        {/* Logo / Title */}
-        <div className="p-6 border-b">
-          <h2 className="text-xl md:text-2xl font-bold text-[#003366] tracking-wide text-center">
-            Developer Panel
+        <div className="pt-6 px-6">
+          <h2 className="text-2xl font-extrabold mb-10 text-center">
+            <span className="text-yellow-400">Developer</span>
+            <span className="text-orange-400"> Panel</span>
           </h2>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 flex flex-col gap-1 overflow-y-auto px-4">
           {links.map((link) => {
             const Icon = link.icon;
             const active = pathname === link.href;
-
             return (
               <Link
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition font-medium
-                ${
-                  active
-                    ? "bg-[#003366] text-white shadow"
-                    : "text-gray-700 hover:bg-yellow-700 hover:text-white"
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium
+                  ${
+                    active
+                      ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-black shadow-lg shadow-orange-500/20"
+                      : "text-white/60 hover:bg-white/5 hover:text-yellow-400"
+                  }`}
               >
                 <Icon size={20} />
                 {link.name}
@@ -123,19 +110,18 @@ export default function DeveloperSideBar() {
         </nav>
 
         {/* Logout */}
-        <div className="p-4 border-t">
+        <div className="px-4 pb-2">
           <Link
             href="/"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 font-medium"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 font-medium transition"
           >
             <LucideLogOut size={20} />
             Logout
           </Link>
         </div>
 
-        {/* Footer */}
-        <div className="text-center text-xs text-gray-400 pb-4">
+        <div className="text-center text-xs text-white/20 py-4 border-t border-white/5">
           © {new Date().getFullYear()} CyberTrace
         </div>
       </aside>

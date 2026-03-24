@@ -32,14 +32,14 @@ const FeatureCard = React.forwardRef(({ className, title, description, children,
       viewport={{ once: true, amount: 0.3 }}
       variants={cardVariants}
       className={cn(
-        "relative flex w-full flex-col overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-shadow hover:shadow-md md:p-8",
+        "relative flex w-full flex-col overflow-hidden rounded-2xl border bg-[#1a1a1a] border-white/10 p-6 shadow-sm transition-shadow hover:shadow-md md:p-8",
         className
       )}
       {...props}>
       <div className="flex-grow">
         {/* Card Header: Title and Description */}
-        <h3 className="text-xl font-semibold text-card-foreground">{title}</h3>
-        <p className="mt-2 text-muted-foreground">{description}</p>
+        <h3 className="text-xl font-semibold text-white">{title}</h3>
+        <p className="mt-2 text-white/40">{description}</p>
       </div>
       {/* Main Content Area */}
       <div className="mt-6">{children}</div>
