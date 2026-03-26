@@ -1,288 +1,202 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardToolbar,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button-1";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { ShieldCheck, Bug, MoreVertical, Eye, Pause, Play, StopCircle, RotateCcw, Trash, Plus, RefreshCw } from "lucide-react";
+import NewScanDialog from "@/components/popup/NewScanDialog";
 
-import { ShieldCheck, Bug, MoreVertical, Eye, Pause, Play, StopCircle, RotateCcw, Trash } from "lucide-react";
-import { DashboardHeader } from "@/components/header/header";
-import DeveloperSideBar from "@/components/sidebar/DeveloperSideBar/Developer";
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
-/* ---------------- Mock Data ---------------- */
-
-const activeScans = [
-  {
-    id: 1,
-    name: "Full Website Scan",
-    target: "https://example.com",
-    status: "Running",
-    progress: 65,
-    started: "10 mins ago",
-  },
-  {
-    id: 2,
-    name: "API Security Scan",
-    target: "https://api.example.com",
-    status: "Queued",
-    progress: 20,
-    started: "2 mins ago",
-  },
-  {
-    id: 3,
-    name: "Authentication Scan",
-    target: "https://example.com/login",
-    status: "Completed",
-    progress: 100,
-    started: "1 hour ago",
-  },
-];
-
-const vulnerabilities = [
-  {
-    id: 1,
-    scanId: 1,
-    severity: "Critical",
-    title: "SQL Injection",
-  },
-  {
-    id: 2,
-    scanId: 1,
-    severity: "High",
-    title: "Stored XSS",
-  },
-  {
-    id: 3,
-    scanId: 2,
-    severity: "Medium",
-    title: "Open Redirect",
-  },
-];
-
-/* ---------------- Helper ---------------- */
-
-const getVulnCount = (scanId) =>
-  vulnerabilities.filter((v) => v.scanId === scanId).length;
-
-/* ---------------- Component ---------------- */
+const severityClass = (s) => {
+  if (s === 'critical') return 'bg-red-500/10 text-red-400 border border-red-500/20';
+  if (s === 'high')     return 'bg-orange-500/10 text-orange-400 border border-orange-500/20';
+  if (s === 'medium')   return 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20';
+  return 'bg-white/5 text-white/50 border border-white/10';
+};
 
 export default function ScanManagement() {
   const router = useRouter();
-  const [activeScans, setActiveScans] = useState([]);
+  const [scans, setScans] = useState([]);
+  const [vulns, setVulns] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const pollRef = useRef(null);
 
-  useEffect(() => {
-    loadScans();
-  }, []);
+  const token = () => typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const headers = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` });
 
-  const loadScans = () => {
-    const scans = JSON.parse(localStorage.getItem('scans') || '[]');
-    if (scans.length > 0) {
-      setActiveScans(scans);
-    } else {
-      setActiveScans([
-        {
-          id: 1,
-          name: "Full Website Scan",
-          target: "https://example.com",
-          status: "Running",
-          progress: 65,
-          started: "10 mins ago",
-        },
-        {
-          id: 2,
-          name: "API Security Scan",
-          target: "https://api.example.com",
-          status: "Queued",
-          progress: 20,
-          started: "2 mins ago",
-        },
-        {
-          id: 3,
-          name: "Authentication Scan",
-          target: "https://example.com/login",
-          status: "Completed",
-          progress: 100,
-          started: "1 hour ago",
-        },
-      ]);
+  const fetchScans = async () => {
+    try {
+      const res = await fetch(`${API}/api/scans`, { headers: headers() });
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : [];
+      setScans(list);
+
+      // Collect all vulnerabilities from completed scans
+      const allVulns = [];
+      for (const scan of list) {
+        if (scan.vulnerabilities?.length) {
+          scan.vulnerabilities.forEach(v => allVulns.push({ ...v, scanId: scan.id, scanTarget: scan.target }));
+        }
+      }
+      setVulns(allVulns);
+    } catch (e) {
+      console.error('Failed to fetch scans:', e);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleManageAction = (action, scanId) => {
-    console.log(`Action: ${action} on scan ${scanId}`);
+  // Poll progress for running scans
+  const pollProgress = async (scanList) => {
+    const running = scanList.filter(s => s.status === 'Running');
+    if (!running.length) return;
+
+    const updated = [...scanList];
+    for (const scan of running) {
+      try {
+        const res = await fetch(`${API}/api/scans/${scan.id}/progress`, { headers: headers() });
+        const prog = await res.json();
+        const idx = updated.findIndex(s => s.id === scan.id);
+        if (idx !== -1) updated[idx] = { ...updated[idx], progress: prog.progress, progressMsg: prog.message };
+      } catch (e) { /* ignore */ }
+    }
+    setScans(updated);
+  };
+
+  useEffect(() => {
+    fetchScans();
+    pollRef.current = setInterval(async () => {
+      await fetchScans();
+    }, 5000);
+    return () => clearInterval(pollRef.current);
+  }, []);
+
+  const handleAction = async (action, scanId) => {
+    try {
+      await fetch(`${API}/api/scans/${scanId}/${action}`, { method: action === 'delete' ? 'DELETE' : 'POST', headers: headers() });
+      fetchScans();
+    } catch (e) {
+      console.error(`Action ${action} failed:`, e);
+    }
   };
 
   return (
-    <>
-      <DeveloperSideBar />
-      <div className="ml-64 p-5 space-y-6">
+    <div className="w-full min-h-screen bg-[#101010] text-white space-y-6">
       {/* Header */}
-      <DashboardHeader role="scanmanagement" />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Scan Management</h1>
+          <p className="text-white/40">Monitor and manage your security scans</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={fetchScans} className="p-2 rounded-lg text-white/40 hover:text-yellow-400 hover:bg-yellow-500/10 transition">
+            <RefreshCw className="w-4 h-4" />
+          </button>
+          <button onClick={() => setOpenDialog(true)} className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg transition">
+            <Plus className="w-4 h-4" /> New Scan
+          </button>
+        </div>
+      </div>
 
-      <Tabs defaultValue="active" className="space-y-6">
-        {/* Tabs Header */}
-        <TabsList className="grid w-full grid-cols-2 max-w-md h-14 bg-[#e6eef5] p-1 rounded-lg">
-          <TabsTrigger
-            value="active"
-            className="h-full text-lg font-semibold px-6 rounded-md
-              data-[state=active]:bg-[#003366]
-              data-[state=active]:text-white
-              transition"
-          >
-            Active Scans
+      <Tabs defaultValue="active">
+        <TabsList className="grid w-full grid-cols-2 max-w-md h-12 bg-[#1a1a1a] border border-white/10 p-1 rounded-lg">
+          <TabsTrigger value="active" className="h-full text-sm font-semibold px-6 rounded-md text-white/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-orange-500 data-[state=active]:text-black data-[state=active]:font-bold transition">
+            Active Scans <span className="ml-1 text-xs">({scans.length})</span>
           </TabsTrigger>
-
-          <TabsTrigger
-            value="vulnerabilities"
-            className="h-full text-lg font-semibold px-6 rounded-md
-              data-[state=active]:bg-[#003366]
-              data-[state=active]:text-white
-              transition"
-          >
-            Vulnerabilities
+          <TabsTrigger value="vulnerabilities" className="h-full text-sm font-semibold px-6 rounded-md text-white/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-orange-500 data-[state=active]:text-black data-[state=active]:font-bold transition">
+            Vulnerabilities <span className="ml-1 text-xs">({vulns.length})</span>
           </TabsTrigger>
         </TabsList>
 
-        {/* ---------------- Active Scans ---------------- */}
+        <TabsContent value="active" className="mt-6 space-y-4">
+          {loading ? (
+            <div className="text-center py-12 text-white/40">Loading scans...</div>
+          ) : scans.length === 0 ? (
+            <div className="text-center py-12 bg-[#1a1a1a] border border-white/10 rounded-xl">
+              <ShieldCheck className="w-10 h-10 text-white/20 mx-auto mb-3" />
+              <p className="text-white/40">No scans yet. Start your first scan.</p>
+            </div>
+          ) : scans.map((scan) => (
+            <div key={scan.id} className="bg-[#1a1a1a] border border-white/10 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-yellow-400" />
+                  <span className="text-sm font-semibold text-white truncate max-w-xs">{scan.target}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                    scan.status === 'Running'   ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
+                    scan.status === 'Completed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+                    scan.status === 'Failed'    ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                    'bg-white/5 text-white/50 border border-white/10'
+                  }`}>{scan.status}</span>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="p-1.5 rounded-lg text-white/40 hover:text-yellow-400 hover:bg-yellow-500/10 transition">
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-[#1a1a1a] border border-white/10 text-white">
+                    <DropdownMenuItem className="hover:bg-yellow-500/10 hover:text-yellow-400 cursor-pointer gap-2" onClick={() => router.push(`/dashboard/developer/scan_management/${scan.id}`)}><Eye className="w-4 h-4" />View Details</DropdownMenuItem>
+                    <DropdownMenuItem className="hover:bg-yellow-500/10 hover:text-yellow-400 cursor-pointer gap-2" onClick={() => handleAction('pause', scan.id)}><Pause className="w-4 h-4" />Pause</DropdownMenuItem>
+                    <DropdownMenuItem className="hover:bg-yellow-500/10 hover:text-yellow-400 cursor-pointer gap-2" onClick={() => handleAction('resume', scan.id)}><Play className="w-4 h-4" />Resume</DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem className="hover:bg-orange-500/10 hover:text-orange-400 cursor-pointer gap-2" onClick={() => handleAction('stop', scan.id)}><StopCircle className="w-4 h-4" />Stop</DropdownMenuItem>
+                    <DropdownMenuItem className="hover:bg-orange-500/10 hover:text-orange-400 cursor-pointer gap-2" onClick={() => handleAction('rerun', scan.id)}><RotateCcw className="w-4 h-4" />Re-run</DropdownMenuItem>
+                    <DropdownMenuItem className="hover:bg-red-500/10 hover:text-red-400 cursor-pointer gap-2" onClick={() => handleAction('delete', scan.id)}><Trash className="w-4 h-4" />Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
-        <TabsContent value="active" className="space-y-6">
-          {activeScans.map((scan) => (
-            <Card key={scan.id} className="w-full max-w-5xl">
-              <CardHeader className="border-0 min-h-auto py-5">
-                <CardTitle className="flex items-center gap-2.5">
-                  <ShieldCheck className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-semibold text-foreground">{scan.name}</span>
-                </CardTitle>
-                <CardToolbar>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="dim" size="sm" mode="icon" className="-me-1.5">
-                        <MoreVertical />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" side="bottom">
-                      <DropdownMenuItem onClick={() => router.push(`/dashboard/developer/scan_management/${scan.id}`)}>
-                        <Eye />
-                        View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleManageAction('pause', scan.id)}>
-                        <Pause />
-                        Pause Scan
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleManageAction('resume', scan.id)}>
-                        <Play />
-                        Resume Scan
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleManageAction('stop', scan.id)}>
-                        <StopCircle />
-                        Stop Scan
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleManageAction('rerun', scan.id)}>
-                        <RotateCcw />
-                        Re-run Scan
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleManageAction('delete', scan.id)}>
-                        <Trash />
-                        Delete Scan
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </CardToolbar>
-              </CardHeader>
-              <CardContent className="space-y-2.5">
-                <div className="flex grow gap-1">
-                  {[...Array(100)].map((_, i) => (
-                    <span
-                      key={i}
-                      className={`inline-block w-3 h-4 rounded-sm border transition-colors ${
-                        i < scan.progress ? 'bg-primary border-primary' : 'bg-muted border-muted'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
-                  <span>{scan.target}</span>
-                  <span className="font-semibold text-foreground">{scan.progress}% complete</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Started: {scan.started}</span>
-                  <Badge variant="destructive">{getVulnCount(scan.id)} vulnerabilities</Badge>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Progress bar */}
+              {scan.status === 'Running' && (
+                <>
+                  <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden mb-2">
+                    <div className="h-full bg-gradient-to-r from-yellow-500 to-orange-500 transition-all duration-500" style={{ width: `${scan.progress || 0}%` }} />
+                  </div>
+                  <p className="text-xs text-white/40 mb-2">{scan.progressMsg || 'Scanning...'}</p>
+                </>
+              )}
+
+              <div className="flex items-center justify-between text-xs text-white/40">
+                <span>{new Date(scan.created_at).toLocaleString()}</span>
+                <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                  {scan.issues || scan.vulnerabilities?.length || 0} vulnerabilities
+                </span>
+              </div>
+            </div>
           ))}
         </TabsContent>
 
-        {/* ---------------- Vulnerabilities ---------------- */}
-
-        <TabsContent value="vulnerabilities" className="space-y-4">
-          {/* Counter */}
-          <div className="text-sm text-gray-600">
-            Total Vulnerabilities
-            <Badge variant="destructive" className="ml-2">
-              {vulnerabilities.length}
-            </Badge>
-          </div>
-
-          {vulnerabilities.map((vuln) => (
-            <Card
-              key={vuln.id}
-              className="cursor-pointer hover:shadow-lg transition-shadow border hover:border-red-400"
-              onClick={() =>
-                router.push(
-                  `/dashboard/developer/scan_management/${vuln.scanId}`
-                )
-              }
-            >
-              <CardHeader className="flex justify-between items-start">
+        <TabsContent value="vulnerabilities" className="mt-6 space-y-4">
+          {vulns.length === 0 ? (
+            <div className="text-center py-12 bg-[#1a1a1a] border border-white/10 rounded-xl">
+              <Bug className="w-10 h-10 text-white/20 mx-auto mb-3" />
+              <p className="text-white/40">No vulnerabilities found yet.</p>
+            </div>
+          ) : vulns.map((vuln, i) => (
+            <div key={i} onClick={() => router.push(`/dashboard/developer/scan_management/${vuln.scanId}`)}
+              className="bg-[#1a1a1a] border border-white/10 rounded-xl p-4 cursor-pointer hover:border-yellow-500/30 transition-all">
+              <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bug className="h-4 w-4 text-red-500" />
-                    {vuln.title}
-                  </CardTitle>
-
-                  <CardDescription>
-                    Found in Scan #{vuln.scanId}
-                  </CardDescription>
+                  <div className="flex items-center gap-2">
+                    <Bug className="h-4 w-4 text-red-400" />
+                    <span className="font-semibold text-white">{vuln.title}</span>
+                  </div>
+                  <p className="text-xs text-white/40 mt-1">{vuln.scanTarget} · Scan #{vuln.scanId}</p>
                 </div>
-
-                <Badge
-                  variant={
-                    vuln.severity === "Critical"
-                      ? "destructive"
-                      : vuln.severity === "High"
-                      ? "destructive"
-                      : vuln.severity === "Medium"
-                      ? "secondary"
-                      : "outline"
-                  }
-                >
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${severityClass(vuln.severity)}`}>
                   {vuln.severity}
-                </Badge>
-              </CardHeader>
-            </Card>
+                </span>
+              </div>
+            </div>
           ))}
         </TabsContent>
       </Tabs>
+
+      <NewScanDialog open={openDialog} onOpenChange={(open) => { setOpenDialog(open); if (!open) fetchScans(); }} role="developer" />
     </div>
     </>
   );

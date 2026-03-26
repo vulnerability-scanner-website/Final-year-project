@@ -18,181 +18,129 @@ export default function Page() {
   const [requireApproval, setRequireApproval] = useState(true)
 
   return (
-    <div className="space-y-4 w-full">
-      
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <DashboardHeader role="settings" />
-        <Button className="w-full sm:w-auto text-sm md:text-base">Save Changes</Button>
+    <div className="min-h-screen bg-[#101010] text-white space-y-4 w-full">
+      <DashboardHeader role="settings" />
+
+      <div className="px-4 pb-6 space-y-4">
+      {/* Save Button */}
+      <div className="flex justify-end">
+        <button className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-5 py-2 rounded-lg transition text-sm">Save Changes</button>
       </div>
 
       {/* Top Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
 
         {/* University Info */}
-        <Card>
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg">University Information</CardTitle>
-            <CardDescription className="text-xs md:text-sm">
-              Update your university's basic information
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 md:space-y-4 p-4 md:p-6">
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-4 md:p-6">
+          <h3 className="text-base md:text-lg font-semibold text-white mb-1">University Information</h3>
+          <p className="text-xs text-white/40 mb-4">Update your university's basic information</p>
+          <div className="space-y-3">
             <div>
-              <label className="text-xs md:text-sm">University Name</label>
-              <Input defaultValue="INSA University" className="text-sm md:text-base" />
+              <label className="text-xs text-white/50">University Name</label>
+              <input defaultValue="INSA University" className="w-full mt-1 bg-[#101010] border border-white/10 text-white placeholder-white/30 p-2 rounded-lg focus:outline-none focus:border-yellow-500 transition text-sm" />
             </div>
-
             <div>
-              <label className="text-xs md:text-sm">Contact Email</label>
-              <Input defaultValue="admin@insa.fr" className="text-sm md:text-base" />
+              <label className="text-xs text-white/50">Contact Email</label>
+              <input defaultValue="admin@insa.fr" className="w-full mt-1 bg-[#101010] border border-white/10 text-white placeholder-white/30 p-2 rounded-lg focus:outline-none focus:border-yellow-500 transition text-sm" />
             </div>
-
             <div>
-              <label className="text-xs md:text-sm">Contact Phone</label>
-              <Input defaultValue="+33 1 23 45 67 89" className="text-sm md:text-base" />
+              <label className="text-xs text-white/50">Contact Phone</label>
+              <input defaultValue="+33 1 23 45 67 89" className="w-full mt-1 bg-[#101010] border border-white/10 text-white placeholder-white/30 p-2 rounded-lg focus:outline-none focus:border-yellow-500 transition text-sm" />
             </div>
-
             <div>
-              <label className="text-xs md:text-sm">Address</label>
-              <Textarea defaultValue="123 University Street, Lyon, France" className="text-sm md:text-base" />
+              <label className="text-xs text-white/50">Address</label>
+              <textarea defaultValue="123 University Street, Lyon, France" className="w-full mt-1 bg-[#101010] border border-white/10 text-white placeholder-white/30 p-2 rounded-lg focus:outline-none focus:border-yellow-500 transition text-sm" />
             </div>
-
             <div>
-              <label className="text-xs md:text-sm">Description</label>
-              <Textarea defaultValue="Leading engineering school specializing in technology and innovation." className="text-sm md:text-base" />
+              <label className="text-xs text-white/50">Description</label>
+              <textarea defaultValue="Leading engineering school specializing in technology and innovation." className="w-full mt-1 bg-[#101010] border border-white/10 text-white placeholder-white/30 p-2 rounded-lg focus:outline-none focus:border-yellow-500 transition text-sm" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Notification Settings */}
-        <Card>
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg">Notification Settings</CardTitle>
-            <CardDescription className="text-xs md:text-sm">
-              Configure how you receive notifications
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 md:space-y-5 p-4 md:p-6">
-
-            <div className="flex justify-between items-center gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm md:text-base">Email Notifications</p>
-                <p className="text-xs md:text-sm text-muted-foreground">
-                  Receive notifications via email
-                </p>
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-4 md:p-6">
+          <h3 className="text-base md:text-lg font-semibold text-white mb-1">Notification Settings</h3>
+          <p className="text-xs text-white/40 mb-4">Configure how you receive notifications</p>
+          <div className="space-y-4">
+            {[
+              { label: 'Email Notifications', desc: 'Receive notifications via email', state: emailNotif, set: setEmailNotif },
+              { label: 'SMS Notifications', desc: 'Receive notifications via SMS', state: smsNotif, set: setSmsNotif },
+              { label: 'Weekly Reports', desc: 'Receive weekly summary reports', state: weeklyReports, set: setWeeklyReports },
+              { label: 'Evaluation Reminders', desc: 'Get reminders for pending evaluations', state: evaluationReminder, set: setEvaluationReminder },
+            ].map(({ label, desc, state, set }) => (
+              <div key={label}>
+                <div className="flex justify-between items-center gap-3">
+                  <div>
+                    <p className="text-sm text-white">{label}</p>
+                    <p className="text-xs text-white/40">{desc}</p>
+                  </div>
+                  <button
+                    onClick={() => set(!state)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      state ? 'bg-orange-500' : 'bg-white/20'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                      state ? 'translate-x-6' : 'translate-x-1'
+                    }`} />
+                  </button>
+                </div>
+                <div className="border-t border-white/5 mt-4" />
               </div>
-              <Switch checked={emailNotif} onCheckedChange={setEmailNotif} className="flex-shrink-0" />
-            </div>
-
-            <Separator />
-
-            <div className="flex justify-between items-center gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm md:text-base">SMS Notifications</p>
-                <p className="text-xs md:text-sm text-muted-foreground">
-                  Receive notifications via SMS
-                </p>
-              </div>
-              <Switch checked={smsNotif} onCheckedChange={setSmsNotif} className="flex-shrink-0" />
-            </div>
-
-            <Separator />
-
-            <div className="flex justify-between items-center gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm md:text-base">Weekly Reports</p>
-                <p className="text-xs md:text-sm text-muted-foreground">
-                  Receive weekly summary reports
-                </p>
-              </div>
-              <Switch checked={weeklyReports} onCheckedChange={setWeeklyReports} className="flex-shrink-0" />
-            </div>
-
-            <Separator />
-
-            <div className="flex justify-between items-center gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm md:text-base">Evaluation Reminders</p>
-                <p className="text-xs md:text-sm text-muted-foreground">
-                  Get reminders for pending evaluations
-                </p>
-              </div>
-              <Switch
-                checked={evaluationReminder}
-                onCheckedChange={setEvaluationReminder}
-                className="flex-shrink-0"
-              />
-            </div>
-          </CardContent>
-        </Card>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Bottom Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
 
         {/* System Settings */}
-        <Card>
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg">System Settings</CardTitle>
-            <CardDescription className="text-xs md:text-sm">
-              Configure system behavior and permissions
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 md:space-y-5 p-4 md:p-6">
-
-            <div className="flex justify-between items-center gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm md:text-base">Auto-assign Supervisors</p>
-                <p className="text-xs md:text-sm text-muted-foreground">
-                  Automatically assign supervisors
-                </p>
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-4 md:p-6">
+          <h3 className="text-base md:text-lg font-semibold text-white mb-1">System Settings</h3>
+          <p className="text-xs text-white/40 mb-4">Configure system behavior and permissions</p>
+          <div className="space-y-4">
+            {[
+              { label: 'Auto-assign Supervisors', desc: 'Automatically assign supervisors', state: autoAssign, set: setAutoAssign },
+              { label: 'Require Approval', desc: 'Require approval for applications', state: requireApproval, set: setRequireApproval },
+            ].map(({ label, desc, state, set }) => (
+              <div key={label}>
+                <div className="flex justify-between items-center gap-3">
+                  <div>
+                    <p className="text-sm text-white">{label}</p>
+                    <p className="text-xs text-white/40">{desc}</p>
+                  </div>
+                  <button
+                    onClick={() => set(!state)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      state ? 'bg-orange-500' : 'bg-white/20'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                      state ? 'translate-x-6' : 'translate-x-1'
+                    }`} />
+                  </button>
+                </div>
+                <div className="border-t border-white/5 mt-4" />
               </div>
-              <Switch checked={autoAssign} onCheckedChange={setAutoAssign} className="flex-shrink-0" />
-            </div>
-
-            <Separator />
-
-            <div className="flex justify-between items-center gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm md:text-base">Require Approval</p>
-                <p className="text-xs md:text-sm text-muted-foreground">
-                  Require approval for applications 
-                </p>
-              </div>
-              <Switch
-                checked={requireApproval}
-                onCheckedChange={setRequireApproval}
-                className="flex-shrink-0"
-              />
-            </div>
-          </CardContent>
-        </Card>
+            ))}
+          </div>
+        </div>
 
         {/* Account Management */}
-        <Card>
-          <CardHeader className="p-4 md:p-6">
-            <CardTitle className="text-base md:text-lg">Account Management</CardTitle>
-            <CardDescription className="text-xs md:text-sm">
-              Manage account security and access
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 md:space-y-4 p-4 md:p-6">
-
-            <Button variant="outline" className="w-full text-sm md:text-base">
-              Change Password
-            </Button>
-
-            <Button variant="outline" className="w-full text-sm md:text-base">
-              Manage User Roles
-            </Button>
-
-            <Button variant="outline" className="w-full text-sm md:text-base">
-              Email Templates
-            </Button>
-
-          </CardContent>
-        </Card>
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-4 md:p-6">
+          <h3 className="text-base md:text-lg font-semibold text-white mb-1">Account Management</h3>
+          <p className="text-xs text-white/40 mb-4">Manage account security and access</p>
+          <div className="space-y-3">
+            {['Change Password', 'Manage User Roles', 'Email Templates'].map((label) => (
+              <button key={label} className="w-full text-sm border border-white/10 text-white/70 hover:border-yellow-500 hover:text-yellow-400 py-2 rounded-lg transition">
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
       </div>
     </div>
   )

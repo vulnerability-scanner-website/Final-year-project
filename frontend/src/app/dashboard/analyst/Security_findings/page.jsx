@@ -1,211 +1,57 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Shield, Search, AlertTriangle, CheckCircle, Clock, ShieldCheck } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import TrackingTimeline, { TimelineItem } from "@/components/ui/order-history";
-import { scansAPI, connectWebSocket } from "@/lib/api";
-
+import { useState } from "react";
+import { Plus, Shield, Search, CheckCircle, Clock, ShieldCheck } from "lucide-react";
+import TrackingTimeline from "@/components/ui/order-history";
 import ViewScanDialog from "@/components/popup/ViewScanDialog";
-import AnalystSideBar from "@/components/sidebar/AnalystSideBar/Analyst";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+const scan1History = [
+  { id: 1, status: "completed",   title: "Scan Initiated",           date: "15 Jan 2024, 08:45", icon: <Search      className="h-4 w-4 text-white" /> },
+  { id: 2, status: "completed",   title: "Vulnerability Assessment",  date: "15 Jan 2024, 08:47", icon: <Shield      className="h-4 w-4 text-white" /> },
+  { id: 3, status: "completed",   title: "Security Analysis Complete",date: "15 Jan 2024, 08:52", icon: <CheckCircle className="h-4 w-4 text-white" /> },
+];
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+const scan2History = [
+  { id: 4, status: "completed",   title: "Scan Initiated",          date: "15 Jan 2024, 09:15", icon: <Search    className="h-4 w-4 text-white" /> },
+  { id: 5, status: "in-progress", title: "Vulnerability Assessment", date: "In Progress",        icon: <Clock     className="h-4 w-4 text-yellow-400" /> },
+  { id: 6, status: "pending",     title: "Security Analysis",        date: "Pending",            icon: <ShieldCheck className="h-4 w-4 text-white/30" /> },
+];
 
-export default function ScanManagementPage() {
-
-  /* ---------------- State ---------------- */
-
-  const scan1History = [
-    {
-      id: 1,
-      status: "completed",
-      title: "Scan Initiated",
-      date: "15 Jan 2024, 08:45",
-      icon: <Search className="h-4 w-4 text-white" />,
-    },
-    {
-      id: 2,
-      status: "completed",
-      title: "Vulnerability Assessment",
-      date: "15 Jan 2024, 08:47",
-      icon: <Shield className="h-4 w-4 text-white" />,
-    },
-    {
-      id: 3,
-      status: "completed",
-      title: "Security Analysis Complete",
-      date: "15 Jan 2024, 08:52",
-      icon: <CheckCircle className="h-4 w-4 text-white" />,
-    },
-  ];
-
-  const scan2History = [
-    {
-      id: 4,
-      status: "completed",
-      title: "Scan Initiated",
-      date: "15 Jan 2024, 09:15",
-      icon: <Search className="h-4 w-4 text-white" />,
-    },
-    {
-      id: 5,
-      status: "in-progress",
-      title: "Vulnerability Assessment",
-      date: "In Progress",
-      icon: <Clock className="h-4 w-4 text-primary" />,
-    },
-    {
-      id: 6,
-      status: "pending",
-      title: "Security Analysis",
-      date: "Pending",
-      icon: <ShieldCheck className="h-4 w-4 text-muted-foreground/50" />,
-    },
-  ];
-
-  const [scans, setScans] = useState([]);
+export default function SecurityFindingsPage() {
   const [selectedScan, setSelectedScan] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [newScanOpen, setNewScanOpen] = useState(false);
-  const [url, setUrl] = useState("");
-
-  useEffect(() => {
-    const fetchScans = async () => {
-      try {
-        const data = await scansAPI.getAll();
-        setScans(data);
-      } catch (err) {
-        console.error('Failed to fetch scans:', err);
-      }
-    };
-
-    fetchScans();
-
-    const ws = connectWebSocket((data) => {
-      if (data.type === 'scan_started') {
-        setScans(prev => [data.data, ...prev]);
-      }
-    });
-
-    return () => ws.close();
-  }, []);
-
-  /* ---------------- Start Scan ---------------- */
-
-  const handleStartScan = async () => {
-    if (!url) return;
-
-    try {
-      const newScan = await scansAPI.create(url);
-      setScans([newScan, ...scans]);
-      setUrl("");
-      setNewScanOpen(false);
-    } catch (err) {
-      console.error('Failed to create scan:', err);
-    }
-  };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="w-full min-h-screen bg-[#101010] text-white space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Security Findings</h1>
+          <p className="text-white/40">View and track your security scan findings</p>
+        </div>
+        <button
+          onClick={() => setOpenDialog(true)}
+          className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg transition"
+        >
+          <Plus className="h-4 w-4" />
+          New Scan
+        </button>
+      </div>
 
-      {/* Sidebar */}
-      <AnalystSideBar />
-
-      {/* Main */}
-      <main className="flex-1 ml-64 p-8">
-
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">My Scans</h1>
-            <p className="text-muted-foreground">
-              View and manage your security scans
-            </p>
-          </div>
-
-          <Button
-            onClick={() => setNewScanOpen(true)}
-            className="bg-[#003366] hover:bg-yellow-700 cursor-pointer"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            New Scan
-          </Button>
+      <div className="space-y-6">
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6">
+          <h3 className="text-lg font-semibold text-white mb-1">mywebsite.com — Scan Complete</h3>
+          <p className="text-sm text-white/40 mb-6">Security scan completed successfully</p>
+          <TrackingTimeline items={scan1History} className="border-white/10" />
         </div>
 
-        {/* Scan History Timeline */}
-        <div className="space-y-6 mt-6">
-          <Card className="shadow-lg border-0 rounded-2xl">
-            <CardHeader>
-              <CardTitle>mywebsite.com - Scan Complete</CardTitle>
-              <CardDescription>
-                Security scan completed successfully
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TrackingTimeline items={scan1History} />
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-lg border-0 rounded-2xl">
-            <CardHeader>
-              <CardTitle>api.mywebsite.com - Scan In Progress</CardTitle>
-              <CardDescription>
-                Security scan currently running
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TrackingTimeline items={scan2History} />
-            </CardContent>
-          </Card>
+        <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6">
+          <h3 className="text-lg font-semibold text-white mb-1">api.mywebsite.com — Scan In Progress</h3>
+          <p className="text-sm text-white/40 mb-6">Security scan currently running</p>
+          <TrackingTimeline items={scan2History} className="border-white/10" />
         </div>
+      </div>
 
-        {/* View Scan Dialog */}
-        <ViewScanDialog
-          open={openDialog}
-          onOpenChange={setOpenDialog}
-          scan={selectedScan}
-        />
-
-        {/* New Scan Dialog */}
-        <Dialog open={newScanOpen} onOpenChange={setNewScanOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Start New Scan</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              <Input
-                placeholder="Enter target URL (example: https://example.com)"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-              />
-
-              <Button
-                onClick={handleStartScan}
-                className="w-full bg-[#003366] hover:bg-[#00264d]"
-              >
-                Start Scan
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-      </main>
+      <ViewScanDialog open={openDialog} onOpenChange={setOpenDialog} scan={selectedScan} />
     </div>
   );
 }

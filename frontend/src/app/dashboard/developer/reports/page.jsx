@@ -1,94 +1,60 @@
 "use client";
 
 import React from "react";
-import DeveloperSideBar from "@/components/sidebar/DeveloperSideBar/Developer";
 import ReportsDownload from "@/components/ui/download-toast";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { FileText, Calendar } from "lucide-react";
+import { FileText, Calendar, AlertTriangle } from "lucide-react";
 
-/* ---------------- Mock Data ---------------- */
-const reports = [
-  { id: 1, name: "Weekly Security Report", type: "Weekly", generated: "2026-02-25", status: "Completed" },
-  { id: 2, name: "Critical Vulnerability Summary", type: "Critical", generated: "2026-02-24", status: "Completed" },
-  { id: 3, name: "Monthly Audit Report", type: "Monthly", generated: "2026-02-01", status: "Processing" },
+const statCards = [
+  { label: "Total Reports", value: "38", sub: "Generated this year", icon: FileText, color: "yellow" },
+  { label: "Critical Reports", value: "7", sub: "Requires review", icon: AlertTriangle, color: "red" },
+  { label: "Scheduled Reports", value: "12", sub: "Automated recurring reports", icon: Calendar, color: "orange" },
 ];
+
+const colorMap = {
+  yellow: { icon: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20" },
+  red:    { icon: "text-red-400",    bg: "bg-red-500/10",    border: "border-red-500/20" },
+  orange: { icon: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" },
+};
 
 export default function ReportPage() {
   return (
-    <div className="flex">
-      {/* Sidebar */}
-      <DeveloperSideBar />
-
-      {/* Main Content */}
-      <main className="flex-1 ml-64 p-8 space-y-6 bg-gray-50 min-h-screen">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-          <h1 className="text-3xl font-bold">Reports Dashboard</h1>
-          <p className="text-muted-foreground">
-            View and manage your generated security reports
-          </p>
-        </div>
+    <div className="w-full min-h-screen bg-[#101010] text-white space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <Button className="bg-[#003366] hover:bg-[#00264d] cursor-pointer">Generate New Report</Button>
+          <h1 className="text-3xl font-bold text-white">Reports</h1>
+          <p className="text-white/40">View and manage your generated security reports</p>
         </div>
-        </div>
-        {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="flex justify-between items-center">
-              <CardTitle>Total Reports</CardTitle>
-              <FileText className="h-5 w-5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">38</div>
-              <p className="text-sm text-muted-foreground">Generated this year</p>
-            </CardContent>
-          </Card>
+        <button className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg transition text-sm">
+          Generate New Report
+        </button>
+      </div>
 
-          <Card>
-            <CardHeader className="flex justify-between items-center">
-              <CardTitle>Critical Reports</CardTitle>
-              <Badge variant="destructive">High Risk</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">7</div>
-              <p className="text-sm text-muted-foreground">Requires review</p>
-            </CardContent>
-          </Card>
+      {/* Summary Cards */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+        {statCards.map(({ label, value, sub, icon: Icon, color }) => {
+          const c = colorMap[color];
+          return (
+            <div key={label} className={`bg-[#1a1a1a] border ${c.border} rounded-xl p-5`}>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm text-white/50">{label}</p>
+                <div className={`w-9 h-9 ${c.bg} rounded-lg flex items-center justify-center`}>
+                  <Icon className={`w-4 h-4 ${c.icon}`} />
+                </div>
+              </div>
+              <p className={`text-3xl font-bold ${c.icon}`}>{value}</p>
+              <p className="text-xs text-white/40 mt-1">{sub}</p>
+            </div>
+          );
+        })}
+      </div>
 
-          <Card>
-            <CardHeader className="flex justify-between items-center">
-              <CardTitle>Scheduled Reports</CardTitle>
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">12</div>
-              <p className="text-sm text-muted-foreground">Automated recurring reports</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Generated Reports */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Generated Reports</CardTitle>
-            <CardDescription>Download your security reports</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ReportsDownload />
-          </CardContent>
-        </Card>
-      </main>
+      {/* Generated Reports */}
+      <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6">
+        <h3 className="text-lg font-semibold text-white mb-1">Generated Reports</h3>
+        <p className="text-sm text-white/40 mb-4">Download your security reports</p>
+        <ReportsDownload />
+      </div>
     </div>
   );
 }

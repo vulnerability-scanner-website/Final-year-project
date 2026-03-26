@@ -4,37 +4,25 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Shield, Clock, CheckCircle, AlertCircle, Plus, Globe, Server, Network } from "lucide-react";
-import DeveloperSideBar from "@/components/sidebar/DeveloperSideBar/Developer";
 import { CardStack } from "@/components/ui/card-stack";
 import { FeatureCard } from "@/components/ui/feature-card";
 import SubscriptionBanner from "@/components/SubscriptionBanner";
 import NewScanDialog from "@/components/popup/NewScanDialog";
 
-const ScanItem = ({
-  icon,
-  title,
-  status,
-  progress,
-  issues,
-  total,
-  date,
-}) => (
+const ScanItem = ({ icon, title, status, progress, issues, total, date }) => (
   <div className="mb-4 flex items-center gap-4 last:mb-0">
-    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-500/10">
       {icon}
     </div>
     <div className="flex-1">
       <div className="flex justify-between">
-        <p className="font-medium text-card-foreground">{title}</p>
-        <p className="text-sm font-semibold text-card-foreground">{progress}%</p>
+        <p className="font-medium text-white">{title}</p>
+        <p className="text-sm font-semibold text-yellow-400">{progress}%</p>
       </div>
-      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className="h-full bg-primary"
-          style={{ width: `${progress}%` }}
-        />
+      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="h-full bg-gradient-to-r from-yellow-500 to-orange-500" style={{ width: `${progress}%` }} />
       </div>
-      <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+      <div className="mt-1 flex justify-between text-xs text-white/40">
         <span>{issues} of {total} issues</span>
         {date && <span>{date}</span>}
         <span>{status}</span>
@@ -92,26 +80,26 @@ export default function Page() {
 
   return (
     <>
-      <DeveloperSideBar />
-      <div className="ml-64 p-6 space-y-8 min-h-screen relative z-10">
+      <div className="space-y-8 min-h-screen bg-[#101010] text-white">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">My Dashboard</h1>
-            <p className="text-muted-foreground">
-              Monitor your security scans and vulnerabilities
-            </p>
+            <h1 className="text-3xl font-bold text-white">My Dashboard</h1>
+            <p className="text-white/40">Monitor your security scans and vulnerabilities</p>
           </div>
-
-          <Button
-            className="gap-2"
-            onClick={() => isSubscribed && setOpenDialog(true)}
-            disabled={!isSubscribed}
-            title={!isSubscribed ? 'Subscribe to a plan to start scanning' : ''}
-          >
-            <Plus size={16} />
-            New Scan
-          </Button>
+          <div className="relative inline-block group">
+            <button
+              onClick={() => isSubscribed && setOpenDialog(true)}
+              disabled={!isSubscribed}
+              title={!isSubscribed ? 'Subscribe to a plan to start scanning' : ''}
+              className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-semibold px-4 py-2 rounded-lg transition"
+            >
+              <Plus size={16} />
+              New Scan
+            </button>
+            <span className="absolute top-0 right-0 w-0 h-0 border-t-2 border-r-2 border-orange-400 group-hover:w-6 group-hover:h-6 transition-all duration-300" />
+            <span className="absolute bottom-0 left-0 w-0 h-0 border-b-2 border-l-2 border-orange-400 group-hover:w-6 group-hover:h-6 transition-all duration-300" />
+          </div>
         </div>
 
         {/* Subscription Status */}
@@ -166,14 +154,14 @@ export default function Page() {
         <FeatureCard
           title="My Recent Scans"
           description="Overview of your latest security scans and their progress"
+          className="bg-[#1a1a1a] border-white/10 text-white"
         >
           <div className="flex flex-col space-y-4">
             {recentScans.length > 0 ? (
               recentScans.map((scan) => (
                 <ScanItem
                   key={scan.id}
-                  icon={<Globe className="h-6 w-6 text-primary" />}
-                  title={scan.name}
+                  icon={<Globe className="h-6 w-6 text-yellow-400" />}
                   progress={scan.progress || 0}
                   issues={0}
                   total={0}
@@ -184,7 +172,7 @@ export default function Page() {
             ) : (
               <>
                 <ScanItem
-                  icon={<Globe className="h-6 w-6 text-primary" />}
+                  icon={<Globe className="h-6 w-6 text-yellow-400" />}
                   title="Website Security Scan"
                   progress={63}
                   issues={25}
@@ -192,7 +180,7 @@ export default function Page() {
                   status="In Progress"
                 />
                 <ScanItem
-                  icon={<Server className="h-6 w-6 text-primary" />}
+                  icon={<Server className="h-6 w-6 text-orange-400" />}
                   title="API Vulnerability Test"
                   progress={63}
                   issues={35}
@@ -200,7 +188,7 @@ export default function Page() {
                   status="Scanning"
                 />
                 <ScanItem
-                  icon={<Network className="h-6 w-6 text-primary" />}
+                  icon={<Network className="h-6 w-6 text-white/50" />}
                   title="Network Security Audit"
                   progress={100}
                   issues={42}

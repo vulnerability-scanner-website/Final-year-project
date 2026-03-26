@@ -54,47 +54,38 @@ export default function AnalystSideBar() {
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Mobile menu button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-3 bg-[#003366] text-white rounded-lg shadow-2xl hover:bg-[#004488] transition-colors"
+        className="md:hidden fixed top-4 left-4 z-50 p-3 bg-[#1a1a1a] text-yellow-400 border border-yellow-500/30 rounded-lg shadow-lg"
         aria-label="Toggle menu"
       >
-        {isOpen ? <X size={28} /> : <Menu size={28} />}
+        {isOpen ? <X size={26} /> : <Menu size={26} />}
       </button>
 
       {/* Overlay */}
       {isOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        w-64 bg-[#ffffff] p-6 min-h-screen shadow-xl flex flex-col fixed top-0 left-0 z-40
+        bg-[#101010] border-r border-white/10 shadow-xl flex flex-col z-40
+        fixed top-0 left-0 h-screen w-64
         transition-transform duration-300 ease-in-out
-        ${
-          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        }
+        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        {/* Close button inside sidebar for mobile */}
-        <div className="md:hidden flex justify-end mb-4">
-          <button
-            onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            aria-label="Close menu"
-          >
-            <X size={24} className="text-gray-600" />
-          </button>
+        <div className="pt-6 px-6">
+          <h2 className="text-2xl font-extrabold mb-10 text-center">
+            <span className="text-yellow-400">Analyst</span>
+            <span className="text-orange-400"> Panel</span>
+          </h2>
         </div>
 
-        <h2 className="text-2xl md:text-3xl font-extrabold mb-10 text-center tracking-wider text-gray-800">
-          SecurAnalyst
-        </h2>
-
-        <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
+        <nav className="flex-1 flex flex-col gap-1 overflow-y-auto px-4">
           {links.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -106,10 +97,10 @@ export default function AnalystSideBar() {
                   flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium
                   ${
                     link.color
-                      ? link.color
+                      ? "text-red-400 hover:bg-red-500/10"
                       : isActive
-                        ? "bg-[#003366] text-white shadow-lg"
-                        : "text-gray-700 hover:bg-gradient-to-r hover:from-orange-400 hover:to-yellow-400 hover:text-white shadow-sm"
+                        ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-black shadow-lg shadow-orange-500/20"
+                        : "text-white/60 hover:bg-white/5 hover:text-yellow-400"
                   }
                 `}
               >
@@ -120,8 +111,8 @@ export default function AnalystSideBar() {
           })}
         </nav>
 
-        <div className="mt-auto text-center text-sm text-gray-400">
-          © {new Date().getFullYear()} Analyst
+        <div className="mt-auto text-center text-xs text-white/20 py-4 border-t border-white/5">
+          © {new Date().getFullYear()} CyberTrace Analyst
         </div>
       </aside>
     </>
