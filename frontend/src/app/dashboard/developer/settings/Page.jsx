@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import DeveloperSideBar from "@/components/sidebar/DeveloperSideBar/Developer"
 
 export default function DeveloperSettings() {
   const [emailNotif, setEmailNotif] = useState(true)
@@ -14,7 +15,9 @@ export default function DeveloperSettings() {
   const [apiAccess, setApiAccess] = useState(false)
 
   return (
-    <div className="ml-64 p-6 space-y-6 bg-gray-50 min-h-screen">
+    <>
+      <DeveloperSideBar />
+      <div className="ml-64 p-6 space-y-6 bg-gray-50 min-h-screen">
       
       <div className="flex justify-between items-center">
         <div>
@@ -150,6 +153,7 @@ export default function DeveloperSettings() {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

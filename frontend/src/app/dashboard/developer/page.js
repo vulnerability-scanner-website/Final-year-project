@@ -7,8 +7,8 @@ import { Shield, Clock, CheckCircle, AlertCircle, Plus, Globe, Server, Network }
 import DeveloperSideBar from "@/components/sidebar/DeveloperSideBar/Developer";
 import { CardStack } from "@/components/ui/card-stack";
 import { FeatureCard } from "@/components/ui/feature-card";
-import NewScanDialog from "@/components/popup/NewScanDialog";
 import SubscriptionBanner from "@/components/SubscriptionBanner";
+import NewScanDialog from "@/components/popup/NewScanDialog";
 
 const ScanItem = ({
   icon,
@@ -93,7 +93,7 @@ export default function Page() {
   return (
     <>
       <DeveloperSideBar />
-      <div className="ml-64 p-6 space-y-8 min-h-screen bg-gray-50">
+      <div className="ml-64 p-6 space-y-8 min-h-screen relative z-10">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>

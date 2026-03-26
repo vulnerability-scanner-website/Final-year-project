@@ -25,6 +25,7 @@ import {
 
 import { ShieldCheck, Bug, MoreVertical, Eye, Pause, Play, StopCircle, RotateCcw, Trash } from "lucide-react";
 import { DashboardHeader } from "@/components/header/header";
+import DeveloperSideBar from "@/components/sidebar/DeveloperSideBar/Developer";
 
 /* ---------------- Mock Data ---------------- */
 
@@ -130,7 +131,9 @@ export default function ScanManagement() {
   };
 
   return (
-    <div className="ml-64 p-5 space-y-6">
+    <>
+      <DeveloperSideBar />
+      <div className="ml-64 p-5 space-y-6">
       {/* Header */}
       <DashboardHeader role="scanmanagement" />
 
@@ -281,5 +284,6 @@ export default function ScanManagement() {
         </TabsContent>
       </Tabs>
     </div>
+    </>
   );
 }
