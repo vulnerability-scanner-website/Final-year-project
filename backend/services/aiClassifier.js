@@ -52,7 +52,7 @@ class AIClassifier {
       } else if (error.code === 'ECONNABORTED') {
         console.warn(`⚠️  AI Classification timeout - Colab is taking too long to respond`);
       } else {
-        console.warn(`⚠️  AI Classification error: ${error.message}`);
+        console.warn(`⚠️ AI Classification error: ${error.message}`);
       }
       return null;
     }

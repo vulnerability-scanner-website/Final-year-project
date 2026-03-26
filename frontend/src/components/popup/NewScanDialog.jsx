@@ -1,186 +1,124 @@
 "use client";
 
-import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert-1';
-import { Button } from '@/components/ui/button-1';
-import {
-  Dialog,
-  DialogBody,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogBody } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useDirection } from '@radix-ui/react-direction';
-import { RiCheckboxCircleFill } from '@remixicon/react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { useRouter } from 'next/navigation';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+import { Loader2 } from 'lucide-react';
 
 const FormSchema = z.object({
-  scanName: z.string().min(1, 'Scan name is required').max(100, 'Scan name cannot exceed 100 characters'),
-  targetUrl: z.string().url('Please enter a valid URL').min(1, 'Target URL is required'),
-  scanType: z.enum(['full', 'zap', 'nuclei', 'nikto']).default('zap'),
-  description: z.string().max(500, 'Description cannot exceed 500 characters').optional(),
+  scanName:   z.string().min(1, 'Scan name is required').max(100),
+  targetUrl:  z.string().url('Please enter a valid URL'),
+  scanType:   z.enum(['full', 'zap', 'nuclei', 'nikto']).default('zap'),
+  description: z.string().max(500).optional(),
 });
 
 export default function NewScanDialog({ open, onOpenChange, role }) {
-  const direction = useDirection();
-  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
-    defaultValues: { 
-      scanName: '', 
-      targetUrl: '',
-      scanType: 'zap',
-      description: ''
-    },
+    defaultValues: { scanName: '', targetUrl: '', scanType: 'zap', description: '' },
     mode: 'onSubmit',
   });
 
-  // Check subscription before opening dialog
-  const handleOpenChange = async (isOpen) => {
-    if (!isOpen) { onOpenChange(false); return; }
-    onOpenChange(true);
-  };
-
   async function onSubmit(data) {
+    setSubmitting(true);
     try {
-      // Get token from localStorage
       const token = localStorage.getItem('token');
-      
-      if (!token) {
-        toast.error('Please login first');
-        return;
-      }
-      
-      // Call backend API to start scan
-      const response = await fetch(`${API_URL}/api/scans`, {
+      if (!token) { toast.error('Please login first'); return; }
+
+      const res = await fetch('/api/scans', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          target: data.targetUrl,
-          scanType: data.scanType
-        })
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ target: data.targetUrl, scanType: data.scanType }),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to start scan');
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to start scan');
       }
 
-      const scan = await response.json();
-      console.log('Scan started:', scan);
-      
-      toast.custom((t) => (
-        <Alert variant="mono" icon="primary" onClose={() => toast.dismiss(t)}>
-          <AlertIcon>
-            <RiCheckboxCircleFill />
-          </AlertIcon>
-          <AlertTitle>Scan "{data.scanName}" initiated successfully (ID: {scan.id})</AlertTitle>
-        </Alert>
-      ));
-
+      const scan = await res.json();
+      toast.success(`Scan "${data.scanName}" started (ID: ${scan.id})`);
       form.reset();
       onOpenChange(false);
-      
-      // Trigger refresh
-      window.dispatchEvent(new Event('storage'));
     } catch (error) {
-      console.error('Scan error:', error);
       toast.error('Failed to start scan: ' + error.message);
+    } finally {
+      setSubmitting(false);
     }
   }
 
+  const inputClass = "w-full mt-1 bg-[#101010] border border-white/10 text-white placeholder-white/30 px-3 py-2 rounded-lg focus:outline-none focus:border-yellow-500 transition text-sm";
+
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md" dir={direction}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md bg-[#1a1a1a] border border-white/10 text-white">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <DialogHeader>
-              <DialogTitle>Create New Security Scan</DialogTitle>
-              <DialogDescription>Configure your vulnerability scan settings</DialogDescription>
+              <DialogTitle className="text-white">New Security Scan</DialogTitle>
+              <DialogDescription className="text-white/40">Configure your vulnerability scan settings</DialogDescription>
             </DialogHeader>
-            <DialogBody className="space-y-4">
-              <FormField
-                control={form.control}
-                name="scanName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Scan Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Production Website Scan" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="targetUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Target URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com" {...field} />
-                    </FormControl>
-                    <FormDescription>Enter the URL you want to scan for vulnerabilities</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="scanType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Scan Type</FormLabel>
-                    <FormControl>
-                      <select {...field} className="w-full px-3 py-2 border rounded-md">
-                        <option value="zap">ZAP - OWASP ZAP (Recommended - Most Comprehensive)</option>
-                        <option value="nuclei">Nuclei (Fast Vulnerability Templates)</option>
-                        <option value="nikto">Nikto (Web Server Checks)</option>
-                        <option value="full">Full Scan (All Tools)</option>
-                      </select>
-                    </FormControl>
-                    <FormDescription>Choose the type of security scan to perform</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description (Optional)</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Add notes about this scan..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
+            <DialogBody className="space-y-4 py-4">
+              <FormField control={form.control} name="scanName" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white/70 text-xs">Scan Name</FormLabel>
+                  <FormControl><input placeholder="e.g., Production Website Scan" className={inputClass} {...field} /></FormControl>
+                  <FormMessage className="text-red-400 text-xs" />
+                </FormItem>
+              )} />
+
+              <FormField control={form.control} name="targetUrl" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white/70 text-xs">Target URL</FormLabel>
+                  <FormControl><input placeholder="https://example.com" className={inputClass} {...field} /></FormControl>
+                  <FormDescription className="text-white/30 text-xs">URL to scan for vulnerabilities</FormDescription>
+                  <FormMessage className="text-red-400 text-xs" />
+                </FormItem>
+              )} />
+
+              <FormField control={form.control} name="scanType" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white/70 text-xs">Scan Type</FormLabel>
+                  <FormControl>
+                    <select {...field} className={inputClass}>
+                      <option value="zap">ZAP — OWASP ZAP (Recommended)</option>
+                      <option value="nuclei">Nuclei — Fast Template Scan</option>
+                      <option value="nikto">Nikto — Web Server Checks</option>
+                      <option value="full">Full — All Tools Combined</option>
+                    </select>
+                  </FormControl>
+                  <FormMessage className="text-red-400 text-xs" />
+                </FormItem>
+              )} />
+
+              <FormField control={form.control} name="description" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-white/70 text-xs">Description (Optional)</FormLabel>
+                  <FormControl><textarea placeholder="Add notes about this scan..." className={`${inputClass} resize-none`} rows={2} {...field} /></FormControl>
+                  <FormMessage className="text-red-400 text-xs" />
+                </FormItem>
+              )} />
             </DialogBody>
-            <DialogFooter>
+
+            <DialogFooter className="gap-2">
               <DialogClose asChild>
-                <Button type="button" variant="outline">
+                <button type="button" className="px-4 py-2 text-sm border border-white/10 text-white/60 hover:text-white rounded-lg transition">
                   Cancel
-                </Button>
+                </button>
               </DialogClose>
-              <Button type="submit">Start Scan</Button>
+              <button type="submit" disabled={submitting} className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 disabled:opacity-50 text-black font-semibold px-4 py-2 rounded-lg transition text-sm">
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {submitting ? 'Starting...' : 'Start Scan'}
+              </button>
             </DialogFooter>
           </form>
         </Form>

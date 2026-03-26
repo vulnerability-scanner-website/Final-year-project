@@ -54,7 +54,7 @@ export default function AdminSideBar() {
       {isMobile && (
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="fixed top-4 left-4 z-50 p-3 bg-[#003366] text-white rounded-lg shadow-lg md:hidden"
+          className="fixed top-4 left-4 z-50 p-3 bg-[#1a1a1a] text-yellow-400 border border-yellow-500/30 rounded-lg shadow-lg md:hidden"
           aria-label="Toggle menu"
         >
           {isOpen ? <X size={26} /> : <Menu size={26} />}
@@ -64,7 +64,7 @@ export default function AdminSideBar() {
       {/* Overlay for mobile */}
       {isMobile && isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -72,7 +72,7 @@ export default function AdminSideBar() {
       {/* Sidebar */}
       <aside
         className={`
-          bg-white shadow-xl flex flex-col z-40
+          bg-[#101010] border-r border-white/10 shadow-xl flex flex-col z-40
           ${isMobile 
             ? `fixed top-0 left-0 h-screen w-64 transition-transform duration-300
                ${isOpen ? 'translate-x-0' : '-translate-x-full'}`
@@ -83,7 +83,7 @@ export default function AdminSideBar() {
         {/* Mobile close button */}
         {isMobile && isOpen && (
           <div className="flex justify-end p-4">
-            <button onClick={() => setIsOpen(false)} className="p-1">
+            <button onClick={() => setIsOpen(false)} className="p-1 text-white/50 hover:text-white">
               <X size={24} />
             </button>
           </div>
@@ -91,11 +91,12 @@ export default function AdminSideBar() {
 
         <div className={`${isMobile && isOpen ? 'pt-0' : 'pt-6'} px-6`}>
           <h2 className="text-2xl font-extrabold mb-10 text-center">
-            Admin Panel
+            <span className="text-yellow-400">Admin</span>
+            <span className="text-orange-400"> Panel</span>
           </h2>
         </div>
 
-        <nav className="flex-1 flex flex-col gap-2 overflow-y-auto px-4">
+        <nav className="flex-1 flex flex-col gap-1 overflow-y-auto px-4">
           {links.map((link) => {
             const isActive = pathname === link.href;
 
@@ -108,10 +109,10 @@ export default function AdminSideBar() {
                   flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium
                   ${
                     link.color
-                      ? link.color
+                      ? "text-red-400 hover:bg-red-500/10"
                       : isActive
-                        ? "bg-[#003366] text-white shadow-lg"
-                        : "text-gray-700 hover:bg-gradient-to-r hover:from-orange-400 hover:to-yellow-400 hover:text-white shadow-sm"
+                        ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-black shadow-lg shadow-orange-500/20"
+                        : "text-white/60 hover:bg-white/5 hover:text-yellow-400"
                   }
                 `}
               >
@@ -122,8 +123,8 @@ export default function AdminSideBar() {
           })}
         </nav>
 
-        <div className="mt-auto text-center text-sm text-gray-400 py-4">
-          © {new Date().getFullYear()} Admin
+        <div className="mt-auto text-center text-xs text-white/20 py-4 border-t border-white/5">
+          © {new Date().getFullYear()} CyberTrace Admin
         </div>
       </aside>
     </>

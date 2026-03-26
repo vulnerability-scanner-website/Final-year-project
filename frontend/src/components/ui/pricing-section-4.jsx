@@ -79,12 +79,12 @@ const PricingSwitch = ({ onSwitch }) => {
 
   return (
     <div className="flex justify-center">
-      <div className="relative z-10 mx-auto flex w-fit rounded-full bg-gray-200 border border-gray-300 p-1">
+      <div className="relative z-10 mx-auto flex w-fit rounded-full bg-[#1a1a1a] border border-white/10 p-1">
         <button
           onClick={() => handleSwitch("0")}
           className={cn(
             "relative z-10 w-fit h-9 rounded-full sm:px-6 px-3 font-medium transition-colors text-sm",
-            selected === "0" ? "bg-[#003366] text-white shadow" : "text-gray-600",
+            selected === "0" ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-black shadow" : "text-white/50",
           )}
         >
           Monthly
@@ -93,7 +93,7 @@ const PricingSwitch = ({ onSwitch }) => {
           onClick={() => handleSwitch("1")}
           className={cn(
             "relative z-10 w-fit h-9 rounded-full sm:px-6 px-3 font-medium transition-colors text-sm",
-            selected === "1" ? "bg-[#003366] text-white shadow" : "text-gray-600",
+            selected === "1" ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-black shadow" : "text-white/50",
           )}
         >
           Yearly
@@ -175,47 +175,41 @@ export default function PricingSection4() {
     setIsYearly(Number.parseInt(value) === 1);
 
   return (
-    <div
-      className="min-h-screen w-full relative bg-gray-50 overflow-x-hidden"
-      ref={pricingRef}
-    >
-      <article className="text-center mb-6 pt-10 px-4 max-w-3xl mx-auto space-y-2 relative z-50">
-        <h2 className="text-4xl font-bold text-[#003366]">
+    <div className="min-h-screen w-full relative bg-[#101010] overflow-x-hidden" ref={pricingRef}>
+      <article className="text-center mb-6 px-4 max-w-3xl mx-auto space-y-2 relative z-50">
+        <h2 className="text-4xl font-bold text-white">
           Choose Your Security Scanning Plan
         </h2>
-
-        <p className="text-gray-500">
+        <p className="text-white/40">
           Secure your applications with our comprehensive vulnerability scanning solutions.
         </p>
         <PricingSwitch onSwitch={togglePricingPeriod} />
       </article>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 max-w-5xl gap-6 py-8 mx-auto px-4">
-        {plans.map((plan, index) => (
+        {plans.map((plan) => (
           <div key={plan.name}>
-            <Card
-              className={`relative border ${
-                plan.popular
-                  ? "bg-[#003366] text-white border-[#003366] shadow-lg"
-                  : "bg-white text-gray-800 border-gray-200 shadow-sm"
-              }`}
-            >
+            <Card className={`relative border ${
+              plan.popular
+                ? "bg-gradient-to-b from-yellow-500/10 to-orange-500/10 border-yellow-500/40 shadow-lg shadow-yellow-500/10"
+                : "bg-[#1a1a1a] border-white/10"
+            }`}>
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-yellow-400 text-[#003366] text-xs font-bold px-3 py-1 rounded-full">Most Popular</span>
+                  <span className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-xs font-bold px-3 py-1 rounded-full">Most Popular</span>
                 </div>
               )}
               <CardHeader className="text-left">
-                <h3 className={`text-2xl font-bold mb-1 ${plan.popular ? 'text-white' : 'text-[#003366]'}`}>{plan.name}</h3>
+                <h3 className={`text-2xl font-bold mb-1 ${plan.popular ? 'text-yellow-400' : 'text-white'}`}>{plan.name}</h3>
                 <div className="flex items-baseline">
-                  <span className="text-4xl font-bold">
+                  <span className="text-4xl font-bold text-white">
                     {isYearly ? plan.yearlyPrice : plan.price} ETB
                   </span>
-                  <span className={`ml-1 text-sm ${plan.popular ? 'text-blue-200' : 'text-gray-400'}`}>
+                  <span className="ml-1 text-sm text-white/40">
                     /{isYearly ? "year" : "month"}
                   </span>
                 </div>
-                <p className={`text-sm mt-1 ${plan.popular ? 'text-blue-100' : 'text-gray-500'}`}>{plan.description}</p>
+                <p className="text-sm mt-1 text-white/40">{plan.description}</p>
               </CardHeader>
 
               <CardContent className="pt-0">
@@ -223,22 +217,20 @@ export default function PricingSection4() {
                   onClick={() => handleGetStarted(plan)}
                   className={`w-full mb-6 py-3 text-base font-semibold rounded-lg cursor-pointer transition-opacity hover:opacity-90 ${
                     plan.popular
-                      ? "bg-yellow-400 text-[#003366]"
-                      : "bg-[#003366] text-white"
+                      ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-black"
+                      : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
                   }`}
                 >
                   {plan.buttonText}{loading && selectedPlan?.name === plan.name ? '...' : ''}
                 </button>
 
-                <div className={`space-y-3 pt-4 border-t ${plan.popular ? 'border-blue-400' : 'border-gray-200'}`}>
-                  <h4 className={`font-semibold text-sm mb-3 ${plan.popular ? 'text-blue-100' : 'text-gray-600'}`}>
-                    {plan.includes[0]}
-                  </h4>
+                <div className={`space-y-3 pt-4 border-t ${plan.popular ? 'border-yellow-500/20' : 'border-white/10'}`}>
+                  <h4 className="font-semibold text-sm mb-3 text-white/50">{plan.includes[0]}</h4>
                   <ul className="space-y-2">
                     {plan.includes.slice(1).map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center gap-2">
-                        <span className={`h-2 w-2 rounded-full flex-shrink-0 ${plan.popular ? 'bg-yellow-400' : 'bg-[#003366]'}`}></span>
-                        <span className={`text-sm ${plan.popular ? 'text-blue-100' : 'text-gray-600'}`}>{feature}</span>
+                        <span className={`h-2 w-2 rounded-full flex-shrink-0 ${plan.popular ? 'bg-yellow-400' : 'bg-orange-400'}`}></span>
+                        <span className="text-sm text-white/60">{feature}</span>
                       </li>
                     ))}
                   </ul>
