@@ -9,6 +9,7 @@ import {
   LucideFileText,
   LucideLogOut,
   User2Icon,
+  Bell,
   Wallet,
   Settings,
   Menu,
@@ -49,6 +50,11 @@ export default function DeveloperSideBar() {
       name: "Reports",
       href: "/dashboard/developer/reports",
       icon: LucideFileText,
+    },
+    {
+      name: "Notifications",
+      href: "/dashboard/developer/notifications",
+      icon: Bell,
     },
   ];
 

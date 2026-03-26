@@ -9,6 +9,7 @@ import {
   LucideFileText,
   LucideActivity,
   LucideLogOut,
+  Bell,
   Wallet,
   Menu,
   X
@@ -43,6 +44,11 @@ export default function AnalystSideBar() {
       name: "Reports",
       href: "/dashboard/analyst/Reports",
       icon: <LucideFileText size={20} />,
+    },
+    {
+      name: "Notifications",
+      href: "/dashboard/analyst/notifications",
+      icon: <Bell size={20} />,
     },
     {
       name: "Logout",

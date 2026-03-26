@@ -1,5 +1,6 @@
 const ScanModel = require('../models/Scan');
 const VulnerabilityModel = require('../models/Vulnerability');
+const NotificationModel = require('../models/Notification');
 const scannerService = require('../services/scanner');
 const AIClassifier = require('../services/aiClassifier');
 const fs = require('fs').promises;
@@ -15,6 +16,7 @@ class ScanController {
     this.fastify = fastify;
     this.scanModel = new ScanModel(fastify.pg);
     this.vulnerabilityModel = new VulnerabilityModel(fastify.pg);
+    this.notificationModel = new NotificationModel(fastify.pg);
     this.aiClassifier = new AIClassifier(process.env.COLAB_URL);
   }
 
@@ -84,7 +86,21 @@ class ScanController {
 
     try {
       const scan = await this.scanModel.create(request.user.id, target);
-      
+
+      // Notify admins: scan started
+      await this.notificationModel.notifyAdmins(
+        `User #${request.user.id} (${request.user.email}) started a new scan on target: ${target}`,
+        'scan',
+        '🔍 New Scan Started'
+      );
+      // Notify the user
+      await this.notificationModel.create(
+        request.user.id,
+        `Your scan on ${target} has started. We will notify you when it completes.`,
+        'scan',
+        '🔍 Scan Started'
+      );
+
       // Initialize progress
       scanProgress.set(scan.id, { progress: 0, message: 'Starting scan...' });
 
@@ -203,11 +219,38 @@ class ScanController {
 
           updateProgress(100, 'Scan completed');
           await this.scanModel.updateStatus(scan.id, 'Completed', vulnCount);
-          
+
+          // Notify admins: scan completed
+          await this.notificationModel.notifyAdmins(
+            `Scan #${scan.id} on ${target} completed. Found ${vulnCount} vulnerabilities.`,
+            'success',
+            '✅ Scan Completed'
+          );
+          // Notify the user
+          await this.notificationModel.create(
+            scan.user_id,
+            `Your scan on ${target} completed. Found ${vulnCount} vulnerabilities.`,
+            'success',
+            '✅ Scan Completed'
+          );
+
         } catch (error) {
           console.error('Scan error:', error);
           scanProgress.set(scan.id, { progress: 0, message: `Error: ${error.message}` });
           await this.scanModel.updateStatus(scan.id, 'Failed');
+
+          // Notify admins: scan failed
+          await this.notificationModel.notifyAdmins(
+            `Scan #${scan.id} on ${target} failed. Error: ${error.message}`,
+            'error',
+            '❌ Scan Failed'
+          );
+          await this.notificationModel.create(
+            scan.user_id,
+            `Your scan on ${target} failed. Please try again.`,
+            'error',
+            '❌ Scan Failed'
+          );
         }
       });
 
@@ -221,14 +264,21 @@ class ScanController {
   async delete(request, reply) {
     try {
       const result = await this.scanModel.delete(request.params.id, request.user.id);
-      
+
       if (!result) {
         return reply.code(404).send({ error: 'Scan not found' });
       }
-      
+
       scanProgress.delete(parseInt(request.params.id));
       scanControl.delete(parseInt(request.params.id));
-      
+
+      // Notify admins: scan deleted
+      await this.notificationModel.notifyAdmins(
+        `User #${request.user.id} (${request.user.email}) deleted scan #${request.params.id}.`,
+        'warning',
+        '🗑️ Scan Deleted'
+      );
+
       return { success: true, message: 'Scan deleted' };
     } catch (error) {
       console.error('Delete scan error:', error);

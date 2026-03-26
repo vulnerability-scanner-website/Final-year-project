@@ -90,6 +90,15 @@ export const reportsAPI = {
   getAll: () => apiRequest('/api/reports'),
 };
 
+// Notifications API
+export const notificationsAPI = {
+  getAll: () => apiRequest('/api/notifications'),
+  markRead: (id) => apiRequest(`/api/notifications/${id}/read`, { method: 'POST', body: '{}' }),
+  markAllRead: () => apiRequest('/api/notifications/read-all', { method: 'POST', body: '{}' }),
+  delete: (id) => apiRequest(`/api/notifications/${id}`, { method: 'DELETE', body: '{}' }),
+  deleteAll: () => apiRequest('/api/notifications/all', { method: 'DELETE', body: '{}' }),
+};
+
 // WebSocket connection
 export const connectWebSocket = (onMessage) => {
   const wsUrl = API_URL.replace('http://', 'ws://').replace('https://', 'wss://');
