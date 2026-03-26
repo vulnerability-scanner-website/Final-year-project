@@ -5,6 +5,24 @@ class AdminController {
     this.fastify = fastify;
   }
 
+  // Helper function to create user notification
+  async createNotification(userId, message) {
+    try {
+      const client = await this.fastify.pg.connect();
+      try {
+        await client.query(
+          'INSERT INTO notifications (user_id, message) VALUES ($1, $2)',
+          [userId, message]
+        );
+        console.log(`📢 Notification created for user ${userId}: ${message}`);
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      console.error('Failed to create notification:', error.message);
+    }
+  }
+
   // Get all users (admin only)
   async getAllUsers(request, reply) {
     if (request.user.role !== 'admin') {
@@ -65,7 +83,15 @@ class AdminController {
         [email, hashedPassword, role, status || 'active']
       );
       
-      return { success: true, user: result.rows[0] };
+      const newUser = result.rows[0];
+
+      // Notify the new user
+      await this.createNotification(
+        newUser.id,
+        `Your account has been created by an administrator. Welcome to the security scanner platform!`
+      );
+      
+      return { success: true, user: newUser };
     } catch (err) {
       if (err.code === '23505') {
         return reply.code(409).send({ error: 'Email already exists' });
@@ -100,7 +126,15 @@ class AdminController {
         return reply.code(404).send({ error: 'User not found' });
       }
 
-      return { success: true, user: result.rows[0] };
+      const updatedUser = result.rows[0];
+
+      // Notify user about account update
+      await this.createNotification(
+        updatedUser.id,
+        `Your account has been updated by an administrator. Role: ${role}, Status: ${status}`
+      );
+
+      return { success: true, user: updatedUser };
     } catch (err) {
       if (err.code === '23505') {
         return reply.code(409).send({ error: 'Email already exists' });
@@ -135,7 +169,21 @@ class AdminController {
         return reply.code(404).send({ error: 'User not found' });
       }
 
-      return { success: true, user: result.rows[0] };
+      const user = result.rows[0];
+
+      // Create appropriate notification based on status change
+      let message = '';
+      if (status === 'active') {
+        message = '🎉 Your account has been activated! You can now access all features.';
+      } else if (status === 'inactive') {
+        message = '⚠️ Your account has been deactivated. Please contact support if you believe this is an error.';
+      } else if (status === 'pending') {
+        message = '⏳ Your account status has been changed to pending. Please wait for further review.';
+      }
+
+      await this.createNotification(user.id, message);
+
+      return { success: true, user };
     } finally {
       client.release();
     }
@@ -156,8 +204,15 @@ class AdminController {
 
     const client = await this.fastify.pg.connect();
     try {
-      // First, delete all related scans
+      // Get user info before deletion for notification
+      const userResult = await client.query('SELECT email FROM users WHERE id = $1', [userId]);
+      if (userResult.rows.length === 0) {
+        return reply.code(404).send({ error: 'User not found' });
+      }
+
+      // First, delete all related scans and notifications
       await client.query('DELETE FROM scans WHERE user_id = $1', [userId]);
+      await client.query('DELETE FROM notifications WHERE user_id = $1', [userId]);
       
       // Then delete the user
       const result = await client.query(
@@ -165,11 +220,7 @@ class AdminController {
         [userId]
       );
 
-      if (result.rows.length === 0) {
-        return reply.code(404).send({ error: 'User not found' });
-      }
-
-      return { success: true, message: 'User and associated scans deleted successfully' };
+      return { success: true, message: 'User and associated data deleted successfully' };
     } catch (err) {
       console.error('Delete user error:', err);
       return reply.code(500).send({ error: 'Failed to delete user' });
