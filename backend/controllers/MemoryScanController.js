@@ -267,6 +267,7 @@ class MemoryScanController {
             
             // Add AI classification (non-blocking)
             if (this.aiClassifier) {
+              const vulnIndex = vulnerabilities.length;
               this.aiClassifier.classifyVulnerability(
                 `${title}: ${alert.description || ''}`
               ).then(aiResult => {
@@ -274,6 +275,13 @@ class MemoryScanController {
                   vuln.ai_type = aiResult.type;
                   vuln.ai_confidence = aiResult.confidence;
                   console.log(`✓ AI: ${title} → ${aiResult.type} (${Math.round(aiResult.confidence * 100)}%)`);
+                  
+                  // Update database with AI classification using dbId
+                  const scan = scanResults.get(scanId);
+                  const actualDbId = scan?.dbId || scanId;
+                  this.updateVulnerabilityInDatabase(actualDbId, vulnIndex, aiResult).catch(err => {
+                    console.warn(`Failed to update AI classification in DB: ${err.message}`);
+                  });
                 }
               }).catch(err => {
                 console.warn(`⚠️  AI classification failed for ${title}: ${err.message}`);
@@ -312,6 +320,7 @@ class MemoryScanController {
                 
                 // Add AI classification (non-blocking)
                 if (this.aiClassifier) {
+                  const vulnIndex = vulnerabilities.length;
                   this.aiClassifier.classifyVulnerability(
                     `${title}: ${vuln_data.info?.description || ''}`
                   ).then(aiResult => {
@@ -319,6 +328,13 @@ class MemoryScanController {
                       vuln.ai_type = aiResult.type;
                       vuln.ai_confidence = aiResult.confidence;
                       console.log(`✓ AI: ${title} → ${aiResult.type} (${Math.round(aiResult.confidence * 100)}%)`);
+                      
+                      // Update database with AI classification using dbId
+                      const scan = scanResults.get(scanId);
+                      const actualDbId = scan?.dbId || scanId;
+                      this.updateVulnerabilityInDatabase(actualDbId, vulnIndex, aiResult).catch(err => {
+                        console.warn(`Failed to update AI classification in DB: ${err.message}`);
+                      });
                     }
                   }).catch(err => {
                     console.warn(`⚠️  AI classification failed for ${title}: ${err.message}`);
@@ -413,6 +429,42 @@ class MemoryScanController {
     scanProgress.delete(scanId);
     
     return { success: true, message: 'Scan deleted from memory' };
+  }
+
+  async updateVulnerabilityInDatabase(scanId, vulnIndex, aiResult) {
+    try {
+      const client = await this.fastify.pg.connect();
+      try {
+        // Fetch current vulnerabilities_data
+        const result = await client.query(
+          'SELECT vulnerabilities_data FROM scans WHERE id = $1',
+          [scanId]
+        );
+        
+        if (result.rows.length > 0) {
+          const vulns = result.rows[0].vulnerabilities_data || [];
+          
+          // Update the specific vulnerability
+          if (vulns[vulnIndex]) {
+            vulns[vulnIndex].ai_type = aiResult.type;
+            vulns[vulnIndex].ai_confidence = aiResult.confidence;
+            
+            // Save back to database
+            await client.query(
+              'UPDATE scans SET vulnerabilities_data = $1 WHERE id = $2',
+              [JSON.stringify(vulns), scanId]
+            );
+            
+            console.log(`✓ Updated AI classification in database for scan ${scanId}, vuln ${vulnIndex}`);
+          }
+        }
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      console.error(`Failed to update vulnerability in database: ${error.message}`);
+      throw error;
+    }
   }
 }
 

@@ -28,7 +28,9 @@ class AIClassifier {
         {
           timeout: 300000, // 5 minutes timeout
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'ngrok-skip-browser-warning': 'true'
           },
           maxRedirects: 5
         }

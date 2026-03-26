@@ -31,6 +31,7 @@ services:
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/security_scanner
       JWT_SECRET: your-super-secret-key-change-this
       CHAPA_SECRET_KEY: CHASECK_TEST-WkIFYnNAoscOkZGTknnxP7hhPA4J2nTX
+      COLAB_URL: https://unbriefed-nonangling-tristan.ngrok-free.dev
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -53,9 +54,11 @@ services:
       - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:5001
+      TURBOPACK: 0
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - /app/.next
     depends_on:
       - backend
     networks:
