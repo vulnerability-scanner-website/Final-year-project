@@ -204,8 +204,6 @@ class ScanController {
           updateProgress(100, 'Scan completed');
           await this.scanModel.updateStatus(scan.id, 'Completed', vulnCount);
           
-          // Clean up progress after 5 minutes
-          setTimeout(() => scanProgress.delete(scan.id), 300000);
         } catch (error) {
           console.error('Scan error:', error);
           scanProgress.set(scan.id, { progress: 0, message: `Error: ${error.message}` });
