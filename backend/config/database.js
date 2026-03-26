@@ -125,10 +125,22 @@ const initDatabase = async (client) => {
       CREATE TABLE IF NOT EXISTS notifications (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        title VARCHAR(255) DEFAULT 'Notification',
         message TEXT NOT NULL,
+        type VARCHAR(50) DEFAULT 'info',
         read BOOLEAN DEFAULT false,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications' AND column_name='type') THEN
+          ALTER TABLE notifications ADD COLUMN type VARCHAR(50) DEFAULT 'info';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notifications' AND column_name='title') THEN
+          ALTER TABLE notifications ADD COLUMN title VARCHAR(255) DEFAULT 'Notification';
+        END IF;
+      END $$;
 
       CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
       CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);

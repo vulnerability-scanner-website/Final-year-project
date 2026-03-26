@@ -1,50 +1,12 @@
 const bcrypt = require('bcrypt');
 const UserModel = require('../models/User');
+const NotificationModel = require('../models/Notification');
 
 class AuthController {
   constructor(fastify) {
     this.fastify = fastify;
     this.userModel = new UserModel(fastify.pg);
-  }
-
-  // Helper function to notify admin
-  async notifyAdmin(message) {
-    try {
-      const client = await this.fastify.pg.connect();
-      try {
-        // Get all admin users
-        const adminResult = await client.query("SELECT id FROM users WHERE role = 'admin'");
-        for (const admin of adminResult.rows) {
-          await client.query(
-            'INSERT INTO notifications (user_id, message) VALUES ($1, $2)',
-            [admin.id, message]
-          );
-        }
-        console.log(`📢 Admin notification: ${message}`);
-      } finally {
-        client.release();
-      }
-    } catch (error) {
-      console.error('Failed to notify admin:', error.message);
-    }
-  }
-
-  // Helper function to create user notification
-  async createNotification(userId, message) {
-    try {
-      const client = await this.fastify.pg.connect();
-      try {
-        await client.query(
-          'INSERT INTO notifications (user_id, message) VALUES ($1, $2)',
-          [userId, message]
-        );
-        console.log(`📢 Notification created for user ${userId}: ${message}`);
-      } finally {
-        client.release();
-      }
-    } catch (error) {
-      console.error('Failed to create notification:', error.message);
-    }
+    this.notificationModel = new NotificationModel(fastify.pg);
   }
 
   async register(request, reply) {
@@ -79,12 +41,18 @@ class AuthController {
         });
 
         // Notify admin about new user registration
-        await this.notifyAdmin(`New user registered: ${email} (${role}) - Account pending approval`);
+        await this.notificationModel.notifyAdmins(
+          `New user registered: ${email} (${role}) - Account pending approval`,
+          'user',
+          '👤 New User Registration'
+        );
 
         // Welcome notification for the new user
-        await this.createNotification(
-          user.id, 
-          'Welcome! Your account has been created and is pending admin approval. You will be notified once approved.'
+        await this.notificationModel.create(
+          user.id,
+          'Welcome! Your account has been created and is pending admin approval. You will be notified once approved.',
+          'info',
+          '👋 Welcome'
         );
         
         return { 
@@ -139,11 +107,20 @@ class AuthController {
 
       // Notify admin about user login (only for non-admin users)
       if (user.role !== 'admin') {
-        await this.notifyAdmin(`User ${email} (${user.role}) logged in`);
+        await this.notificationModel.notifyAdmins(
+          `User ${email} (${user.role}) logged in`,
+          'user',
+          '🔐 User Login'
+        );
       }
 
       // Create login notification for user
-      await this.createNotification(user.id, 'You have successfully logged in to your account.');
+      await this.notificationModel.create(
+        user.id,
+        'You have successfully logged in to your account.',
+        'info',
+        '🔐 Login Successful'
+      );
       
       return { 
         success: true, 

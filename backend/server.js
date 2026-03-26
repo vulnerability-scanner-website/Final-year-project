@@ -21,7 +21,7 @@ fastify.register(require('@fastify/cors'), {
 
 fastify.addContentTypeParser('application/json', { parseAs: 'string' }, function (req, body, done) {
   try {
-    const json = JSON.parse(body);
+    const json = body ? JSON.parse(body) : {};
     done(null, json);
   } catch (err) {
     err.statusCode = 400;

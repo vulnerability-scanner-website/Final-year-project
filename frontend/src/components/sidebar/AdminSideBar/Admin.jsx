@@ -15,26 +15,38 @@ import {
   Menu,
   X
 } from "lucide-react";
+import { notificationsAPI } from "@/lib/api";
 
 export default function AdminSideBar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  // Check if mobile on mount and resize
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
       if (window.innerWidth >= 768) {
-        setIsOpen(true); // Auto-open on desktop
+        setIsOpen(true);
       } else {
-        setIsOpen(false); // Auto-close on mobile
+        setIsOpen(false);
       }
     };
-
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const data = await notificationsAPI.getAll();
+        setUnreadCount(data.filter(n => !n.read).length);
+      } catch {}
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const links = [
@@ -43,7 +55,16 @@ export default function AdminSideBar() {
     { name: "Subscription", href: "/dashboard/admin/price-management", icon: <Wallet size={20} /> },
     { name: "Users Management", href: "/dashboard/admin/Users", icon: <LucideUsers size={20} /> },
     { name: "Reports", href: "/dashboard/admin/Reports", icon: <LucideFileText size={20} /> },
-    { name: "Notifications", href: "/dashboard/admin/notifications", icon: <Bell size={20} /> },
+    { name: "Notifications", href: "/dashboard/admin/notifications", icon: (
+      <span className="relative">
+        <Bell size={20} />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-yellow-500 text-black text-[9px] font-bold rounded-full flex items-center justify-center">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </span>
+    )},
     { name: "Settings", href: "/dashboard/admin/settings", icon: <LucideSettings size={20} /> },
     { name: "Logout", href: "/", icon: <LucideLogOut size={20} />, color: "text-red-400" },
   ];
