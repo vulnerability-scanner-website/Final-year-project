@@ -36,8 +36,21 @@ const initDatabase = async (client) => {
         issues INTEGER DEFAULT 0,
         date DATE DEFAULT CURRENT_DATE,
         duration VARCHAR(50),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        finished_at TIMESTAMP,
+        vulnerabilities_data JSONB
       );
+
+      -- Add missing columns if they don't exist
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='scans' AND column_name='finished_at') THEN
+          ALTER TABLE scans ADD COLUMN finished_at TIMESTAMP;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='scans' AND column_name='vulnerabilities_data') THEN
+          ALTER TABLE scans ADD COLUMN vulnerabilities_data JSONB;
+        END IF;
+      END $$;
 
       CREATE INDEX IF NOT EXISTS idx_scans_user_id ON scans(user_id);
       CREATE INDEX IF NOT EXISTS idx_scans_status ON scans(status);
@@ -111,11 +124,15 @@ const initDatabase = async (client) => {
 
       CREATE TABLE IF NOT EXISTS notifications (
         id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES users(id),
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
         message TEXT NOT NULL,
         read BOOLEAN DEFAULT false,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+
+      CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
+      CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);
+      CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at DESC);
 
       CREATE TABLE IF NOT EXISTS settings (
         id SERIAL PRIMARY KEY,

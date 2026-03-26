@@ -10,7 +10,6 @@ let scanIdCounter = 1;
 class MemoryScanController {
   constructor(fastify) {
     this.fastify = fastify;
-    // Initialize AI Classifier with Colab URL
     const colabUrl = process.env.COLAB_URL;
     console.log(`🤖 AI Classifier initialized with Colab URL: ${colabUrl}`);
     this.aiClassifier = new AIClassifier(colabUrl);
@@ -23,32 +22,43 @@ class MemoryScanController {
   }
 
   async getAll(request, reply) {
+    const userId = request.user.id;
+    const userRole = request.user.role;
     const scans = [];
     
     // Get from memory first
     for (const [scanId, result] of scanResults.entries()) {
-      scans.push({
-        id: scanId,
-        target: result.target,
-        status: result.status,
-        created_at: result.created_at,
-        issues: result.vulnerabilities?.length || 0
-      });
+      // Admin sees all scans, users see only their own
+      if (userRole === 'admin' || result.user_id === userId) {
+        scans.push({
+          id: scanId,
+          user_id: result.user_id,
+          target: result.target,
+          status: result.status,
+          created_at: result.created_at,
+          issues: result.vulnerabilities?.length || 0
+        });
+      }
     }
     
     // Also fetch from database
     try {
       const client = await this.fastify.pg.connect();
       try {
-        const result = await client.query(
-          'SELECT id, target, status, created_at, vulnerabilities_data FROM scans ORDER BY created_at DESC LIMIT 100'
-        );
+        const query = userRole === 'admin' 
+          ? 'SELECT id, user_id, target, status, created_at, vulnerabilities_data FROM scans ORDER BY created_at DESC LIMIT 100'
+          : 'SELECT id, user_id, target, status, created_at, vulnerabilities_data FROM scans WHERE user_id = $1 ORDER BY created_at DESC LIMIT 100';
+        
+        const params = userRole === 'admin' ? [] : [userId];
+        const result = await client.query(query, params);
+        
         for (const row of result.rows) {
           // Only add if not already in memory
           if (!scanResults.has(row.id)) {
             const vulns = JSON.parse(row.vulnerabilities_data || '[]');
             scans.push({
               id: row.id,
+              user_id: row.user_id,
               target: row.target,
               status: row.status,
               created_at: row.created_at,
@@ -68,6 +78,8 @@ class MemoryScanController {
 
   async getById(request, reply) {
     const scanId = parseInt(request.params.id);
+    const userId = request.user.id;
+    const userRole = request.user.role;
     let scan = scanResults.get(scanId);
     
     // If not in memory, try to fetch from database
@@ -75,14 +87,18 @@ class MemoryScanController {
       try {
         const client = await this.fastify.pg.connect();
         try {
-          const result = await client.query(
-            'SELECT id, target, status, created_at, finished_at, vulnerabilities_data FROM scans WHERE id = $1',
-            [scanId]
-          );
+          const query = userRole === 'admin'
+            ? 'SELECT id, user_id, target, status, created_at, finished_at, vulnerabilities_data FROM scans WHERE id = $1'
+            : 'SELECT id, user_id, target, status, created_at, finished_at, vulnerabilities_data FROM scans WHERE id = $1 AND user_id = $2';
+          
+          const params = userRole === 'admin' ? [scanId] : [scanId, userId];
+          const result = await client.query(query, params);
+          
           if (result.rows.length > 0) {
             const row = result.rows[0];
             scan = {
               id: row.id,
+              user_id: row.user_id,
               target: row.target,
               status: row.status,
               created_at: row.created_at,
@@ -104,22 +120,76 @@ class MemoryScanController {
       return reply.code(404).send({ error: 'Scan not found' });
     }
     
+    // Check access permissions
+    if (userRole !== 'admin' && scan.user_id !== userId) {
+      return reply.code(403).send({ error: 'Access denied' });
+    }
+    
     return scan;
   }
 
   async getVulnerabilitiesByScanId(request, reply) {
     const scanId = parseInt(request.params.scanId);
+    const userId = request.user.id;
+    const userRole = request.user.role;
     const scan = scanResults.get(scanId);
     
     if (!scan) {
       return reply.code(404).send({ error: 'Scan not found or expired' });
     }
     
+    // Check access permissions
+    if (userRole !== 'admin' && scan.user_id !== userId) {
+      return reply.code(403).send({ error: 'Access denied' });
+    }
+    
     return scan.vulnerabilities || [];
+  }
+
+  // Helper function to create notifications
+  async createNotification(userId, message) {
+    try {
+      const client = await this.fastify.pg.connect();
+      try {
+        await client.query(
+          'INSERT INTO notifications (user_id, message) VALUES ($1, $2)',
+          [userId, message]
+        );
+        console.log(`📢 Notification created for user ${userId}: ${message}`);
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      console.error('Failed to create notification:', error.message);
+    }
+  }
+
+  // Helper function to notify admin
+  async notifyAdmin(message) {
+    try {
+      const client = await this.fastify.pg.connect();
+      try {
+        // Get all admin users
+        const adminResult = await client.query("SELECT id FROM users WHERE role = 'admin'");
+        for (const admin of adminResult.rows) {
+          await client.query(
+            'INSERT INTO notifications (user_id, message) VALUES ($1, $2)',
+            [admin.id, message]
+          );
+        }
+        console.log(`📢 Admin notification: ${message}`);
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      console.error('Failed to notify admin:', error.message);
+    }
   }
 
   async create(request, reply) {
     const { target, scanType } = request.body;
+    const userId = request.user.id;
+    const userEmail = request.user.email;
     
     if (!target) {
       return reply.code(400).send({ error: 'Target URL is required' });
@@ -128,9 +198,10 @@ class MemoryScanController {
     const scanId = scanIdCounter++;
     const createdAt = new Date().toISOString();
     
-    // Initialize in memory
+    // Initialize in memory with user_id
     scanResults.set(scanId, {
       id: scanId,
+      user_id: userId,
       target,
       status: 'Running',
       created_at: createdAt,
@@ -138,6 +209,9 @@ class MemoryScanController {
     });
     
     scanProgress.set(scanId, { progress: 0, message: 'Starting scan...' });
+
+    // Notify admin about new scan
+    await this.notifyAdmin(`User ${userEmail} started a new scan on ${target}`);
 
     // Start scan asynchronously
     setImmediate(async () => {
@@ -262,10 +336,10 @@ class MemoryScanController {
           }
         }
 
-
         // Update scan result in memory AND save to database
         const scanData = {
           id: scanId,
+          user_id: userId,
           target,
           status: 'Completed',
           created_at: createdAt,
@@ -275,21 +349,33 @@ class MemoryScanController {
         
         scanResults.set(scanId, scanData);
         
-        // Save to database
+        // Save to database with user_id
         try {
           const client = await this.fastify.pg.connect();
           try {
             await client.query(
-              'INSERT INTO scans (target, status, created_at, finished_at, vulnerabilities_data) VALUES ($1, $2, $3, $4, $5)',
-              [target, 'Completed', createdAt, new Date().toISOString(), JSON.stringify(vulnerabilities)]
+              'INSERT INTO scans (user_id, target, status, created_at, finished_at, vulnerabilities_data) VALUES ($1, $2, $3, $4, $5, $6)',
+              [userId, target, 'Completed', createdAt, new Date().toISOString(), JSON.stringify(vulnerabilities)]
             );
-            console.log(`Scan ${scanId} saved to database`);
+            console.log(`Scan ${scanId} saved to database for user ${userId}`);
           } finally {
             client.release();
           }
         } catch (dbError) {
           console.warn(`Failed to save scan to database: ${dbError.message}`);
         }
+
+        // Notify user about scan completion
+        const vulnCount = vulnerabilities.length;
+        await this.createNotification(
+          userId, 
+          `Scan completed for ${target}. Found ${vulnCount} vulnerabilities.`
+        );
+
+        // Notify admin about scan completion
+        await this.notifyAdmin(
+          `User ${userEmail} completed scan on ${target} - ${vulnCount} vulnerabilities found`
+        );
         
       } catch (error) {
         console.error('Scan error:', error);
@@ -298,6 +384,10 @@ class MemoryScanController {
           ...scanResults.get(scanId),
           status: 'Failed'
         });
+
+        // Notify user about scan failure
+        await this.createNotification(userId, `Scan failed for ${target}: ${error.message}`);
+        await this.notifyAdmin(`User ${userEmail} scan failed on ${target}: ${error.message}`);
       }
     });
 
@@ -306,9 +396,17 @@ class MemoryScanController {
 
   async delete(request, reply) {
     const scanId = parseInt(request.params.id);
+    const userId = request.user.id;
+    const userRole = request.user.role;
     
-    if (!scanResults.has(scanId)) {
+    const scan = scanResults.get(scanId);
+    if (!scan) {
       return reply.code(404).send({ error: 'Scan not found' });
+    }
+    
+    // Check access permissions
+    if (userRole !== 'admin' && scan.user_id !== userId) {
+      return reply.code(403).send({ error: 'Access denied' });
     }
     
     scanResults.delete(scanId);
