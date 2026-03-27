@@ -160,11 +160,14 @@ class ScanController {
                   `${title}: ${alert.description || ''}`
                 ).then(aiResult => {
                   if (aiResult) {
-                    this.vulnerabilityModel.updateWithAI(vuln.id, aiResult).catch(err => 
-                      console.error('Failed to update AI classification:', err.message)
-                    );
+                    console.log(`✓ AI: ${title} → ${aiResult.type} (${Math.round(aiResult.confidence * 100)}%)`);
+                    return this.vulnerabilityModel.updateWithAI(vuln.id, aiResult);
                   }
-                }).catch(err => console.error('AI classification error:', err.message));
+                }).then(updated => {
+                  if (updated) {
+                    console.log(`✅ DB Updated: Vulnerability ${vuln.id} with AI data`);
+                  }
+                }).catch(err => console.error('❌ AI classification/update error:', err.message));
               }
             }
           }
@@ -202,11 +205,14 @@ class ScanController {
                       `${title}: ${vuln.info?.description || ''}`
                     ).then(aiResult => {
                       if (aiResult) {
-                        this.vulnerabilityModel.updateWithAI(vulnRecord.id, aiResult).catch(err => 
-                          console.error('Failed to update AI classification:', err.message)
-                        );
+                        console.log(`✓ AI: ${title} → ${aiResult.type} (${Math.round(aiResult.confidence * 100)}%)`);
+                        return this.vulnerabilityModel.updateWithAI(vulnRecord.id, aiResult);
                       }
-                    }).catch(err => console.error('AI classification error:', err.message));
+                    }).then(updated => {
+                      if (updated) {
+                        console.log(`✅ DB Updated: Vulnerability ${vulnRecord.id} with AI data`);
+                      }
+                    }).catch(err => console.error('❌ AI classification/update error:', err.message));
                   }
                 } catch (parseError) {
                   console.error('Failed to parse vulnerability:', parseError.message);
