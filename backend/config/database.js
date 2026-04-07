@@ -218,6 +218,16 @@ const initDatabase = async (client) => {
       ON CONFLICT (email) DO NOTHING;
     `, [hashedPassword]);
     
+    // Insert default pricing plans
+    await client.query(`
+      INSERT INTO pricing (name, price, features)
+      VALUES 
+        ('Basic', 0, '{"scans": 10, "support": "email", "history_days": 30, "reports": "pdf"}'),
+        ('Professional', 1500, '{"scans": 50, "support": "priority", "history_days": 90, "reports": "detailed_pdf", "api_access": true}'),
+        ('Enterprise', 4000, '{"scans": "unlimited", "support": "24/7", "history_days": "unlimited", "reports": "advanced", "api_access": true, "custom_integrations": true}')
+      ON CONFLICT DO NOTHING;
+    `);
+    
     console.log('✅ Database initialized successfully');
   } catch (error) {
     console.error('❌ Database initialization failed:', error);

@@ -19,11 +19,39 @@ class ScanModel {
   async findById(id, userId) {
     const client = await this.pg.connect();
     try {
-      const result = await client.query(
+      // Get scan
+      const scanResult = await client.query(
         'SELECT * FROM scans WHERE id = $1 AND user_id = $2',
         [id, userId]
       );
-      return result.rows[0];
+      
+      if (scanResult.rows.length === 0) {
+        return null;
+      }
+      
+      const scan = scanResult.rows[0];
+      
+      // Get vulnerabilities for this scan
+      const vulnResult = await client.query(
+        `SELECT id, title, severity, description, affected_url as url, affected_parameter as param, 
+                evidence, remediation as solution, cwe_id as cwe, cvss_score, scanner_type as source,
+                ai_type, ai_confidence
+         FROM vulnerabilities 
+         WHERE scan_id = $1 
+         ORDER BY 
+           CASE severity 
+             WHEN 'critical' THEN 1 
+             WHEN 'high' THEN 2 
+             WHEN 'medium' THEN 3 
+             WHEN 'low' THEN 4 
+             ELSE 5 
+           END, 
+           created_at DESC`,
+        [id]
+      );
+      
+      scan.vulnerabilities = vulnResult.rows;
+      return scan;
     } finally {
       client.release();
     }
