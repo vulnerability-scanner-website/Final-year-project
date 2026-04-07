@@ -79,12 +79,63 @@ class ScanController {
 
   async create(request, reply) {
     const { target, scanType } = request.body;
-    
+
     if (!target) {
       return reply.code(400).send({ error: 'Target URL is required' });
     }
 
     try {
+      // ── Free plan limit check ──────────────────────────────────────
+      const client = await this.fastify.pg.connect();
+      let userRow;
+      try {
+        const uRes = await client.query(
+          'SELECT free_scans_used, free_plan_start FROM users WHERE id = $1',
+          [request.user.id]
+        );
+        userRow = uRes.rows[0];
+
+        // Check if user has an active paid subscription
+        const subRes = await client.query(
+          `SELECT id FROM subscriptions WHERE user_id = $1 AND status = 'active' AND end_date > NOW() LIMIT 1`,
+          [request.user.id]
+        );
+        const hasPaidPlan = subRes.rows.length > 0;
+
+        if (!hasPaidPlan) {
+          const scansUsed = userRow?.free_scans_used || 0;
+          const planStart = userRow?.free_plan_start ? new Date(userRow.free_plan_start) : new Date();
+          const monthsElapsed = (Date.now() - planStart.getTime()) / (1000 * 60 * 60 * 24 * 30);
+
+          if (monthsElapsed >= 3) {
+            return reply.code(403).send({
+              error: 'Free plan expired',
+              message: 'Your 3-month free plan has expired. Please subscribe to continue scanning.',
+              upgrade_required: true
+            });
+          }
+
+          if (scansUsed >= 3) {
+            return reply.code(403).send({
+              error: 'Free plan scan limit reached',
+              message: 'You have used all 3 free scans this month. Please upgrade to continue.',
+              upgrade_required: true,
+              scans_used: scansUsed,
+              scans_limit: 3
+            });
+          }
+
+          // Increment free scan counter
+          await client.query(
+            'UPDATE users SET free_scans_used = free_scans_used + 1 WHERE id = $1',
+            [request.user.id]
+          );
+        }
+      } finally {
+        client.release();
+      }
+      // ──────────────────────────────────────────────────────────────
+
       const scan = await this.scanModel.create(request.user.id, target);
 
       // Notify admins: scan started
