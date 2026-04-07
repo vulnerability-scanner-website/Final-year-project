@@ -179,6 +179,36 @@ const initDatabase = async (client) => {
       CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
       CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status);
     `);
+
+    // Seed Free plan
+    await client.query(`
+      INSERT INTO pricing (name, price, features)
+      VALUES ('Free', 0, '["3 scans/month","Basic vulnerability detection","3 months access","Community support"]')
+      ON CONFLICT DO NOTHING;
+    `);
+
+    // Seed paid plans
+    await client.query(`
+      INSERT INTO pricing (name, price, features)
+      VALUES 
+        ('Basic', 500, '["10 scans/month","Basic vulnerability detection","Email support","30 days history"]'),
+        ('Professional', 1500, '["50 scans/month","Advanced threat detection","Priority support","90 days history"]'),
+        ('Enterprise', 4000, '["Unlimited scans","AI-powered detection","24/7 support","Unlimited history"]')
+      ON CONFLICT DO NOTHING;
+    `);
+
+    // Migration: add free plan tracking columns to users
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='free_scans_used') THEN
+          ALTER TABLE users ADD COLUMN free_scans_used INTEGER DEFAULT 0;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='free_plan_start') THEN
+          ALTER TABLE users ADD COLUMN free_plan_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+        END IF;
+      END $$;
+    `);
     
     // Create default admin user
     const hashedPassword = await bcrypt.hash('admin123', 10);
