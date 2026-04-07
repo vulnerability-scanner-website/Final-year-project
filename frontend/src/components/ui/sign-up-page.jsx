@@ -11,6 +11,7 @@ export function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [validationErrors, setValidationErrors] = useState({});
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -20,17 +21,89 @@ export function SignupPage() {
     agreeToTerms: false,
   });
 
+  // Email validation
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Password validation
+  const validatePassword = (password) => {
+    return password.length >= 8;
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
+    
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: newValue,
     }));
+
+    // Clear validation error for this field
+    setValidationErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+
+    // Real-time validation
+    if (name === "email" && value) {
+      if (!validateEmail(value)) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          email: "Please enter a valid email address",
+        }));
+      }
+    }
+
+    if (name === "password" && value) {
+      if (!validatePassword(value)) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          password: "Password must be at least 8 characters",
+        }));
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setValidationErrors({});
+
+    // Client-side validation
+    const errors = {};
+    
+    if (!formData.email) {
+      errors.email = "Email is required";
+    } else if (!validateEmail(formData.email)) {
+      errors.email = "Please enter a valid email address";
+    }
+
+    if (!formData.password) {
+      errors.password = "Password is required";
+    } else if (!validatePassword(formData.password)) {
+      errors.password = "Password must be at least 8 characters";
+    }
+
+    if (!formData.firstName) {
+      errors.firstName = "First name is required";
+    }
+
+    if (!formData.lastName) {
+      errors.lastName = "Last name is required";
+    }
+
+    if (!formData.agreeToTerms) {
+      errors.agreeToTerms = "You must agree to the terms and conditions";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -45,7 +118,22 @@ export function SignupPage() {
         window.location.href = '/auth/login';
       }, 2000);
     } catch (err) {
-      setError(err.message || 'Registration failed');
+      // Display backend validation errors
+      const errorMessage = err.message || 'Registration failed';
+      setError(errorMessage);
+      
+      // Parse specific field errors if available
+      if (errorMessage.includes('email')) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          email: errorMessage,
+        }));
+      } else if (errorMessage.includes('password')) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          password: errorMessage,
+        }));
+      }
     }
 
     setIsLoading(false);
@@ -113,9 +201,13 @@ export function SignupPage() {
                   value={formData.firstName}
                   onChange={handleInputChange}
                   placeholder="Alpha"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                  required
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                    validationErrors.firstName ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
+                {validationErrors.firstName && (
+                  <p className="mt-1 text-sm text-red-600">{validationErrors.firstName}</p>
+                )}
               </div>
               <div>
                 <label
@@ -131,9 +223,13 @@ export function SignupPage() {
                   value={formData.lastName}
                   onChange={handleInputChange}
                   placeholder="Guyasa"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                  required
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                    validationErrors.lastName ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
+                {validationErrors.lastName && (
+                  <p className="mt-1 text-sm text-red-600">{validationErrors.lastName}</p>
+                )}
               </div>
             </div>
 
@@ -146,15 +242,19 @@ export function SignupPage() {
                 Email Address
               </label>
               <input
-                type="email"
+                type="text"
                 id="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="Email Address"
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                required
+                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                  validationErrors.email ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
+              {validationErrors.email && (
+                <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+              )}
             </div>
 
             {/* Role Field */}
@@ -193,9 +293,10 @@ export function SignupPage() {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  placeholder="Password"
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                  required
+                  placeholder="Password (min 8 characters)"
+                  className={`w-full px-4 py-3 pr-12 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                    validationErrors.password ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
                 <button
                   type="button"
@@ -209,28 +310,35 @@ export function SignupPage() {
                   )}
                 </button>
               </div>
+              {validationErrors.password && (
+                <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
+              )}
             </div>
 
             {/* Terms Checkbox */}
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="agreeToTerms"
-                name="agreeToTerms"
-                checked={formData.agreeToTerms}
-                onChange={handleInputChange}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                required
-              />
-              <label htmlFor="agreeToTerms" className="text-sm text-gray-600">
-                I agree to the{" "}
-                <button
-                  type="button"
-                  className="text-black font-medium hover:underline"
-                >
-                  Terms & Conditions
-                </button>
-              </label>
+            <div>
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="agreeToTerms"
+                  name="agreeToTerms"
+                  checked={formData.agreeToTerms}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="agreeToTerms" className="text-sm text-gray-600">
+                  I agree to the{" "}
+                  <button
+                    type="button"
+                    className="text-black font-medium hover:underline"
+                  >
+                    Terms & Conditions
+                  </button>
+                </label>
+              </div>
+              {validationErrors.agreeToTerms && (
+                <p className="mt-1 text-sm text-red-600">{validationErrors.agreeToTerms}</p>
+              )}
             </div>
 
             {/* Submit Button */}

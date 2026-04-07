@@ -5,6 +5,8 @@ const scannerService = require('../services/scanner');
 const AIClassifier = require('../services/aiClassifier');
 const fs = require('fs').promises;
 const scanStorage = require('../config/scan-storage');
+const { validator } = require('../middlewares/validation');
+const rateLimiter = require('../middlewares/rateLimiter');
 
 // Store active scan progress and control
 const scanProgress = new Map();
@@ -80,23 +82,33 @@ class ScanController {
   async create(request, reply) {
     const { target, scanType } = request.body;
     
-    if (!target) {
-      return reply.code(400).send({ error: 'Target URL is required' });
+    // Sanitize target URL
+    const sanitizedTarget = validator.sanitizeString(target, 500);
+
+    // Check scan rate limit
+    const plan = request.user.plan || 'free';
+    const scanLimit = rateLimiter.checkScanLimit(request.user.id, plan);
+    
+    if (!scanLimit.allowed) {
+      return reply.code(429).send({
+        error: 'Scan limit exceeded',
+        message: `You have reached your scan limit. Try again in ${scanLimit.retryAfter} seconds`,
+        retryAfter: scanLimit.retryAfter,
+        limit: scanLimit.limit
+      });
     }
 
     try {
-      const scan = await this.scanModel.create(request.user.id, target);
+      const scan = await this.scanModel.create(request.user.id, sanitizedTarget);
 
-      // Notify admins: scan started
       await this.notificationModel.notifyAdmins(
-        `User #${request.user.id} (${request.user.email}) started a new scan on target: ${target}`,
+        `User #${request.user.id} (${request.user.email}) started a new scan on target: ${validator.sanitizeHtml(sanitizedTarget)}`,
         'scan',
         '🔍 New Scan Started'
       );
-      // Notify the user
       await this.notificationModel.create(
         request.user.id,
-        `Your scan on ${target} has started. We will notify you when it completes.`,
+        `Your scan on ${validator.sanitizeHtml(sanitizedTarget)} has started. We will notify you when it completes.`,
         'scan',
         '🔍 Scan Started'
       );
