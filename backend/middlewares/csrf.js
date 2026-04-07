@@ -58,6 +58,11 @@ class CSRFProtection {
         return;
       }
 
+      // Skip CSRF for health check
+      if (request.url === '/health') {
+        return;
+      }
+
       const token = request.headers['x-csrf-token'];
       const userId = request.user?.id;
 
