@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ShieldCheck, Bug, MoreVertical, Eye, Pause, Play, StopCircle, RotateCcw, Trash, Plus, RefreshCw } from "lucide-react";
 import NewScanDialog from "@/components/popup/NewScanDialog";
+import UpgradePlanModal from "@/components/popup/UpgradePlanModal";
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
@@ -22,6 +23,7 @@ export default function ScanManagement() {
   const [vulns, setVulns] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const pollRef = useRef(null);
 
   const token = () => typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -55,7 +57,11 @@ export default function ScanManagement() {
 
   const handleAction = async (action, scanId) => {
     try {
-      await fetch(`${API}/api/scans/${scanId}/${action}`, { method: action === 'delete' ? 'DELETE' : 'POST', headers: headers() });
+      const res = await fetch(`${API}/api/scans/${scanId}/${action}`, { method: action === 'delete' ? 'DELETE' : 'POST', headers: headers() });
+      if (res.status === 403) {
+        const data = await res.json();
+        if (data.upgrade_required) { setShowUpgrade(true); return; }
+      }
       fetchScans();
     } catch (e) { console.error(`Action ${action} failed:`, e); }
   };
@@ -171,6 +177,7 @@ export default function ScanManagement() {
         </TabsContent>
       </Tabs>
 
+      <UpgradePlanModal open={showUpgrade} onClose={() => setShowUpgrade(false)} role="analyst" />
       <NewScanDialog open={openDialog} onOpenChange={(open) => { setOpenDialog(open); if (!open) fetchScans(); }} role="analyst" />
     </div>
   );

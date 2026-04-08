@@ -1,3 +1,5 @@
+"use client";
+
 import AnalystSideBar from "@/components/sidebar/AnalystSideBar/Analyst.jsx";
 
 export default function AnalystLayout({ children }) {

@@ -155,11 +155,25 @@ const initDatabase = async (client) => {
 
       CREATE TABLE IF NOT EXISTS pricing (
         id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
+        name VARCHAR(255) UNIQUE NOT NULL,
         price DECIMAL(10,2) NOT NULL,
         features JSONB,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+
+      -- Migration: add unique constraint if missing
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'pricing_name_key'
+        ) THEN
+          -- Remove duplicates first, keep lowest id
+          DELETE FROM pricing WHERE id NOT IN (
+            SELECT MIN(id) FROM pricing GROUP BY name
+          );
+          ALTER TABLE pricing ADD CONSTRAINT pricing_name_key UNIQUE (name);
+        END IF;
+      END $$;
 
       CREATE TABLE IF NOT EXISTS subscriptions (
         id SERIAL PRIMARY KEY,
@@ -180,21 +194,14 @@ const initDatabase = async (client) => {
       CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status);
     `);
 
-    // Seed Free plan
+    // Seed plans — only insert if name doesn't exist
     await client.query(`
-      INSERT INTO pricing (name, price, features)
-      VALUES ('Free', 0, '["3 scans/month","Basic vulnerability detection","3 months access","Community support"]')
-      ON CONFLICT DO NOTHING;
-    `);
-
-    // Seed paid plans
-    await client.query(`
-      INSERT INTO pricing (name, price, features)
-      VALUES 
+      INSERT INTO pricing (name, price, features) VALUES
+        ('Free', 0, '["3 scans/month","Basic vulnerability detection","3 months access","Community support"]'),
         ('Basic', 500, '["10 scans/month","Basic vulnerability detection","Email support","30 days history"]'),
         ('Professional', 1500, '["50 scans/month","Advanced threat detection","Priority support","90 days history"]'),
         ('Enterprise', 4000, '["Unlimited scans","AI-powered detection","24/7 support","Unlimited history"]')
-      ON CONFLICT DO NOTHING;
+      ON CONFLICT (name) DO NOTHING;
     `);
 
     // Migration: add free plan tracking columns to users

@@ -19,18 +19,8 @@ const csrfProtection = require('./middlewares/csrf');
 const rateLimiter = require('./middlewares/rateLimiter');
 const CleanupService = require('./services/cleanup');
 
-// Security: Register Helmet for security headers
-fastify.register(require('@fastify/helmet'), {
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", 'data:', 'https:'],
-    },
-  },
-  crossOriginEmbedderPolicy: false,
-});
+// Security: Helmet disabled - install @fastify/helmet if needed
+// fastify.register(require('@fastify/helmet'), { ... });
 
 // Register plugins
 fastify.register(require('@fastify/cors'), {

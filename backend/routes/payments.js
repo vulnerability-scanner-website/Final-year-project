@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const CHAPA_SECRET_KEY = process.env.CHAPA_SECRET_KEY || 'CHASECK_TEST-your-chapa-secret-key';
+const CHAPA_SECRET_KEY = process.env.CHAPA_SECRET_KEY || 'CHASECK_TEST-WkIFYnNAoscOkZGTknnxP7hhPA4J2nTX';
 const CHAPA_BASE_URL = 'https://api.chapa.co/v1';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
