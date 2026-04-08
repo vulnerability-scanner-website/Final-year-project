@@ -1,245 +1,243 @@
 "use client";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Sparkles as SparklesComp } from "@/components/ui/sparkles";
-import { TimelineContent } from "@/components/ui/timeline-animation";
-import {VerticalCutReveal} from "@/components/ui/vertical-cut-reveal";
+import { useEffect, useState } from "react";
+import { Check, Zap, Shield, Star, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CreditCardForm } from "@/components/ui/credit-card-form";
-import { motion } from "framer-motion";
-import { useRef, useState } from "react";
 
-const plans = [
-  {
-    name: "Basic",
-    description:
-      "Perfect for small projects and individual developers getting started",
-    price: 0,
-    yearlyPrice: 0, // No yearly option for Basic
-    buttonText: "Get started",
-    buttonVariant: "outline",
-    includes: [
-      "Basic Plan includes:",
-      "10 Security scans per month",
-      "Basic vulnerability detection",
-      "Email support",
-      "Scan history (30 days)",
-      "PDF reports",
-      "Dashboard access",
-    ],
-  },
-  {
-    name: "Professional",
-    description:
-      "Best for growing teams that need advanced security testing features",
-    price: 1500,
-    yearlyPrice: 15000,
-    buttonText: "Get started",
-    buttonVariant: "default",
-    popular: true,
-    includes: [
-      "Everything in Basic, plus:",
-      "50 Security scans per month",
-      "Advanced threat detection",
-      "Priority support",
-      "Scan history (90 days)",
-      "Detailed PDF reports",
-      "API access",
-      "Custom scan configurations",
-    ],
-  },
-  {
-    name: "Enterprise",
-    description:
-      "Complete solution for large organizations with unlimited security needs",
-    price: 4000,
-    yearlyPrice: 40000,
-    buttonText: "Contact Sales",
-    buttonVariant: "outline",
-    includes: [
-      "Everything in Professional, plus:",
-      "Unlimited security scans",
-      "AI-powered threat detection",
-      "24/7 dedicated support",
-      "Unlimited scan history",
-      "Advanced analytics dashboard",
-      "Full API access",
-      "Custom integrations",
-      "Compliance reports",
-    ],
-  },
-];
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
-const PricingSwitch = ({ onSwitch }) => {
-  const [selected, setSelected] = useState("0");
+const PLAN_ICONS = {
+  Free:         <Shield className="h-5 w-5 text-white/40" />,
+  Basic:        <Zap className="h-5 w-5 text-yellow-400" />,
+  Professional: <Star className="h-5 w-5 text-orange-400" />,
+  Enterprise:   <Shield className="h-5 w-5 text-purple-400" />,
+};
 
-  const handleSwitch = (value) => {
-    setSelected(value);
-    onSwitch(value);
-  };
-
-  return (
-    <div className="flex justify-center">
-      <div className="relative z-10 mx-auto flex w-fit rounded-full bg-[#1a1a1a] border border-white/10 p-1">
-        <button
-          onClick={() => handleSwitch("0")}
-          className={cn(
-            "relative z-10 w-fit h-9 rounded-full sm:px-6 px-3 font-medium transition-colors text-sm",
-            selected === "0" ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-black shadow" : "text-white/50",
-          )}
-        >
-          Monthly
-        </button>
-        <button
-          onClick={() => handleSwitch("1")}
-          className={cn(
-            "relative z-10 w-fit h-9 rounded-full sm:px-6 px-3 font-medium transition-colors text-sm",
-            selected === "1" ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-black shadow" : "text-white/50",
-          )}
-        >
-          Yearly
-        </button>
-      </div>
-    </div>
-  );
+const PLAN_STYLES = {
+  Free:         "border-white/10 bg-[#1a1a1a]",
+  Basic:        "border-yellow-500/30 bg-gradient-to-b from-yellow-500/5 to-transparent",
+  Professional: "border-orange-500/40 bg-gradient-to-b from-orange-500/10 to-transparent shadow-lg shadow-orange-500/10",
+  Enterprise:   "border-purple-500/30 bg-gradient-to-b from-purple-500/5 to-transparent",
 };
 
 export default function PricingSection4() {
-  const [isYearly, setIsYearly] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const pricingRef = useRef(null);
+  const [plans, setPlans] = useState([]);
+  const [subscription, setSubscription] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [initiating, setInitiating] = useState(null);
+  const [error, setError] = useState(null);
 
-  const revealVariants = {
-    visible: (i) => ({
-      y: 0,
-      opacity: 1,
-      filter: "blur(0px)",
-      transition: {
-        delay: i * 0.4,
-        duration: 0.5,
-      },
-    }),
-    hidden: {
-      filter: "blur(10px)",
-      y: -20,
-      opacity: 0,
-    },
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const headers = { Authorization: `Bearer ${token}` };
 
-  const handleGetStarted = async (plan) => {
-    setSelectedPlan(plan);
-    setLoading(true);
+        const [plansRes, subRes] = await Promise.all([
+          fetch(`${API}/api/pricing`),
+          fetch(`${API}/api/payments/subscription`, { headers }),
+        ]);
+
+        const plansData = await plansRes.json();
+        const subData = await subRes.json();
+
+        // Sort: Free, Basic, Professional, Enterprise
+        const order = ["Free", "Basic", "Professional", "Enterprise"];
+        const sorted = [...plansData].sort(
+          (a, b) => order.indexOf(a.name) - order.indexOf(b.name)
+        );
+
+        setPlans(sorted);
+        setSubscription(subData);
+      } catch (err) {
+        setError("Failed to load plans");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleSubscribe = async (plan) => {
+    // Free plan — no payment needed
+    if (parseFloat(plan.price) === 0) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) { window.location.href = "/auth/login"; return; }
+
+    setInitiating(plan.id);
+    setError(null);
+
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        window.location.href = '/auth/login';
-        return;
-      }
-
-      // First get plan id from backend by matching name
-      const plansRes = await fetch('/api/pricing');
-      const backendPlans = await plansRes.json();
-      const matchedPlan = backendPlans.find(
-        (p) => p.name.toLowerCase() === plan.name.toLowerCase()
-      );
-
-      if (!matchedPlan) {
-        alert('Plan not found. Please contact admin.');
-        return;
-      }
-
-      const res = await fetch('/api/payments/initiate', {
-        method: 'POST',
+      const res = await fetch(`${API}/api/payments/initiate`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ plan_id: matchedPlan.id }),
+        body: JSON.stringify({ plan_id: plan.id }),
       });
 
       const data = await res.json();
+
       if (data.checkout_url) {
         window.location.href = data.checkout_url;
       } else {
-        alert(data.error || 'Failed to initiate payment');
+        setError(data.error || "Failed to initiate payment. Please try again.");
       }
     } catch (err) {
-      console.error(err);
-      alert('Payment initiation failed');
+      setError("Payment initiation failed. Check your connection.");
     } finally {
-      setLoading(false);
+      setInitiating(null);
     }
   };
 
-  const togglePricingPeriod = (value) =>
-    setIsYearly(Number.parseInt(value) === 1);
+  const isCurrentPlan = (plan) => {
+    if (!subscription) return false;
+    if (subscription.status === "free" && plan.name === "Free") return true;
+    if (subscription.status === "active" && subscription.plan_name === plan.name) return true;
+    return false;
+  };
+
+  const getButtonLabel = (plan) => {
+    if (isCurrentPlan(plan)) return "Current Plan";
+    if (parseFloat(plan.price) === 0) return "Free Plan";
+    return "Subscribe Now";
+  };
+
+  const getFeatures = (plan) => {
+    try {
+      return Array.isArray(plan.features)
+        ? plan.features
+        : JSON.parse(plan.features || "[]");
+    } catch { return []; }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#101010] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 text-yellow-400 animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen w-full relative bg-[#101010] overflow-x-hidden" ref={pricingRef}>
-      <article className="text-center mb-6 px-4 max-w-3xl mx-auto space-y-2 relative z-50">
-        <h2 className="text-4xl font-bold text-white">
-          Choose Your Security Scanning Plan
+    <div className="min-h-screen w-full bg-[#101010] px-4 py-10">
+      {/* Header */}
+      <div className="text-center mb-10 space-y-2">
+        <h2 className="text-3xl md:text-4xl font-bold text-white">
+          Choose Your Security Plan
         </h2>
-        <p className="text-white/40">
-          Secure your applications with our comprehensive vulnerability scanning solutions.
+        <p className="text-white/40 text-sm">
+          Secure your applications with our vulnerability scanning solutions.
         </p>
-        <PricingSwitch onSwitch={togglePricingPeriod} />
-      </article>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 max-w-5xl gap-6 py-8 mx-auto px-4">
-        {plans.map((plan) => (
-          <div key={plan.name}>
-            <Card className={`relative border ${
-              plan.popular
-                ? "bg-gradient-to-b from-yellow-500/10 to-orange-500/10 border-yellow-500/40 shadow-lg shadow-yellow-500/10"
-                : "bg-[#1a1a1a] border-white/10"
-            }`}>
-              {plan.popular && (
+      {/* Current subscription banner */}
+      {subscription && subscription.status === "active" && (
+        <div className="max-w-5xl mx-auto mb-6 bg-green-500/10 border border-green-500/20 rounded-xl px-5 py-3 flex items-center gap-3">
+          <Check className="h-5 w-5 text-green-400 shrink-0" />
+          <p className="text-green-400 text-sm">
+            You are on the <span className="font-bold">{subscription.plan_name}</span> plan.
+            Expires: {subscription.end_date ? new Date(subscription.end_date).toLocaleDateString() : "—"}
+          </p>
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div className="max-w-5xl mx-auto mb-6 bg-red-500/10 border border-red-500/20 rounded-xl px-5 py-3">
+          <p className="text-red-400 text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* Plans grid — exactly 4 cards: 1 col mobile, 2 col tablet, 4 col desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 max-w-6xl gap-5 mx-auto">
+        {plans.map((plan) => {
+          const features = getFeatures(plan);
+          const isCurrent = isCurrentPlan(plan);
+          const isPopular = plan.name === "Professional";
+          const isFree = parseFloat(plan.price) === 0;
+          const isLoading = initiating === plan.id;
+
+          return (
+            <div
+              key={plan.id}
+              className={cn(
+                "relative rounded-2xl border p-6 flex flex-col gap-5 transition-all duration-300",
+                PLAN_STYLES[plan.name] || "border-white/10 bg-[#1a1a1a]",
+                isCurrent && "ring-2 ring-yellow-500/50"
+              )}
+            >
+              {isPopular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-xs font-bold px-3 py-1 rounded-full">Most Popular</span>
+                  <span className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-xs font-bold px-3 py-1 rounded-full">
+                    Most Popular
+                  </span>
                 </div>
               )}
-              <CardHeader className="text-left">
-                <h3 className={`text-2xl font-bold mb-1 ${plan.popular ? 'text-yellow-400' : 'text-white'}`}>{plan.name}</h3>
-                <div className="flex items-baseline">
-                  <span className="text-4xl font-bold text-white">
-                    {isYearly ? plan.yearlyPrice : plan.price} ETB
-                  </span>
-                  <span className="ml-1 text-sm text-white/40">
-                    /{isYearly ? "year" : "month"}
+
+              {isCurrent && (
+                <div className="absolute -top-3 right-4">
+                  <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                    Active
                   </span>
                 </div>
-                <p className="text-sm mt-1 text-white/40">{plan.description}</p>
-              </CardHeader>
+              )}
 
-              <CardContent className="pt-0">
-                <button
-                  onClick={() => handleGetStarted(plan)}
-                  className={`w-full mb-6 py-3 text-base font-semibold rounded-lg cursor-pointer transition-opacity hover:opacity-90 ${
-                    plan.popular
-                      ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-black"
-                      : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
-                  }`}
-                >
-                  {plan.buttonText}{loading && selectedPlan?.name === plan.name ? '...' : ''}
-                </button>
-
-                <div className={`space-y-3 pt-4 border-t ${plan.popular ? 'border-yellow-500/20' : 'border-white/10'}`}>
-                  <h4 className="font-semibold text-sm mb-3 text-white/50">{plan.includes[0]}</h4>
-                  <ul className="space-y-2">
-                    {plan.includes.slice(1).map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center gap-2">
-                        <span className={`h-2 w-2 rounded-full flex-shrink-0 ${plan.popular ? 'bg-yellow-400' : 'bg-orange-400'}`}></span>
-                        <span className="text-sm text-white/60">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+              {/* Plan name & price */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  {PLAN_ICONS[plan.name] || <Zap className="h-5 w-5 text-white/40" />}
+                  <h3 className="text-lg font-bold text-white">{plan.name}</h3>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        ))}
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-bold text-white">
+                    {isFree ? "Free" : `${parseFloat(plan.price).toLocaleString()} ETB`}
+                  </span>
+                  {!isFree && <span className="text-white/40 text-sm">/month</span>}
+                </div>
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-2 flex-1">
+                {features.map((feature, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-yellow-400 shrink-0 mt-0.5" />
+                    <span className="text-sm text-white/60">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Button */}
+              <button
+                onClick={() => !isCurrent && !isFree && handleSubscribe(plan)}
+                disabled={isCurrent || isFree || isLoading}
+                className={cn(
+                  "w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2",
+                  isCurrent
+                    ? "bg-green-500/10 text-green-400 border border-green-500/20 cursor-default"
+                    : isFree
+                    ? "bg-white/5 text-white/40 border border-white/10 cursor-default"
+                    : isPopular
+                    ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-black hover:opacity-90 cursor-pointer"
+                    : "bg-white/5 border border-white/10 text-white hover:bg-white/10 cursor-pointer"
+                )}
+              >
+                {isLoading ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</>
+                ) : (
+                  getButtonLabel(plan)
+                )}
+              </button>
+            </div>
+          );
+        })}
       </div>
+
+      {/* Chapa note */}
+      <p className="text-center text-white/20 text-xs mt-8">
+        Payments are securely processed by Chapa. You will be redirected to complete your payment.
+      </p>
     </div>
   );
 }
