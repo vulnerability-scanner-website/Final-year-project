@@ -28,7 +28,7 @@ class AuthController {
       try {
         const result = await client.query(
           'INSERT INTO users (email, password, role, status) VALUES ($1, $2, $3, $4) RETURNING id, email, role, status, created_at',
-          [sanitizedEmail, hashedPassword, role, 'pending']
+          [sanitizedEmail, hashedPassword, role, 'active']
         );
         
         const user = result.rows[0];
@@ -40,23 +40,23 @@ class AuthController {
         });
 
         await this.notificationModel.notifyAdmins(
-          `New user registered: ${sanitizedEmail} (${role}) - Account pending approval`,
+          `New user registered: ${sanitizedEmail} (${role}) - Account auto-approved`,
           'user',
           '👤 New User Registration'
         );
 
         await this.notificationModel.create(
           user.id,
-          'Welcome! Your account has been created and is pending admin approval. You will be notified once approved.',
-          'info',
-          '👋 Welcome'
+          'Welcome! Your account has been created and is ready to use. You can start scanning now.',
+          'success',
+          '🎉 Welcome to CyberTrace'
         );
         
         return { 
           success: true, 
           token, 
           user,
-          message: 'Registration successful. Your account is pending admin approval.' 
+          message: 'Registration successful. Your account is ready to use.' 
         };
       } finally {
         client.release();

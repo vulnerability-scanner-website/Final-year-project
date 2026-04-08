@@ -11,11 +11,20 @@ import { useRouter } from "next/navigation";
 export function DashboardHeader({ role, onActionClick }) {
   const [showNewScanDialog, setShowNewScanDialog] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [userRole, setUserRole] = useState("developer");
   const router = useRouter();
 
+  // Get actual user role from localStorage
+  useEffect(() => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      if (user.role) setUserRole(user.role);
+    } catch {}
+  }, []);
+
   const notifPath =
-    role === "admin"     ? "/dashboard/admin/notifications"
-    : role === "developer" ? "/dashboard/developer/notifications"
+    userRole === "admin"     ? "/dashboard/admin/notifications"
+    : userRole === "developer" ? "/dashboard/developer/notifications"
     : "/dashboard/analyst/notifications";
 
   const fetchUnread = useCallback(async () => {
