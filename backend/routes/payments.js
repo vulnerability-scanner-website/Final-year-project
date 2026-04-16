@@ -143,7 +143,7 @@ module.exports = async function (fastify, opts) {
                VALUES ($1, $2, $3, $4)`,
               [
                 admin.id,
-                '💳 New Subscription Payment',
+                'New Subscription Payment',
                 `User ${sub.email} subscribed to ${sub.plan_name} plan. Payment auto-verified.`,
                 'success'
               ]
