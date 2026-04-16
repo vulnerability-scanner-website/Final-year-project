@@ -31,21 +31,15 @@ class ScanController {
   async getAll(request, reply) {
     try {
       if (scanStorage.TEMPORARY_SCAN_MODE) {
-        // Return in-memory scans only
         const scans = [];
         for (const [scanId, result] of scanResults.entries()) {
-          scans.push({
-            id: scanId,
-            target: result.target,
-            status: result.status,
-            created_at: result.created_at,
-            issues: result.vulnerabilities?.length || 0
-          });
+          scans.push({ id: scanId, target: result.target, status: result.status, created_at: result.created_at, issues: result.vulnerabilities?.length || 0 });
         }
         return scans;
       }
-      
-      const scans = await this.scanModel.findByUserId(request.user.id);
+      // Admin sees all scans, others see only their own
+      const userId = request.user.role === 'admin' ? 'admin' : request.user.id;
+      const scans = await this.scanModel.findByUserId(userId);
       return scans;
     } catch (error) {
       console.error('Get scans error:', error);
@@ -58,19 +52,16 @@ class ScanController {
       const scanId = parseInt(request.params.id);
       
       if (scanStorage.TEMPORARY_SCAN_MODE) {
-        // Return from memory
         const scan = scanResults.get(scanId);
-        if (!scan) {
-          return reply.code(404).send({ error: 'Scan not found or expired' });
-        }
+        if (!scan) return reply.code(404).send({ error: 'Scan not found or expired' });
         return scan;
       }
       
-      const scan = await this.scanModel.findById(request.params.id, request.user.id);
+      // Admin can view any scan
+      const userId = request.user.role === 'admin' ? 'admin' : request.user.id;
+      const scan = await this.scanModel.findById(scanId, userId);
       
-      if (!scan) {
-        return reply.code(404).send({ error: 'Scan not found' });
-      }
+      if (!scan) return reply.code(404).send({ error: 'Scan not found' });
       
       return scan;
     } catch (error) {
