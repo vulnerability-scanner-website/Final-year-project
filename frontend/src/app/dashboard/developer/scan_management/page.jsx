@@ -71,20 +71,7 @@ export default function ScanManagement() {
       <DashboardHeader role="scanmanagement" onActionClick={() => setOpenDialog(true)} />
 
       <div className="space-y-6 px-1">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Scan Management</h1>
-            <p className="text-white/40 text-sm">Monitor and manage your security scans</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={fetchScans} className="p-2 rounded-lg text-white/40 hover:text-yellow-400 hover:bg-yellow-500/10 transition">
-              <RefreshCw className="w-4 h-4" />
-            </button>
-            <button onClick={() => setOpenDialog(true)} className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg transition text-sm">
-              <Plus className="w-4 h-4" /> New Scan
-            </button>
-          </div>
-        </div>
+        
 
         <Tabs defaultValue="active">
           <TabsList className="grid w-full grid-cols-2 max-w-md h-12 bg-[#1a1a1a] border border-white/10 p-1 rounded-lg">

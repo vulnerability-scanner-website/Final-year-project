@@ -31,14 +31,16 @@ export default function ScanDetailPage({ backPath }) {
       if (res.ok) {
         const data = await res.json();
         setScan(data);
-        // Stop polling once completed/failed
         if (data.status === 'Completed' || data.status === 'Failed') {
           clearInterval(pollRef.current);
           setProgress({ progress: data.status === 'Completed' ? 100 : 0, message: data.status });
         }
+      } else {
+        clearInterval(pollRef.current);
       }
     } catch (e) {
       console.error('Failed to fetch scan:', e);
+      clearInterval(pollRef.current);
     } finally {
       setLoading(false);
     }
@@ -93,8 +95,16 @@ export default function ScanDetailPage({ backPath }) {
   );
 
   if (!scan) return (
-    <div className="w-full min-h-screen bg-[#101010] flex items-center justify-center">
-      <p className="text-white/40">Scan not found.</p>
+    <div className="w-full min-h-screen bg-[#101010] flex flex-col items-center justify-center gap-4">
+      <Shield className="w-12 h-12 text-white/20" />
+      <p className="text-white/40 text-lg">Scan not found.</p>
+      <p className="text-white/20 text-sm">This scan may not exist or you don't have permission to view it.</p>
+      <button
+        onClick={() => router.push(backPath)}
+        className="flex items-center gap-2 mt-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-black font-semibold rounded-lg transition text-sm"
+      >
+        <ArrowLeft className="w-4 h-4" /> Back to Scans
+      </button>
     </div>
   );
 
@@ -109,7 +119,7 @@ export default function ScanDetailPage({ backPath }) {
   }, {});
 
   return (
-    <div className="w-full min-h-screen bg-[#101010] text-white space-y-6">
+    <div className="w-full min-h-screen bg-[#101010] text-white space-y-6 p-1">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

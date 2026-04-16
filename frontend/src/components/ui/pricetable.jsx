@@ -203,7 +203,7 @@ export default function PricingTable() {
       {/* Note */}
       <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4">
         <p className="text-sm text-yellow-400/70">
-          <span className="font-semibold text-yellow-400">Note:</span> Payments are processed via Chapa. Admin can manually confirm or activate subscriptions.
+          <span className="font-semibold text-yellow-400">Note:</span> Payments are processed via Chapa.
         </p>
       </div>
     </div>

@@ -19,15 +19,15 @@ class ScanModel {
   async findById(id, userId) {
     const client = await this.pg.connect();
     try {
-      // Get scan
+      // Get scan — admin can see all scans, others only their own
       const scanResult = await client.query(
-        'SELECT * FROM scans WHERE id = $1 AND user_id = $2',
-        [id, userId]
+        userId === 'admin'
+          ? 'SELECT * FROM scans WHERE id = $1'
+          : 'SELECT * FROM scans WHERE id = $1 AND user_id = $2',
+        userId === 'admin' ? [id] : [id, userId]
       );
       
-      if (scanResult.rows.length === 0) {
-        return null;
-      }
+      if (scanResult.rows.length === 0) return null;
       
       const scan = scanResult.rows[0];
       
@@ -60,10 +60,9 @@ class ScanModel {
   async findByUserId(userId) {
     const client = await this.pg.connect();
     try {
-      const result = await client.query(
-        'SELECT id, user_id, target, status, issues, duration, created_at FROM scans WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50',
-        [userId]
-      );
+      const result = userId === 'admin'
+        ? await client.query('SELECT id, user_id, target, status, issues, duration, created_at FROM scans ORDER BY created_at DESC LIMIT 100')
+        : await client.query('SELECT id, user_id, target, status, issues, duration, created_at FROM scans WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50', [userId]);
       return result.rows;
     } finally {
       client.release();
