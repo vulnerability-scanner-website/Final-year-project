@@ -148,7 +148,7 @@ const initDatabase = async (client) => {
 
       CREATE TABLE IF NOT EXISTS settings (
         id SERIAL PRIMARY KEY,
-        user_id INTEGER UNIQUE REFERENCES users(id),
+        user_id INTEGER UNIQUE,
         data JSONB,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
@@ -217,6 +217,11 @@ const initDatabase = async (client) => {
       END $$;
     `);
     
+    // Migration: drop FK on settings to allow user_id=0 for system settings
+    await client.query(`
+      ALTER TABLE settings DROP CONSTRAINT IF EXISTS settings_user_id_fkey;
+    `);
+
     // Create default admin user
     const hashedPassword = await bcrypt.hash('admin123', 10);
     await client.query(`
