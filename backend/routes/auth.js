@@ -15,4 +15,16 @@ module.exports = async function (fastify, opts) {
   }, async (request, reply) => {
     return authController.login(request, reply);
   });
+
+  fastify.post('/forgot-password', {
+    preHandler: validateInput(schemas.forgotPassword)
+  }, async (request, reply) => {
+    return authController.forgotPassword(request, reply);
+  });
+
+  fastify.post('/reset-password', {
+    preHandler: validateInput(schemas.resetPassword)
+  }, async (request, reply) => {
+    return authController.resetPassword(request, reply);
+  });
 };

@@ -124,6 +124,52 @@ class UserModel {
       client.release();
     }
   }
+
+  async saveResetToken(id, token, expires) {
+    const client = await this.pg.connect();
+    try {
+      await client.query(
+        'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE id = $3',
+        [token, expires, id]
+      );
+    } finally {
+      client.release();
+    }
+  }
+
+  async findByResetToken(token) {
+    const client = await this.pg.connect();
+    try {
+      const result = await client.query(
+        'SELECT id, email, reset_token_expires FROM users WHERE reset_token = $1',
+        [token]
+      );
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async updatePassword(id, hashedPassword) {
+    const client = await this.pg.connect();
+    try {
+      await client.query('UPDATE users SET password = $1 WHERE id = $2', [hashedPassword, id]);
+    } finally {
+      client.release();
+    }
+  }
+
+  async clearResetToken(id) {
+    const client = await this.pg.connect();
+    try {
+      await client.query(
+        'UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE id = $1',
+        [id]
+      );
+    } finally {
+      client.release();
+    }
+  }
 }
 
 module.exports = UserModel;

@@ -59,6 +59,23 @@ const schemas = {
     }
   },
 
+  forgotPassword: {
+    type: 'object',
+    required: ['email'],
+    properties: {
+      email: { type: 'string', format: 'email', maxLength: 255 }
+    }
+  },
+
+  resetPassword: {
+    type: 'object',
+    required: ['token', 'password'],
+    properties: {
+      token: { type: 'string', minLength: 1, maxLength: 255 },
+      password: { type: 'string', minLength: 8, maxLength: 128 }
+    }
+  },
+
   createScan: {
     type: 'object',
     required: ['target'],

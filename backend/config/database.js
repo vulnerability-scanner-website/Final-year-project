@@ -214,6 +214,12 @@ const initDatabase = async (client) => {
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='free_plan_start') THEN
           ALTER TABLE users ADD COLUMN free_plan_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
         END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='reset_token') THEN
+          ALTER TABLE users ADD COLUMN reset_token VARCHAR(255);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='reset_token_expires') THEN
+          ALTER TABLE users ADD COLUMN reset_token_expires TIMESTAMP;
+        END IF;
       END $$;
     `);
     

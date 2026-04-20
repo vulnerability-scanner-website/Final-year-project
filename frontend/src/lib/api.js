@@ -63,6 +63,20 @@ export const authAPI = {
     
     return data;
   },
+
+  forgotPassword: async (email) => {
+    return apiRequest('/api/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  resetPassword: async (token, password) => {
+    return apiRequest('/api/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, password }),
+    });
+  },
   
   logout: () => {
     localStorage.removeItem('token');

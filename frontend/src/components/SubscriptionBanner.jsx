@@ -13,14 +13,16 @@ export default function SubscriptionBanner({ role }) {
     const fetchSubscription = async () => {
       try {
         const token = localStorage.getItem("token");
+        if (!token) { setLoading(false); return; }
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/payments/subscription`,
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/payments/subscription`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        if (!res.ok) { setLoading(false); return; }
         const data = await res.json();
         setSubscription(data);
       } catch (err) {
-        console.error(err);
+        // silently fail — banner just won't show
       } finally {
         setLoading(false);
       }
