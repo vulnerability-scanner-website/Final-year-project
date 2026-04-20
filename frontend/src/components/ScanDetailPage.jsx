@@ -127,7 +127,7 @@ export default function ScanDetailPage({ backPath }) {
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-white">Scan #{scanId}</h1>
+            <h1 className="text-2xl font-bold text-white">Scan No.{scanId}</h1>
             <p className="text-white/40 text-sm truncate max-w-md">{scan.target}</p>
           </div>
         </div>

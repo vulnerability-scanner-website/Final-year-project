@@ -743,7 +743,7 @@ function LoginPage() {
                 </Label>
               </div>
               <a
-                href="#"
+                href="/auth/forgot-password"
                 className="text-sm text-primary hover:underline font-medium"
               >
                 Forgot password?
@@ -772,6 +772,7 @@ function LoginPage() {
               variant="outline"
               className="w-full h-12 bg-background border-border/60 hover:bg-accent"
               type="button"
+              onClick={() => window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/google`}
             >
               <Mail className="mr-2 size-5" />
               Log in with Google

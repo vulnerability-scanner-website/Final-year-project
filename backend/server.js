@@ -12,7 +12,7 @@ const fastify = require('fastify')({
 });
 const path = require('path');
 const { initDatabase } = require('./config/database');
-const { authenticate } = require('./middlewares/auth');
+const { authenticate, authorizeRoles } = require('./middlewares/auth');
 const { errorHandler } = require('./middlewares/errorHandler');
 const { multipartOptions } = require('./middlewares/fileValidation');
 const csrfProtection = require('./middlewares/csrf');
@@ -100,6 +100,7 @@ fastify.addHook('onReady', async function () {
 
 // Authentication decorator
 fastify.decorate('authenticate', authenticate);
+fastify.decorate('authorizeRoles', authorizeRoles);
 
 // CSRF Protection (after authentication) - TEMPORARILY DISABLED FOR TESTING
 // fastify.addHook('onRequest', csrfProtection.middleware());
