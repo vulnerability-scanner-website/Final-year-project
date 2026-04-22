@@ -81,6 +81,11 @@ class AuthController {
       if (!user) {
         return reply.code(401).send({ error: 'Invalid credentials' });
       }
+
+      // Check if user registered with Google
+      if (user.auth_provider === 'google') {
+        return reply.code(400).send({ error: 'This account uses Google login. Please sign in with Google.' });
+      }
       
       const validPassword = await bcrypt.compare(password, user.password);
       
@@ -123,6 +128,88 @@ class AuthController {
     } catch (error) {
       console.error('Login error:', error);
       return reply.code(500).send({ error: 'Internal server error' });
+    }
+  }
+
+  async googleCallback(request, reply) {
+    console.log('=== googleCallback method started ===');
+    console.log('User from request:', request.user);
+    
+    try {
+      const { email, googleId } = request.user;
+      console.log('Email:', email, 'GoogleId:', googleId);
+      
+      let user = await this.userModel.findByGoogleId(googleId);
+      console.log('User found by googleId:', user);
+      
+      if (!user) {
+        user = await this.userModel.findByEmail(email);
+        console.log('User found by email:', user);
+        
+        if (user && user.auth_provider === 'local') {
+          console.log('User exists with local auth');
+          return reply.code(400).send({ 
+            error: 'An account with this email already exists. Please login with email and password.' 
+          });
+        }
+        
+        if (!user) {
+          console.log('Creating new user');
+          user = await this.userModel.create(email, null, 'developer', 'google', googleId);
+          console.log('New user created:', user);
+          
+          await this.notificationModel.notifyAdmins(
+            `New user registered via Google: ${email} (developer) - Account auto-approved`,
+            'user',
+            '👤 New Google User Registration'
+          );
+
+          await this.notificationModel.create(
+            user.id,
+            'Welcome! Your account has been created via Google and is ready to use.',
+            'success',
+            '🎉 Welcome to CyberTrace'
+          );
+        }
+      }
+
+      if (user.status !== 'active') {
+        console.log('User not active');
+        return reply.code(403).send({ 
+          error: 'Account not active. Please contact support.' 
+        });
+      }
+      
+      console.log('Generating JWT token');
+      const token = this.fastify.jwt.sign({ 
+        id: user.id,
+        email: user.email, 
+        role: user.role 
+      });
+      console.log('Token generated');
+
+      if (user.role !== 'admin') {
+        await this.notificationModel.notifyAdmins(
+          `User ${email} (${user.role}) logged in via Google`,
+          'user',
+          '🔐 Google Login'
+        );
+      }
+
+      await this.notificationModel.create(
+        user.id,
+        'You have successfully logged in via Google.',
+        'info',
+        '🔐 Login Successful'
+      );
+
+      const redirectUrl = `${process.env.FRONTEND_URL}/auth/google/success?token=${token}&role=${user.role}`;
+      console.log('Redirecting to:', redirectUrl);
+      return reply.redirect(redirectUrl);
+    } catch (error) {
+      console.error('Google callback error:', error);
+      console.error('Error stack:', error.stack);
+      return reply.redirect(`${process.env.FRONTEND_URL}/auth/login?error=google_auth_failed`);
     }
   }
 }

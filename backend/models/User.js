@@ -39,8 +39,21 @@ class UserModel {
     const client = await this.pg.connect();
     try {
       const result = await client.query(
-        'SELECT id, email, password, role, status, created_at FROM users WHERE email = $1',
+        'SELECT id, email, password, role, status, google_id, auth_provider, created_at FROM users WHERE email = $1',
         [email]
+      );
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async findByGoogleId(googleId) {
+    const client = await this.pg.connect();
+    try {
+      const result = await client.query(
+        'SELECT id, email, password, role, status, google_id, auth_provider, created_at FROM users WHERE google_id = $1',
+        [googleId]
       );
       return result.rows[0];
     } finally {
@@ -65,12 +78,12 @@ class UserModel {
   // ========================
   // Create new user
   // ========================
-  async create(email, hashedPassword, role = 'user') {
+  async create(email, hashedPassword, role = 'user', authProvider = 'local', googleId = null) {
     const client = await this.pg.connect();
     try {
       const result = await client.query(
-        'INSERT INTO users (email, password, role, status) VALUES ($1, $2, $3, $4) RETURNING id, email, role, status, created_at',
-        [email, hashedPassword, role, 'active']
+        'INSERT INTO users (email, password, role, status, auth_provider, google_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, role, status, auth_provider, google_id, created_at',
+        [email, hashedPassword, role, 'active', authProvider, googleId]
       );
       return result.rows[0];
     } finally {
