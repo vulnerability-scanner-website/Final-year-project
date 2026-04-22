@@ -220,8 +220,8 @@ export function DesignAgency() {
       )}
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 overflow-hidden">
-          <div className="container px-4 md:px-6 border border-muted rounded-3xl bg-gradient-to-br from-background to-muted/30">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 overflow-hidden px-4 md:px-6">
+          <div className="w-full max-w-none border border-muted rounded-3xl bg-gradient-to-br from-background to-muted/30">
             <div className="grid gap-3 lg:grid-cols-[1fr_400px] lg:gap-3 xl:grid-cols-[1fr_600px]">
               <motion.div
                 initial="hidden"
@@ -315,13 +315,13 @@ export function DesignAgency() {
         </section>
 
         {/* Client Logos */}
-        <section id="clients" className="w-full py-12 md:py-16 lg:py-20">
+        <section id="clients" className="w-full py-12 md:py-16 lg:py-20 px-4 md:px-6">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
-            className="container px-4 md:px-6 border border-muted rounded-3xl bg-muted/20"
+            className="w-full max-w-none border border-muted rounded-3xl bg-muted/20"
           >
             <div className="flex flex-col items-center justify-center space-y-4 text-center py-10">
               <div className="space-y-3">
@@ -385,13 +385,13 @@ export function DesignAgency() {
         </section>
 
         {/* Services Section */}
-        <section id="services" className="w-full py-12 md:py-24 lg:py-32">
+        <section id="services" className="w-full py-12 md:py-24 lg:py-32 px-4 md:px-6">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
-            className="container px-4 md:px-6"
+            className="w-full max-w-none"
           >
             <div className="flex flex-col items-center justify-center space-y-4 text-center py-10">
               <div className="space-y-3">
@@ -446,13 +446,13 @@ export function DesignAgency() {
         </section>
 
         {/* Portfolio/Work Slider */}
-        <section id="work" className="w-full py-12 md:py-24 lg:py-32">
+        <section id="work" className="w-full py-12 md:py-24 lg:py-32 px-4 md:px-6">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
-            className="container px-4 md:px-6 border border-muted rounded-3xl bg-muted/10"
+            className="w-full max-w-none border border-muted rounded-3xl bg-muted/10"
           >
             <div className="flex flex-col items-center justify-center space-y-4 text-center py-10">
               <div className="space-y-3">
@@ -542,13 +542,13 @@ export function DesignAgency() {
         </section>
 
         {/* About/Team Section */}
-        <section id="about" className="w-full py-12 md:py-24 lg:py-32">
+        <section id="about" className="w-full py-12 md:py-24 lg:py-32 px-4 md:px-6">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
-            className="container px-4 md:px-6 border border-muted rounded-3xl"
+            className="w-full max-w-none border border-muted rounded-3xl"
           >
             <div className="grid gap-3 lg:grid-cols-2 lg:gap-3">
               <motion.div
@@ -617,13 +617,13 @@ export function DesignAgency() {
         </section>
 
         {/* Testimonials */}
-        <section className="w-full py-12 md:py-24 lg:py-32">
+        <section className="w-full py-12 md:py-24 lg:py-32 px-4 md:px-6">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
-            className="container px-4 md:px-6"
+            className="w-full max-w-none"
           >
             <div className="flex flex-col items-center justify-center space-y-4 text-center py-10">
               <div className="space-y-3">
@@ -698,13 +698,13 @@ export function DesignAgency() {
         </section>
 
         {/* Contact Section */}
-        <section id="contact" className="w-full py-12 md:py-24 lg:py-32">
+        <section id="contact" className="w-full py-12 md:py-24 lg:py-32 px-4 md:px-6">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeIn}
-            className="container grid items-center gap-3 px-4 md:px-6 lg:grid-cols-2 border border-muted rounded-3xl"
+            className="w-full max-w-none grid items-center gap-3 lg:grid-cols-2 border border-muted rounded-3xl"
           >
             <motion.div
               initial={{ opacity: 0, x: -50 }}
