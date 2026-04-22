@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const UserModel = require('../models/User');
 const NotificationModel = require('../models/Notification');
 const { validator } = require('../middlewares/validation');
@@ -210,6 +211,72 @@ class AuthController {
       console.error('Google callback error:', error);
       console.error('Error stack:', error.stack);
       return reply.redirect(`${process.env.FRONTEND_URL}/auth/login?error=google_auth_failed`);
+    }
+  }
+
+  async forgotPassword(request, reply) {
+    const { email } = request.body || {};
+    const sanitizedEmail = validator.sanitizeString(email, 255).toLowerCase();
+
+    try {
+      const user = await this.userModel.findByEmail(sanitizedEmail);
+      
+      if (!user) {
+        return { success: true, message: 'If email exists, reset link sent' };
+      }
+
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hour
+
+      await this.userModel.saveResetToken(user.id, resetToken, resetTokenExpires);
+
+      // In production, send email here
+      console.log(`Reset token for ${sanitizedEmail}: ${resetToken}`);
+      console.log(`Reset URL: ${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`);
+
+      await this.notificationModel.create(
+        user.id,
+        `Password reset requested. Token expires in 1 hour.`,
+        'info',
+        '🔑 Password Reset'
+      );
+
+      return { success: true, message: 'If email exists, reset link sent' };
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      return reply.code(500).send({ error: 'Internal server error' });
+    }
+  }
+
+  async resetPassword(request, reply) {
+    const { token, password } = request.body || {};
+
+    if (!token || !password) {
+      return reply.code(400).send({ error: 'Token and password required' });
+    }
+
+    try {
+      const user = await this.userModel.findByResetToken(token);
+
+      if (!user || new Date() > new Date(user.reset_token_expires)) {
+        return reply.code(400).send({ error: 'Invalid or expired token' });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, this.saltRounds);
+      await this.userModel.updatePassword(user.id, hashedPassword);
+      await this.userModel.clearResetToken(user.id);
+
+      await this.notificationModel.create(
+        user.id,
+        'Your password has been successfully reset.',
+        'success',
+        '✅ Password Changed'
+      );
+
+      return { success: true, message: 'Password reset successful' };
+    } catch (error) {
+      console.error('Reset password error:', error);
+      return reply.code(500).send({ error: 'Internal server error' });
     }
   }
 }
