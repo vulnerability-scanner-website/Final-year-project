@@ -772,6 +772,7 @@ function LoginPage() {
               variant="outline"
               className="w-full h-12 bg-background border-border/60 hover:bg-accent"
               type="button"
+              onClick={() => window.location.href = 'http://localhost:5001/api/auth/google'}
             >
               <Mail className="mr-2 size-5" />
               Log in with Google
