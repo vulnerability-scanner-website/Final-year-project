@@ -143,10 +143,10 @@ export function DesignAgency() {
             </Link>
           </nav>
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="outline" size="sm" className="rounded-3xl" asChild>
+            <Button variant="outline" size="sm" className="btn-secondary rounded-3xl" asChild>
               <Link href="/auth/login">Log In</Link>
             </Button>
-            <Button size="sm" className="rounded-3xl" asChild>
+            <Button size="sm" className="btn-primary rounded-3xl" asChild>
               <Link href="/auth/signup">Get Started</Link>
             </Button>
           </div>
@@ -208,10 +208,10 @@ export function DesignAgency() {
               variants={itemFadeIn}
               className="flex flex-col gap-3 pt-4"
             >
-              <Button variant="outline" className="w-full rounded-3xl" asChild>
+              <Button variant="outline" className="btn-secondary w-full rounded-3xl" asChild>
                 <Link href="/auth/login">Log In</Link>
               </Button>
-              <Button className="w-full rounded-3xl" asChild>
+              <Button className="btn-primary w-full rounded-3xl" asChild>
                 <Link href="/auth/signup">Get Started</Link>
               </Button>
             </motion.div>
@@ -268,7 +268,7 @@ export function DesignAgency() {
                   transition={{ duration: 0.7, delay: 0.6 }}
                   className="flex flex-col gap-3 sm:flex-row"
                 >
-                  <Button size="lg" className="rounded-3xl group" asChild>
+                  <Button size="lg" className="btn-primary rounded-3xl group" asChild>
                     <Link href="/auth/signup">
                       Start Security Scan
                       <motion.span
@@ -287,7 +287,7 @@ export function DesignAgency() {
                   <Button
                     variant="outline"
                     size="lg"
-                    className="rounded-3xl"
+                    className="btn-secondary rounded-3xl"
                     asChild
                   >
                     <Link href="#services">View Security Services</Link>
@@ -576,10 +576,10 @@ export function DesignAgency() {
                   deliver comprehensive protection for modern businesses.
                 </p>
                 <div className="flex flex-col gap-3 sm:flex-row">
-                  <Button variant="outline" size="lg" className="rounded-3xl" asChild>
+                  <Button variant="outline" size="lg" className="btn-secondary rounded-3xl" asChild>
                     <Link href="/process">Our Process</Link>
                   </Button>
-                  <Button variant="outline" size="lg" className="rounded-3xl" asChild>
+                  <Button variant="outline" size="lg" className="btn-secondary rounded-3xl" asChild>
                     <Link href="/careers">Join Our Team</Link>
                   </Button>
                 </div>
@@ -862,7 +862,7 @@ export function DesignAgency() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Button type="submit" className="w-full rounded-3xl">
+                  <Button type="submit" className="btn-primary w-full rounded-3xl">
                     Send Message
                   </Button>
                 </motion.div>
@@ -1028,7 +1028,7 @@ export function DesignAgency() {
                 placeholder="Enter your email"
                 className="max-w-lg flex-1 rounded-3xl"
               />
-              <Button type="submit" className="rounded-3xl">
+              <Button type="submit" className="btn-primary rounded-3xl">
                 Subscribe
               </Button>
             </form>

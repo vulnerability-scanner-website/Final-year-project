@@ -10,11 +10,11 @@ export default function UpgradePlanModal({ open, onClose, scansUsed = 3, role = 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
-      <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 max-w-md w-full relative shadow-2xl">
+      <div className="card-elevated max-w-md w-full relative shadow-2xl">
         {/* Close */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/10 transition"
+          className="btn-ghost absolute top-4 right-4 p-1.5"
         >
           <X size={16} />
         </button>
@@ -36,7 +36,7 @@ export default function UpgradePlanModal({ open, onClose, scansUsed = 3, role = 
         </div>
 
         {/* Features teaser */}
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 space-y-2">
+        <div className="card-default mb-6 space-y-2">
           {[
             "10–Unlimited scans per month",
             "Advanced vulnerability detection",
@@ -55,16 +55,16 @@ export default function UpgradePlanModal({ open, onClose, scansUsed = 3, role = 
           <div className="relative group">
             <button
               onClick={() => { onClose(); router.push(pricePath); }}
-              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:opacity-90 text-black font-bold py-3 rounded-xl transition flex items-center justify-center gap-2"
+              className="btn-primary w-full flex items-center justify-center gap-2"
             >
               <Zap className="h-4 w-4" /> Upgrade Plan
             </button>
-            <span className="absolute top-0 right-0 w-0 h-0 border-t-2 border-r-2 border-orange-400 group-hover:w-5 group-hover:h-5 transition-all duration-300" />
-            <span className="absolute bottom-0 left-0 w-0 h-0 border-b-2 border-l-2 border-orange-400 group-hover:w-5 group-hover:h-5 transition-all duration-300" />
+            <span className="absolute top-0 right-0 w-0 h-0 border-t-2 border-r-2 border-[#F97316] group-hover:w-5 group-hover:h-5 transition-all duration-300" />
+            <span className="absolute bottom-0 left-0 w-0 h-0 border-b-2 border-l-2 border-[#F97316] group-hover:w-5 group-hover:h-5 transition-all duration-300" />
           </div>
           <button
             onClick={onClose}
-            className="w-full text-white/40 hover:text-white text-sm transition py-2"
+            className="btn-ghost w-full text-sm py-2"
           >
             Maybe later
           </button>

@@ -66,12 +66,12 @@ export default function NewScanDialog({ open, onOpenChange, role }) {
     }
   }
 
-  const inputClass = "w-full mt-1 bg-[#101010] border border-white/10 text-white placeholder-white/30 px-3 py-2 rounded-lg focus:outline-none focus:border-yellow-500 transition text-sm";
+  const inputClass = "input-default";
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md bg-[#1a1a1a] border border-white/10 text-white">
+        <DialogContent className="card-elevated text-white">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <DialogHeader>
@@ -123,11 +123,11 @@ export default function NewScanDialog({ open, onOpenChange, role }) {
 
               <DialogFooter className="gap-2">
                 <DialogClose asChild>
-                  <button type="button" className="px-4 py-2 text-sm border border-white/10 text-white/60 hover:text-white rounded-lg transition">
+                  <button type="button" className="btn-secondary text-sm">
                     Cancel
                   </button>
                 </DialogClose>
-                <button type="submit" disabled={submitting} className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 disabled:opacity-50 text-black font-semibold px-4 py-2 rounded-lg transition text-sm">
+                <button type="submit" disabled={submitting} className="btn-primary flex items-center gap-2 text-sm">
                   {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                   {submitting ? 'Starting...' : 'Start Scan'}
                 </button>

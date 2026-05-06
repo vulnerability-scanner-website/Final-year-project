@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { generateBankStatementPDF } from "@/utils/bankStatementPDF";
+import { getPaymentBadge } from "@/lib/design-system";
 
 export function BankStatementReport() {
   const [transactions, setTransactions] = useState([]);
@@ -108,9 +109,9 @@ export function BankStatementReport() {
 
   const getStatusBadge = (status) => {
     const variants = {
-      paid: "bg-green-500/10 text-green-400 border-green-500/20",
-      pending: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-      failed: "bg-red-500/10 text-red-400 border-red-500/20",
+      paid: "badge-success",
+      pending: "badge-warning",
+      failed: "badge-error",
     };
     return variants[status] || variants.pending;
   };
@@ -144,7 +145,7 @@ export function BankStatementReport() {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
-        <Card className="bg-[#1a1a1a] border-green-500/20">
+        <Card className="card-default border-green-500/20">
           <CardHeader className="pb-2">
             <CardDescription className="text-green-400/70 text-xs">
               Total Revenue
@@ -160,7 +161,7 @@ export function BankStatementReport() {
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1a1a1a] border-blue-500/20">
+        <Card className="card-default border-blue-500/20">
           <CardHeader className="pb-2">
             <CardDescription className="text-blue-400/70 text-xs">
               Total Transactions
@@ -176,7 +177,7 @@ export function BankStatementReport() {
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1a1a1a] border-green-500/20">
+        <Card className="card-default border-green-500/20">
           <CardHeader className="pb-2">
             <CardDescription className="text-green-400/70 text-xs">
               Successful
@@ -189,7 +190,7 @@ export function BankStatementReport() {
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1a1a1a] border-yellow-500/20">
+        <Card className="card-default border-yellow-500/20">
           <CardHeader className="pb-2">
             <CardDescription className="text-yellow-400/70 text-xs">
               Pending
@@ -202,7 +203,7 @@ export function BankStatementReport() {
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1a1a1a] border-red-500/20">
+        <Card className="card-default border-red-500/20">
           <CardHeader className="pb-2">
             <CardDescription className="text-red-400/70 text-xs">
               Failed
@@ -217,7 +218,7 @@ export function BankStatementReport() {
       </div>
 
       {/* Filters and Actions */}
-      <Card className="bg-[#1a1a1a] border-white/10">
+      <Card className="card-default">
         <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
@@ -228,7 +229,7 @@ export function BankStatementReport() {
             </div>
             <Button
               onClick={handleDownloadPDF}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="btn-primary"
             >
               <Download className="mr-2" size={16} />
               Download PDF
@@ -246,7 +247,7 @@ export function BankStatementReport() {
                 onChange={(e) =>
                   setDateRange({ ...dateRange, start: e.target.value })
                 }
-                className="bg-[#101010] border-white/10 text-white"
+                className="input-default"
               />
             </div>
             <div className="space-y-2">
@@ -257,7 +258,7 @@ export function BankStatementReport() {
                 onChange={(e) =>
                   setDateRange({ ...dateRange, end: e.target.value })
                 }
-                className="bg-[#101010] border-white/10 text-white"
+                className="input-default"
               />
             </div>
             <div className="space-y-2">
@@ -271,7 +272,7 @@ export function BankStatementReport() {
                   placeholder="Email, plan, or tx ref..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="bg-[#101010] border-white/10 text-white pl-10"
+                  className="input-default pl-10"
                 />
               </div>
             </div>

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText } from "lucide-react";
+import { getPaymentBadge, getStatusBadge } from "@/lib/design-system";
 
 const API_URL = "/api";
 
@@ -78,10 +79,10 @@ export default function PricingTable() {
     }
   };
 
-  const getPaymentBadge = (status) => {
-    if (status === "paid") return <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-500/10 text-green-400 border border-green-500/20">Paid</span>;
-    if (status === "free_trial") return <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">Free Trial</span>;
-    return <span className="px-3 py-1 rounded-full text-xs font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20">Pending</span>;
+  const renderPaymentBadge = (status) => {
+    if (status === "paid") return <span className="badge-success">Paid</span>;
+    if (status === "free_trial") return <span className="badge-warning">Free Trial</span>;
+    return <span className="badge-brand">Pending</span>;
   };
 
   const activeRevenue = subscriptions
@@ -99,12 +100,12 @@ export default function PricingTable() {
         <div className="flex gap-3">
           <button
             onClick={() => router.push('/dashboard/admin/bank-statement')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition"
+            className="btn-primary flex items-center gap-2"
           >
             <FileText size={18} />
             Bank Statement Report
           </button>
-          <div className="bg-[#1a1a1a] border border-yellow-500/20 rounded-xl p-5 min-w-[220px]">
+          <div className="card-default border-yellow-500/20 min-w-[220px]">
             <p className="text-sm text-yellow-400/70">Monthly Revenue</p>
             <p className="text-3xl font-bold text-yellow-400 mt-1">ETB {activeRevenue.toFixed(2)}</p>
           </div>
@@ -112,7 +113,7 @@ export default function PricingTable() {
       </div>
 
       {/* Table */}
-      <div className="bg-[#1a1a1a] border border-white/10 rounded-xl overflow-hidden">
+      <div className="card-default overflow-hidden">
         <div className="w-full overflow-x-auto">
           <Table>
             <TableHeader>
@@ -150,19 +151,15 @@ export default function PricingTable() {
                     </TableCell>
 
                     <TableCell className="py-5">
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold border border-yellow-500/20 text-yellow-400 bg-yellow-500/10">
+                      <span className="badge-warning">
                         {sub.plan_name}
                       </span>
                     </TableCell>
 
-                    <TableCell className="py-5">{getPaymentBadge(sub.payment_status)}</TableCell>
+                    <TableCell className="py-5">{renderPaymentBadge(sub.payment_status)}</TableCell>
 
                     <TableCell className="py-5">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        sub.status === "active"
-                          ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                          : "bg-red-500/10 text-red-400 border border-red-500/20"
-                      }`}>
+                      <span className={sub.status === "active" ? "badge-success" : "badge-error"}>
                         {sub.status === "active" ? "Activated" : "Deactivated"}
                       </span>
                     </TableCell>
@@ -182,7 +179,7 @@ export default function PricingTable() {
                         {sub.payment_status === "pending" && (
                           <button
                             onClick={() => handleConfirmPayment(sub.id)}
-                            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-yellow-500 hover:bg-yellow-400 text-black transition"
+                            className="btn-primary text-xs"
                           >
                             Confirm
                           </button>
@@ -190,14 +187,14 @@ export default function PricingTable() {
                         {sub.status !== "active" ? (
                           <button
                             onClick={() => handleActivate(sub.id)}
-                            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 transition"
+                            className="btn-success text-xs"
                           >
                             Activate
                           </button>
                         ) : (
                           <button
                             onClick={() => handleDeactivate(sub.id)}
-                            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition"
+                            className="btn-danger text-xs"
                           >
                             Deactivate
                           </button>

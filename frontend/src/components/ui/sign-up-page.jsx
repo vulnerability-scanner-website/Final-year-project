@@ -171,7 +171,7 @@ export function SignupPage() {
               Already have an account?{" "}
               <button
                 onClick={() => (window.location.href = "/auth/login")}
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="text-orange-500 hover:text-orange-600 font-medium"
               >
                 Log in
               </button>
@@ -200,8 +200,8 @@ export function SignupPage() {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  placeholder="Alpha"
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                  placeholder="John"
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all ${
                     validationErrors.firstName ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
@@ -222,8 +222,8 @@ export function SignupPage() {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  placeholder="Guyasa"
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                  placeholder="Doe"
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all ${
                     validationErrors.lastName ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
@@ -248,7 +248,7 @@ export function SignupPage() {
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="Email Address"
-                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all ${
                   validationErrors.email ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
@@ -270,7 +270,7 @@ export function SignupPage() {
                 name="role"
                 value={formData.role}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
                 required
               >
                 <option value="developer">Developer</option>
@@ -294,7 +294,7 @@ export function SignupPage() {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="Password (min 8 characters)"
-                  className={`w-full px-4 py-3 pr-12 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                  className={`w-full px-4 py-3 pr-12 border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all ${
                     validationErrors.password ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
@@ -324,7 +324,7 @@ export function SignupPage() {
                   name="agreeToTerms"
                   checked={formData.agreeToTerms}
                   onChange={handleInputChange}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
                 />
                 <label htmlFor="agreeToTerms" className="text-sm text-gray-600">
                   I agree to the{" "}
@@ -345,7 +345,7 @@ export function SignupPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-black text-white py-3 px-4 rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary w-full py-3 px-4 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Creating Account..." : "Create Account"}
             </button>
