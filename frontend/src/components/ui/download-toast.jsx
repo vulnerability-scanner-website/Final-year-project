@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Download } from 'lucide-react';
-import jsPDF from 'jspdf';
+import { generateProfessionalPDF } from '@/utils/pdfGenerator';
 
 // --- Helper Components ---
 
@@ -151,7 +151,6 @@ export default function ReportsDownload() {
     setFilteredFiles(filtered);
   }, [files, searchTerm, selectedType]);
 
-  // Handle PDF download
   const handleDownload = async (file) => {
     try {
       const token = localStorage.getItem('token');
@@ -159,119 +158,7 @@ export default function ReportsDownload() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const scan = await response.json();
-
-      // Generate PDF
-      const doc = new jsPDF();
-      let y = 10;
-
-      doc.setFontSize(18);
-      doc.text('Security Scan Report', 10, y);
-      y += 10;
-
-      doc.setFontSize(12);
-      doc.text(`Target: ${scan.target}`, 10, y);
-      y += 7;
-      doc.text(`Status: ${scan.status}`, 10, y);
-      y += 7;
-      doc.text(`Date: ${new Date(scan.created_at).toLocaleString()}`, 10, y);
-      y += 7;
-      doc.text(`Total Issues: ${scan.vulnerabilities?.length || 0}`, 10, y);
-      y += 10;
-
-      doc.setFontSize(14);
-      doc.text('Vulnerabilities:', 10, y);
-      y += 8;
-
-      if (scan.vulnerabilities && scan.vulnerabilities.length > 0) {
-        scan.vulnerabilities.forEach((vuln, index) => {
-          doc.setFontSize(11);
-          doc.text(`${index + 1}. ${vuln.title}`, 10, y);
-          y += 6;
-
-          doc.setFontSize(10);
-          doc.text(`Severity: ${vuln.severity || 'Unknown'}`, 15, y);
-          y += 5;
-
-          if (vuln.description) {
-            doc.text(
-              doc.splitTextToSize(`Description: ${vuln.description}`, 180),
-              15,
-              y
-            );
-            y += 8;
-          }
-
-          if (vuln.url) {
-            doc.text(
-              doc.splitTextToSize(`URL: ${vuln.url}`, 180),
-              15,
-              y
-            );
-            y += 8;
-          }
-
-          if (vuln.param) {
-            doc.text(
-              doc.splitTextToSize(`Parameter: ${vuln.param}`, 180),
-              15,
-              y
-            );
-            y += 8;
-          }
-
-          if (vuln.evidence) {
-            doc.text(
-              doc.splitTextToSize(`Evidence: ${vuln.evidence}`, 180),
-              15,
-              y
-            );
-            y += 8;
-          }
-
-          if (vuln.solution) {
-            doc.text(
-              doc.splitTextToSize(`Fix: ${vuln.solution}`, 180),
-              15,
-              y
-            );
-            y += 8;
-          }
-
-          if (vuln.cwe) {
-            doc.text(`CWE: CWE-${vuln.cwe}`, 15, y);
-            y += 5;
-          }
-
-          if (vuln.reference) {
-            doc.text(
-              doc.splitTextToSize(`Reference: ${vuln.reference}`, 180),
-              15,
-              y
-            );
-            y += 8;
-          }
-
-          if (vuln.ai_type) {
-            doc.text(`AI Classification: ${vuln.ai_type} (${Math.round(vuln.ai_confidence * 100)}%)`, 15, y);
-            y += 5;
-          }
-
-          if (vuln.source) {
-            doc.text(`Scanner: ${vuln.source}`, 15, y);
-            y += 5;
-          }
-
-          y += 5;
-
-          if (y > 260) {
-            doc.addPage();
-            y = 10;
-          }
-        });
-      } else {
-        doc.text('No vulnerabilities found.', 10, y);
-      }
-
+      const doc = generateProfessionalPDF(scan);
       doc.save(file.name);
     } catch (err) {
       console.error('Failed to download report:', err);
