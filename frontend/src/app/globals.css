@@ -48,6 +48,7 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-color-destructive-foreground: var(----color-destructive-foreground);
   --color-color-color-destructive-foreground: var(----color-color-destructive-foreground);
+  --elegant-font: var(----elegant-font);
   @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -92,6 +93,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --destructive-foreground: oklch(0.205 0 0);
+  --elegant-font: 'Great Vibes';
 }
 
 .dark {

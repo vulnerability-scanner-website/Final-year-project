@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -12,12 +13,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileText } from "lucide-react";
 
 const API_URL = "/api";
 
 export default function PricingTable() {
   const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
@@ -93,9 +96,18 @@ export default function PricingTable() {
           <h1 className="text-3xl font-bold text-white">Subscription Management</h1>
           <p className="text-white/40 mt-1">Manage user subscriptions and payment status</p>
         </div>
-        <div className="bg-[#1a1a1a] border border-yellow-500/20 rounded-xl p-5 min-w-[220px]">
-          <p className="text-sm text-yellow-400/70">Monthly Revenue</p>
-          <p className="text-3xl font-bold text-yellow-400 mt-1">ETB {activeRevenue.toFixed(2)}</p>
+        <div className="flex gap-3">
+          <button
+            onClick={() => router.push('/dashboard/admin/bank-statement')}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition"
+          >
+            <FileText size={18} />
+            Bank Statement Report
+          </button>
+          <div className="bg-[#1a1a1a] border border-yellow-500/20 rounded-xl p-5 min-w-[220px]">
+            <p className="text-sm text-yellow-400/70">Monthly Revenue</p>
+            <p className="text-3xl font-bold text-yellow-400 mt-1">ETB {activeRevenue.toFixed(2)}</p>
+          </div>
         </div>
       </div>
 
