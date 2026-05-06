@@ -43,7 +43,7 @@ export default function SubscriptionBanner({ role }) {
 
     return (
       <div className={`flex flex-col sm:flex-row sm:items-center justify-between border rounded-lg px-5 py-4 gap-3
-        ${expired ? "bg-red-500/10 border-red-500/20" : "bg-white/5 border-white/10"}`}>
+        ${expired ? "card-default border-red-500/20" : "card-default"}`}>
         <div className="flex items-center gap-3">
           <CreditCard className={`h-5 w-5 ${expired ? "text-red-400" : "text-white/40"}`} />
           <div>
@@ -67,10 +67,7 @@ export default function SubscriptionBanner({ role }) {
         </div>
         <button
           onClick={() => router.push(pricePath)}
-          className={`shrink-0 font-semibold px-4 py-2 rounded-lg text-sm transition
-            ${expired
-              ? "bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20"
-              : "bg-yellow-500 hover:bg-yellow-400 text-black"}`}
+          className={`shrink-0 text-sm ${expired ? "btn-danger" : "btn-primary"}`}
         >
           {expired ? "Upgrade Now" : "Upgrade Plan"}
         </button>
@@ -81,7 +78,7 @@ export default function SubscriptionBanner({ role }) {
   // No subscription
   if (subscription.status === "none" || !subscription.plan_name) {
     return (
-      <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-5 py-4">
+      <div className="card-default flex items-center justify-between px-5 py-4">
         <div className="flex items-center gap-3">
           <CreditCard className="text-white/40 h-5 w-5" />
           <div>
@@ -91,7 +88,7 @@ export default function SubscriptionBanner({ role }) {
         </div>
         <button
           onClick={() => router.push(pricePath)}
-          className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg text-sm transition"
+          className="btn-primary text-sm"
         >
           View Plans
         </button>
@@ -102,7 +99,7 @@ export default function SubscriptionBanner({ role }) {
   // Pending approval
   if (subscription.status === "pending") {
     return (
-      <div className="flex items-center justify-between bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-5 py-4">
+      <div className="card-default border-yellow-500/20 flex items-center justify-between px-5 py-4">
         <div className="flex items-center gap-3">
           <Clock className="text-yellow-400 h-5 w-5" />
           <div>
@@ -112,7 +109,7 @@ export default function SubscriptionBanner({ role }) {
             </p>
           </div>
         </div>
-        <span className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-xs font-semibold px-3 py-1 rounded-full">
+        <span className="badge-warning">
           Pending
         </span>
       </div>
@@ -122,7 +119,7 @@ export default function SubscriptionBanner({ role }) {
   // Active
   if (subscription.status === "active") {
     return (
-      <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-lg px-5 py-4">
+      <div className="card-default border-green-500/20 flex items-center justify-between px-5 py-4">
         <div className="flex items-center gap-3">
           <CheckCircle className="text-green-400 h-5 w-5" />
           <div>
@@ -133,7 +130,7 @@ export default function SubscriptionBanner({ role }) {
             </p>
           </div>
         </div>
-        <span className="bg-green-500/10 text-green-400 border border-green-500/20 text-xs font-semibold px-3 py-1 rounded-full">
+        <span className="badge-success">
           Active
         </span>
       </div>
@@ -142,7 +139,7 @@ export default function SubscriptionBanner({ role }) {
 
   // Inactive / failed
   return (
-    <div className="flex items-center justify-between bg-red-500/10 border border-red-500/20 rounded-lg px-5 py-4">
+    <div className="card-default border-red-500/20 flex items-center justify-between px-5 py-4">
       <div className="flex items-center gap-3">
         <XCircle className="text-red-400 h-5 w-5" />
         <div>
@@ -152,7 +149,7 @@ export default function SubscriptionBanner({ role }) {
       </div>
       <button
         onClick={() => router.push(pricePath)}
-        className="bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 px-4 py-2 rounded-lg text-sm transition"
+        className="btn-danger text-sm"
       >
         Renew
       </button>

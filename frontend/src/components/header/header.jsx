@@ -85,13 +85,13 @@ export function DashboardHeader({ role, onActionClick }) {
             <Button
               variant="ghost"
               size="icon"
-              className="cursor-pointer text-white/60 hover:text-yellow-400 hover:bg-yellow-500/10"
+              className="btn-ghost"
               onClick={() => router.push(notifPath)}
             >
               <Bell className="h-5 w-5" />
             </Button>
             {unreadCount > 0 && (
-              <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-orange-500 text-white border-0 text-[10px]">
+              <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-[#F59E0B] text-black border-0 text-[10px] font-bold">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </Badge>
             )}
@@ -100,14 +100,14 @@ export function DashboardHeader({ role, onActionClick }) {
           {/* Action Button */}
           <div className="relative inline-block group">
             <Button
-              className="relative z-10 flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-black font-semibold cursor-pointer transition-all duration-300"
+              className="btn-primary relative z-10 flex items-center gap-2"
               onClick={handleButtonClick}
             >
               <Plus className="h-4 w-4" />
               {pagebuttontext}
             </Button>
-            <span className="absolute top-0 right-0 w-0 h-0 border-t-2 border-r-2 border-orange-400 group-hover:w-6 group-hover:h-6 transition-all duration-300" />
-            <span className="absolute bottom-0 left-0 w-0 h-0 border-b-2 border-l-2 border-orange-400 group-hover:w-6 group-hover:h-6 transition-all duration-300" />
+            <span className="absolute top-0 right-0 w-0 h-0 border-t-2 border-r-2 border-[#F97316] group-hover:w-6 group-hover:h-6 transition-all duration-300" />
+            <span className="absolute bottom-0 left-0 w-0 h-0 border-b-2 border-l-2 border-[#F97316] group-hover:w-6 group-hover:h-6 transition-all duration-300" />
           </div>
         </div>
       </header>
