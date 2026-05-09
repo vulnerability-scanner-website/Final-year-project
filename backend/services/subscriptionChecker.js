@@ -6,6 +6,25 @@ class SubscriptionChecker {
   async getUserSubscription(userId, userRole = null) {
     const client = await this.pg.connect();
     try {
+      // ADMINS GET FULL ENTERPRISE ACCESS
+      if (userRole === 'admin') {
+        const enterprisePlan = await client.query(`
+          SELECT id, name as plan_name, scan_limit, access_days, scanners
+          FROM pricing
+          WHERE name = 'Enterprise'
+          LIMIT 1
+        `);
+        
+        if (enterprisePlan.rows.length > 0) {
+          return {
+            ...enterprisePlan.rows[0],
+            status: 'active',
+            user_id: userId,
+            plan_id: enterprisePlan.rows[0].id
+          };
+        }
+      }
+
       // If user is a team member, get subscription through team_members table
       if (userRole === 'team_member') {
         const teamSubResult = await client.query(`
