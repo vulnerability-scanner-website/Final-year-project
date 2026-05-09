@@ -110,26 +110,30 @@ class ScanController {
         return reply.code(403).send({ error: 'No subscription plan found' });
       }
 
-      // Check access expiry
-      const accessCheck = await this.subscriptionChecker.checkAccessExpiry(scanUserId, subscription);
-      if (!accessCheck.valid) {
-        return reply.code(403).send({
-          error: 'Access expired',
-          message: accessCheck.message,
-          upgrade_required: true
-        });
+      // Check access expiry (skip for admins)
+      if (request.user.role !== 'admin') {
+        const accessCheck = await this.subscriptionChecker.checkAccessExpiry(scanUserId, subscription);
+        if (!accessCheck.valid) {
+          return reply.code(403).send({
+            error: 'Access expired',
+            message: accessCheck.message,
+            upgrade_required: true
+          });
+        }
       }
 
-      // Check scan limit
-      const limitCheck = await this.subscriptionChecker.checkScanLimit(scanUserId, subscription);
-      if (!limitCheck.allowed) {
-        return reply.code(403).send({
-          error: 'Scan limit exceeded',
-          message: limitCheck.message,
-          used: limitCheck.used,
-          limit: limitCheck.limit,
-          upgrade_required: true
-        });
+      // Check scan limit (skip for admins)
+      if (request.user.role !== 'admin') {
+        const limitCheck = await this.subscriptionChecker.checkScanLimit(scanUserId, subscription);
+        if (!limitCheck.allowed) {
+          return reply.code(403).send({
+            error: 'Scan limit exceeded',
+            message: limitCheck.message,
+            used: limitCheck.used,
+            limit: limitCheck.limit,
+            upgrade_required: true
+          });
+        }
       }
 
       // Get allowed scanners for this subscription
