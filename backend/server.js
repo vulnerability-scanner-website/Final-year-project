@@ -136,6 +136,7 @@ fastify.register(require('./routes/notifications'), { prefix: '/api' });
 fastify.register(require('./routes/settings'), { prefix: '/api' });
 fastify.register(require('./routes/pricing'), { prefix: '/api' });
 fastify.register(require('./routes/payments'), { prefix: '/api' });
+fastify.register(require('./routes/team'), { prefix: '/api' });
 
 // WebSocket endpoint for real-time updates
 fastify.register(async function (fastify) {

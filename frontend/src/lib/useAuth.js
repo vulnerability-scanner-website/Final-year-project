@@ -16,9 +16,16 @@ export function useAuth(requiredRole = null) {
       return;
     }
 
-    if (requiredRole && user.role !== requiredRole) {
-      router.replace(`/dashboard/${user.role}`);
-      return;
+    if (requiredRole) {
+      // Handle array of allowed roles
+      const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+      
+      if (!allowedRoles.includes(user.role)) {
+        // Team members should use developer dashboard
+        const redirectRole = user.role === 'team_member' ? 'developer' : user.role;
+        router.replace(`/dashboard/${redirectRole}`);
+        return;
+      }
     }
 
     // Admins bypass maintenance mode

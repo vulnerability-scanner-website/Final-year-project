@@ -14,6 +14,53 @@ module.exports = async function (fastify, opts) {
   fastify.post('/login', { 
     preHandler: validateInput(schemas.login) 
   }, async (request, reply) => {
+    const { email, password } = request.body;
+    
+    // Check if it's a team member login
+    const TeamMemberModel = require('../models/TeamMember');
+    const teamMemberModel = new TeamMemberModel(fastify.pg);
+    const teamMember = await teamMemberModel.findByEmail(email);
+    
+    if (teamMember) {
+      // Team member login
+      const bcrypt = require('bcrypt');
+      
+      if (teamMember.status !== 'active') {
+        return reply.code(403).send({ error: 'Account inactive' });
+      }
+      
+      if (teamMember.subscription_status !== 'active') {
+        return reply.code(403).send({ error: 'Subscription inactive' });
+      }
+      
+      const isValid = await bcrypt.compare(password, teamMember.password);
+      if (!isValid) {
+        return reply.code(401).send({ error: 'Invalid credentials' });
+      }
+      
+      await teamMemberModel.updateLastLogin(teamMember.id);
+      
+      const token = fastify.jwt.sign({
+        id: teamMember.id,
+        email: teamMember.email,
+        role: 'team_member',
+        subscription_id: teamMember.subscription_id,
+        owner_id: teamMember.owner_id
+      });
+      
+      return {
+        success: true,
+        token,
+        user: {
+          id: teamMember.id,
+          email: teamMember.email,
+          role: 'team_member',
+          plan_name: teamMember.plan_name
+        }
+      };
+    }
+    
+    // Regular user login
     return authController.login(request, reply);
   });
 

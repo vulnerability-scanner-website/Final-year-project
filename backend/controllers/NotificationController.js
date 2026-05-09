@@ -9,7 +9,9 @@ class NotificationController {
   // GET /api/notifications
   async getAll(request, reply) {
     try {
-      const notifications = await this.notificationModel.findByUserId(request.user.id);
+      // Team members see owner's notifications
+      const userId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+      const notifications = await this.notificationModel.findByUserId(userId);
       return notifications;
     } catch (error) {
       console.error('Get notifications error:', error);
@@ -20,7 +22,9 @@ class NotificationController {
   // GET /api/notifications/unread-count
   async getUnreadCount(request, reply) {
     try {
-      const count = await this.notificationModel.getUnreadCount(request.user.id);
+      // Team members see owner's unread count
+      const userId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+      const count = await this.notificationModel.getUnreadCount(userId);
       return { count };
     } catch (error) {
       console.error('Get unread count error:', error);
@@ -31,7 +35,8 @@ class NotificationController {
   // PUT /api/notifications/:id/read
   async markRead(request, reply) {
     try {
-      const notification = await this.notificationModel.markRead(parseInt(request.params.id), request.user.id);
+      const userId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+      const notification = await this.notificationModel.markRead(parseInt(request.params.id), userId);
       if (!notification) return reply.code(404).send({ error: 'Notification not found' });
       return notification;
     } catch (error) {
@@ -43,7 +48,8 @@ class NotificationController {
   // PUT /api/notifications/read-all
   async markAllRead(request, reply) {
     try {
-      await this.notificationModel.markAllRead(request.user.id);
+      const userId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+      await this.notificationModel.markAllRead(userId);
       return { success: true };
     } catch (error) {
       console.error('Mark all read error:', error);
@@ -54,7 +60,8 @@ class NotificationController {
   // DELETE /api/notifications/:id
   async delete(request, reply) {
     try {
-      const result = await this.notificationModel.delete(parseInt(request.params.id), request.user.id);
+      const userId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+      const result = await this.notificationModel.delete(parseInt(request.params.id), userId);
       if (!result) return reply.code(404).send({ error: 'Notification not found' });
       return { success: true };
     } catch (error) {
@@ -66,7 +73,8 @@ class NotificationController {
   // DELETE /api/notifications
   async deleteAll(request, reply) {
     try {
-      await this.notificationModel.deleteAll(request.user.id);
+      const userId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+      await this.notificationModel.deleteAll(userId);
       return { success: true };
     } catch (error) {
       console.error('Delete all notifications error:', error);

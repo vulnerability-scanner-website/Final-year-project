@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Plus, Globe, Server, Network, ShieldCheck, AlertTriangle, Clock, RefreshCw } from "lucide-react";
+import { Plus, Globe, Server, Network, ShieldCheck, AlertTriangle, Clock, RefreshCw, Users } from "lucide-react";
 import { FeatureCard } from "@/components/ui/feature-card";
 import { CardStack } from "@/components/ui/card-stack";
 import NewScanDialog from "@/components/popup/NewScanDialog";
 import SubscriptionBanner from "@/components/SubscriptionBanner";
 import { DashboardHeader } from "@/components/header/header";
+import { EnterpriseTeamInviteDialog } from "@/components/ui/enterprise-team-invite-dialog";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
@@ -40,11 +41,19 @@ const ScanItem = ({ icon, title, status, progress, issues, date }) => (
 export default function Page() {
   const [recentScans, setRecentScans] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openTeamDialog, setOpenTeamDialog] = useState(false);
   const [stats, setStats] = useState({ totalScans: 0, inProgress: 0, completed: 0, totalIssues: 0 });
+  const [subscription, setSubscription] = useState(null);
+  const [isOwner, setIsOwner] = useState(false);
 
   const fetchScans = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
+      
+      // Check if user is owner (not team member)
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      setIsOwner(!payload.owner_id);
+      
       const res = await fetch(`${API}/api/scans`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       const list = Array.isArray(data) ? data : [];
@@ -55,6 +64,11 @@ export default function Page() {
         completed: list.filter(s => s.status === "Completed").length,
         totalIssues: list.reduce((sum, s) => sum + (s.issues || 0), 0),
       });
+      
+      // Fetch subscription
+      const subRes = await fetch(`${API}/api/payments/subscription`, { headers: { Authorization: `Bearer ${token}` } });
+      const subData = await subRes.json();
+      setSubscription(subData);
     } catch {}
   }, []);
 
@@ -66,6 +80,27 @@ export default function Page() {
 
       <div className="space-y-6 px-1">
         <SubscriptionBanner role="developer" />
+        
+        {/* Enterprise Team Invite Button - Only for subscription owners */}
+        {subscription?.plan_name === "Enterprise" && isOwner && (
+          <div className="bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Users className="text-orange-500" size={24} />
+                <div>
+                  <h3 className="text-white font-semibold">Enterprise Team Management</h3>
+                  <p className="text-gray-400 text-sm">Invite up to 5 team members to your subscription</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setOpenTeamDialog(true)}
+                className="btn-primary px-6 py-2 rounded-lg"
+              >
+                Invite Team
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="w-full overflow-hidden">
@@ -109,6 +144,7 @@ export default function Page() {
       </div>
 
       <NewScanDialog open={openDialog} onOpenChange={(open) => { setOpenDialog(open); if (!open) fetchScans(); }} role="developer" />
+      <EnterpriseTeamInviteDialog open={openTeamDialog} onOpenChange={setOpenTeamDialog} onSuccess={() => {}} />
     </div>
   );
 }
