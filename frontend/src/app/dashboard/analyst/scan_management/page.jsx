@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { ShieldCheck, Bug, MoreVertical, Eye, Pause, Play, StopCircle, RotateCcw, Trash, Plus, RefreshCw } from "lucide-react";
+import { ShieldCheck, Bug, MoreVertical, Eye, Pause, Play, StopCircle, RotateCcw, Trash, Plus, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import NewScanDialog from "@/components/popup/NewScanDialog";
 import UpgradePlanModal from "@/components/popup/UpgradePlanModal";
 
@@ -24,7 +24,10 @@ export default function ScanManagement() {
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const pollRef = useRef(null);
+
+  const itemsPerPage = 5;
 
   const token = () => typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const headers = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` });
@@ -35,6 +38,7 @@ export default function ScanManagement() {
       const data = await res.json();
       const list = Array.isArray(data) ? data : [];
       setScans(list);
+      setCurrentPage(1); // Reset to first page when data is refreshed
       const allVulns = [];
       for (const scan of list) {
         if (scan.vulnerabilities?.length) {
@@ -66,22 +70,33 @@ export default function ScanManagement() {
     } catch (e) { console.error(`Action ${action} failed:`, e); }
   };
 
+  const totalPages = Math.ceil(scans.length / itemsPerPage);
+  const startIdx = (currentPage - 1) * itemsPerPage;
+  const endIdx = startIdx + itemsPerPage;
+  const paginatedScans = scans.slice(startIdx, endIdx);
+
   return (
-    <div className="w-full min-h-screen bg-[#101010] text-white space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Scan Management</h1>
-          <p className="text-white/40">Monitor and manage your security scans</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button onClick={fetchScans} className="p-2 rounded-lg text-white/40 hover:text-yellow-400 hover:bg-yellow-500/10 transition">
-            <RefreshCw className="w-4 h-4" />
-          </button>
-          <button onClick={() => setOpenDialog(true)} className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg transition">
-            <Plus className="w-4 h-4" /> New Scan
-          </button>
+    <div className="w-full min-h-screen bg-[#101010] text-white">
+      {/* Fixed Header */}
+      <div className="fixed top-0 left-0 right-0 md:left-64 z-30 bg-[#101010] border-b border-white/10 py-4 px-4 sm:px-6 lg:px-8 shadow-black/20 shadow-sm">
+        <div className="flex items-center justify-between max-w-screen-2xl mx-auto">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Scan Management</h1>
+            <p className="text-white/40">Monitor and manage your security scans</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={fetchScans} className="p-2 rounded-lg text-white/40 hover:text-yellow-400 hover:bg-yellow-500/10 transition">
+              <RefreshCw className="w-4 h-4" />
+            </button>
+            <button onClick={() => setOpenDialog(true)} className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg transition">
+              <Plus className="w-4 h-4" /> New Scan
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Main Content with top padding for fixed header */}
+      <div className="space-y-6 px-4 sm:px-6 lg:px-8 pt-24">
 
       <Tabs defaultValue="active">
         <TabsList className="grid w-full grid-cols-2 max-w-md h-12 bg-[#1a1a1a] border border-white/10 p-1 rounded-lg">
@@ -101,7 +116,12 @@ export default function ScanManagement() {
               <ShieldCheck className="w-10 h-10 text-white/20 mx-auto mb-3" />
               <p className="text-white/40">No scans yet. Start your first scan.</p>
             </div>
-          ) : scans.map((scan) => (
+          ) : paginatedScans.length === 0 ? (
+            <div className="text-center py-12 bg-[#1a1a1a] border border-white/10 rounded-xl">
+              <ShieldCheck className="w-10 h-10 text-white/20 mx-auto mb-3" />
+              <p className="text-white/40">No scans found on this page.</p>
+            </div>
+          ) : paginatedScans.map((scan) => (
             <div key={scan.id} className="bg-[#1a1a1a] border border-white/10 rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -149,6 +169,30 @@ export default function ScanManagement() {
               </div>
             </div>
           ))}
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-4 mt-6 rounded-xl border border-white/10 bg-[#1a1a1a] p-4">
+              <div className="flex gap-2 text-sm text-white/40 items-center">
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#1a1a1a] px-3 py-2 text-sm text-white/80 hover:border-yellow-400/30 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Previous
+                </button>
+                <span className="px-3 py-2 text-sm text-white/60">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#1a1a1a] px-3 py-2 text-sm text-white/80 hover:border-yellow-400/30 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="vulnerabilities" className="mt-6 space-y-4">
@@ -176,6 +220,7 @@ export default function ScanManagement() {
           ))}
         </TabsContent>
       </Tabs>
+      </div>
 
       <UpgradePlanModal open={showUpgrade} onClose={() => setShowUpgrade(false)} role="analyst" />
       <NewScanDialog open={openDialog} onOpenChange={(open) => { setOpenDialog(open); if (!open) fetchScans(); }} role="analyst" />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Download } from 'lucide-react';
+import { FileText, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { generateProfessionalPDF } from '@/utils/pdfGenerator';
 
 // --- Helper Components ---
@@ -94,7 +94,9 @@ export default function ReportsDownload() {
   const [filteredFiles, setFilteredFiles] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const itemsPerPage = 5;
 
   // Fetch reports from API
   useEffect(() => {
@@ -149,7 +151,18 @@ export default function ReportsDownload() {
     }
     
     setFilteredFiles(filtered);
+    setCurrentPage(1);
   }, [files, searchTerm, selectedType]);
+
+  const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedFiles = filteredFiles.slice(startIndex, startIndex + itemsPerPage);
+
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const handleDownload = async (file) => {
     try {
@@ -195,9 +208,36 @@ export default function ReportsDownload() {
           {loading ? (
             <p className="text-center text-white/40 py-8">Loading reports...</p>
           ) : filteredFiles.length > 0 ? (
-            filteredFiles.map(file => (
-              <FileItem key={file.id} file={file} onDownload={handleDownload} />
-            ))
+            <>
+              {paginatedFiles.map(file => (
+                <FileItem key={file.id} file={file} onDownload={handleDownload} />
+              ))}
+
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 px-2 sm:px-0">
+                  <p className="text-sm text-white/40">
+                    Showing {paginatedFiles.length} of {filteredFiles.length} reports
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#101010] px-3 py-2 text-sm text-white/80 hover:border-yellow-400/30 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft className="w-4 h-4" /> Prev
+                    </button>
+                    <span className="text-sm text-white/60">Page {currentPage} of {totalPages}</span>
+                    <button
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                      className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#101010] px-3 py-2 text-sm text-white/80 hover:border-yellow-400/30 hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <p className="text-center text-white/40 py-8">No reports found matching your criteria.</p>
           )}
