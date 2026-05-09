@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { DashboardHeader } from "@/components/header/header";
@@ -19,7 +19,44 @@ import { StatsCard } from "@/components/statscard/statscard";
 import { VulnerabilityTrend } from "@/components/VulnerabilityTrend/VulnerabilityTrend";
 import { SeverityDistribution } from "@/components/SeverityDistribution/SeverityDistribution";
 
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+
 export default function Page() {
+  const [stats, setStats] = useState({
+    totalScans: 0,
+    criticalIssues: 0,
+    highSeverity: 0,
+    resolved: 0,
+    totalUsers: 0,
+    newUsers: 0,
+    scanGrowth: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API}/api/admin/stats`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-4 w-full bg-[#101010] min-h-screen text-white p-0">
       <DashboardHeader role={"admin"} />
@@ -28,28 +65,28 @@ export default function Page() {
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full px-4">
         <StatsCard
           title="Total Scans"
-          value="128"
-          description="+12% from last month"
+          value={loading ? "..." : stats.totalScans.toString()}
+          description={`${stats.scanGrowth >= 0 ? '+' : ''}${stats.scanGrowth}% from last month`}
           icon={Activity}
         />
 
         <StatsCard
           title="Critical Issues"
-          value="12"
+          value={loading ? "..." : stats.criticalIssues.toString()}
           description="Needs immediate attention"
           icon={ShieldAlert}
         />
 
         <StatsCard
           title="High Severity"
-          value="23"
+          value={loading ? "..." : stats.highSeverity.toString()}
           description="Requires review"
           icon={Bug}
         />
 
         <StatsCard
           title="Resolved"
-          value="89"
+          value={loading ? "..." : stats.resolved.toString()}
           description="Issues fixed successfully"
           icon={CheckCircle}
         />
@@ -67,7 +104,6 @@ export default function Page() {
           <Zap className="w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
           Quick Actions
         </h3>
-        <Link href="/dashboard/admin/Users"></Link>
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full">
           {/* User Management Card */}
           <Link href="/dashboard/admin/Users">
@@ -77,7 +113,7 @@ export default function Page() {
                   <Users className="w-5 h-5 text-yellow-400" />
                 </div>
                 <span className="badge-warning">
-                  12 new
+                  {loading ? "..." : `${stats.newUsers} new`}
                 </span>
               </div>
               <h4 className="font-semibold text-white text-sm md:text-base">
@@ -101,7 +137,7 @@ export default function Page() {
                 <Settings className="w-5 h-5 text-orange-400" />
               </div>
               <span className="badge-brand">
-                Pending
+                Active
               </span>
             </div>
             <h4 className="font-semibold text-white text-sm md:text-base">

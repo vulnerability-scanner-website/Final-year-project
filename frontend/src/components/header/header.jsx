@@ -65,20 +65,20 @@ export function DashboardHeader({ role, onActionClick }) {
 
   return (
     <>
-      <header className="flex items-center justify-between border-b border-white/10 px-6 py-4 relative overflow-hidden bg-[#101010] text-white">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/10 px-4 sm:px-6 py-4 relative overflow-hidden bg-[#101010] text-white">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-yellow-500/5 to-transparent skew-y-12 origin-bottom-left" />
           <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-orange-500/5 to-transparent -skew-y-12 origin-top-right" />
         </div>
 
         {/* Left */}
-        <div className="relative z-10">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">{pageh1}</h1>
-          <p className="text-sm text-white/40">{pageparagraph}</p>
+        <div className="relative z-10 w-full sm:w-auto">
+          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">{pageh1}</h1>
+          <p className="text-sm md:text-base text-white/40 max-w-xl">{pageparagraph}</p>
         </div>
 
         {/* Right */}
-        <div className="flex items-center gap-4 relative z-10">
+        <div className="relative z-10 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
 
           {/* Notification Bell → navigates to notifications page */}
           <div className="relative">

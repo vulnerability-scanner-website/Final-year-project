@@ -99,6 +99,13 @@ export const scansAPI = {
   }),
 };
 
+// Vulnerabilities API
+export const vulnerabilitiesAPI = {
+  getAll: () => apiRequest('/api/vulnerabilities'),
+  getByScan: (scanId) => apiRequest(`/api/scans/${scanId}/vulnerabilities`),
+  getById: (id) => apiRequest(`/api/vulnerabilities/${id}`),
+};
+
 // Reports API
 export const reportsAPI = {
   getAll: () => apiRequest('/api/reports'),
