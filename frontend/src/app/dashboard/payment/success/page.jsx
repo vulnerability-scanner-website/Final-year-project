@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CheckCircle, XCircle, Loader2, Shield, Zap, ArrowRight, RefreshCw } from "lucide-react";
+import { EnterpriseTeamInviteDialog } from "@/components/ui/enterprise-team-invite-dialog";
 
 export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
@@ -11,6 +12,7 @@ export default function PaymentSuccessPage() {
   const [status, setStatus] = useState("verifying");
   const [subscription, setSubscription] = useState(null);
   const [dots, setDots] = useState(".");
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
 
   // Animated dots for verifying state
   useEffect(() => {
@@ -40,6 +42,11 @@ export default function PaymentSuccessPage() {
           const subData = await subRes.json();
           setSubscription(subData);
           setStatus("activated");
+          
+          // Show invite dialog for Enterprise plan
+          if (subData.plan_name === "Enterprise") {
+            setTimeout(() => setShowInviteDialog(true), 1000);
+          }
         } else {
           setStatus("failed");
         }
@@ -200,6 +207,15 @@ export default function PaymentSuccessPage() {
           </div>
         </div>
       )}
+
+      {/* Enterprise Team Invite Dialog */}
+      <EnterpriseTeamInviteDialog 
+        open={showInviteDialog} 
+        onOpenChange={setShowInviteDialog}
+        onSuccess={() => {
+          setTimeout(() => router.push(dashboardPath), 1000);
+        }}
+      />
 
     </div>
   );

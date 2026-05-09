@@ -216,6 +216,19 @@ module.exports = async function (fastify, opts) {
   fastify.get('/payments/subscription', { onRequest: [fastify.authenticate] }, async (request, reply) => {
     const client = await fastify.pg.connect();
     try {
+      // Check if user is a team member
+      if (request.user.role === 'team_member') {
+        const result = await client.query(
+          `SELECT s.*, p.features FROM team_members tm
+           JOIN subscriptions s ON tm.subscription_id = s.id
+           LEFT JOIN pricing p ON s.plan_id = p.id
+           WHERE tm.id = $1`,
+          [request.user.id]
+        );
+        if (result.rows.length > 0) return result.rows[0];
+        return reply.code(404).send({ error: 'Team member subscription not found' });
+      }
+
       const result = await client.query(
         `SELECT s.*, p.features FROM subscriptions s
          LEFT JOIN pricing p ON s.plan_id = p.id

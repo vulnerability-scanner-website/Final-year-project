@@ -2,7 +2,9 @@ const ScanModel = require('../models/Scan');
 const VulnerabilityModel = require('../models/Vulnerability');
 const NotificationModel = require('../models/Notification');
 const scannerService = require('../services/scanner');
+const CustomScanner = require('../services/customScanner');
 const AIClassifier = require('../services/aiClassifier');
+const SubscriptionChecker = require('../services/subscriptionChecker');
 const fs = require('fs').promises;
 const scanStorage = require('../config/scan-storage');
 const { validator } = require('../middlewares/validation');
@@ -19,7 +21,9 @@ class ScanController {
     this.scanModel = new ScanModel(fastify.pg);
     this.vulnerabilityModel = new VulnerabilityModel(fastify.pg);
     this.notificationModel = new NotificationModel(fastify.pg);
+    this.customScanner = new CustomScanner();
     this.aiClassifier = new AIClassifier(process.env.COLAB_URL);
+    this.subscriptionChecker = new SubscriptionChecker(fastify.pg);
   }
 
   async getProgress(request, reply) {
@@ -37,8 +41,15 @@ class ScanController {
         }
         return scans;
       }
-      // Admin sees all scans, others see only their own
-      const userId = request.user.role === 'admin' ? 'admin' : request.user.id;
+      // Admin sees all scans, team members see owner's scans, others see only their own
+      let userId;
+      if (request.user.role === 'admin') {
+        userId = 'admin';
+      } else if (request.user.role === 'team_member') {
+        userId = request.user.owner_id;
+      } else {
+        userId = request.user.id;
+      }
       const scans = await this.scanModel.findByUserId(userId);
       return scans;
     } catch (error) {
@@ -57,8 +68,15 @@ class ScanController {
         return scan;
       }
       
-      // Admin can view any scan
-      const userId = request.user.role === 'admin' ? 'admin' : request.user.id;
+      // Admin can view any scan, team members use owner_id
+      let userId;
+      if (request.user.role === 'admin') {
+        userId = 'admin';
+      } else if (request.user.role === 'team_member') {
+        userId = request.user.owner_id;
+      } else {
+        userId = request.user.id;
+      }
       const scan = await this.scanModel.findById(scanId, userId);
       
       if (!scan) return reply.code(404).send({ error: 'Scan not found' });
@@ -80,82 +98,53 @@ class ScanController {
       return reply.code(400).send({ error: 'Target URL is required' });
     }
 
-    // Check scan rate limit
-    const plan = request.user.plan || 'free';
-    const scanLimit = rateLimiter.checkScanLimit(request.user.id, plan);
-    
-    if (!scanLimit.allowed) {
-      return reply.code(429).send({
-        error: 'Scan limit exceeded',
-        message: `You have reached your scan limit. Try again in ${scanLimit.retryAfter} seconds`,
-        retryAfter: scanLimit.retryAfter,
-        limit: scanLimit.limit
-      });
-    }
-
     try {
-      // ── Free plan limit check (skip for admins) ──────────────────────────────────────
-      if (request.user.role !== 'admin') {
-        const client = await this.fastify.pg.connect();
-        let userRow;
-        try {
-          const uRes = await client.query(
-            'SELECT free_scans_used, free_plan_start FROM users WHERE id = $1',
-            [request.user.id]
-          );
-          userRow = uRes.rows[0];
-
-          // Check if user has an active paid subscription
-          const subRes = await client.query(
-            `SELECT id FROM subscriptions WHERE user_id = $1 AND status = 'active' AND end_date > NOW() LIMIT 1`,
-            [request.user.id]
-          );
-          const hasPaidPlan = subRes.rows.length > 0;
-
-          if (!hasPaidPlan) {
-            const scansUsed = userRow?.free_scans_used || 0;
-            const planStart = userRow?.free_plan_start ? new Date(userRow.free_plan_start) : new Date();
-            const monthsElapsed = (Date.now() - planStart.getTime()) / (1000 * 60 * 60 * 24 * 30);
-
-            if (monthsElapsed >= 3) {
-              return reply.code(403).send({
-                error: 'Free plan expired',
-                message: 'Your 3-month free plan has expired. Please subscribe to continue scanning.',
-                upgrade_required: true
-              });
-            }
-
-            if (scansUsed >= 3) {
-              return reply.code(403).send({
-                error: 'Free plan scan limit reached',
-                message: 'You have used all 3 free scans this month. Please upgrade to continue.',
-                upgrade_required: true,
-                scans_used: scansUsed,
-                scans_limit: 3
-              });
-            }
-
-            // Increment free scan counter
-            await client.query(
-              'UPDATE users SET free_scans_used = free_scans_used + 1 WHERE id = $1',
-              [request.user.id]
-            );
-          }
-        } finally {
-          client.release();
-        }
+      // Determine the actual user_id for scan creation
+      // Team members use owner_id, regular users use their own id
+      const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+      
+      // Get user subscription
+      const subscription = await this.subscriptionChecker.getUserSubscription(request.user.id, request.user.role);
+      
+      if (!subscription) {
+        return reply.code(403).send({ error: 'No subscription plan found' });
       }
-      // ──────────────────────────────────────────────────────────────
 
-      const scan = await this.scanModel.create(request.user.id, sanitizedTarget);
+      // Check access expiry
+      const accessCheck = await this.subscriptionChecker.checkAccessExpiry(scanUserId, subscription);
+      if (!accessCheck.valid) {
+        return reply.code(403).send({
+          error: 'Access expired',
+          message: accessCheck.message,
+          upgrade_required: true
+        });
+      }
+
+      // Check scan limit
+      const limitCheck = await this.subscriptionChecker.checkScanLimit(scanUserId, subscription);
+      if (!limitCheck.allowed) {
+        return reply.code(403).send({
+          error: 'Scan limit exceeded',
+          message: limitCheck.message,
+          used: limitCheck.used,
+          limit: limitCheck.limit,
+          upgrade_required: true
+        });
+      }
+
+      // Get allowed scanners for this subscription
+      const allowedScanners = this.subscriptionChecker.getScanners(subscription);
+      const hasAI = this.subscriptionChecker.hasAIAccess(subscription);
+
+      const scan = await this.scanModel.create(scanUserId, sanitizedTarget);
 
       await this.notificationModel.notifyAdmins(
-        `User #${request.user.id} (${request.user.email}) started a new scan on target: ${validator.sanitizeHtml(sanitizedTarget)}`,
+        `User #${scanUserId} (${request.user.email}) started a new scan on target: ${validator.sanitizeHtml(sanitizedTarget)} [Plan: ${subscription.plan_name}]`,
         'scan',
         '🔍 New Scan Started'
       );
       await this.notificationModel.create(
-        request.user.id,
+        scanUserId,
         `Your scan on ${validator.sanitizeHtml(sanitizedTarget)} has started. We will notify you when it completes.`,
         'scan',
         '🔍 Scan Started'
@@ -167,31 +156,96 @@ class ScanController {
       // Start scan asynchronously
       setImmediate(async () => {
         try {
-          let scanResults;
+          let scanResults = {};
+          let currentProgress = 0;
+          let vulnCount = 0;
           
           const updateProgress = (progress, message) => {
             scanProgress.set(scan.id, { progress, message });
             console.log(`Scan ${scan.id}: ${progress}% - ${message}`);
           };
           
-          if (scanType === 'zap') {
-            updateProgress(5, 'Initializing ZAP scanner...');
-            scanResults = { zap: await scannerService.runZap(target, scan.id, updateProgress) };
-          } else if (scanType === 'full' || !scanType) {
-            updateProgress(5, 'Running full scan...');
-            scanResults = await scannerService.runFullScan(target, scan.id);
-            updateProgress(90, 'Processing results...');
-          } else if (scanType === 'nuclei') {
-            updateProgress(5, 'Running Nuclei scan...');
-            scanResults = { nuclei: await scannerService.runNuclei(target, scan.id) };
-            updateProgress(90, 'Processing results...');
-          } else if (scanType === 'nikto') {
-            updateProgress(5, 'Running Nikto scan...');
-            scanResults = { nikto: await scannerService.runNikto(target, scan.id) };
-            updateProgress(90, 'Processing results...');
+          // Run scanners based on subscription
+          const scannerCount = allowedScanners.length;
+          const progressPerScanner = 80 / scannerCount;
+
+          // Custom scanner (always included)
+          if (allowedScanners.includes('custom')) {
+            updateProgress(currentProgress + 5, 'Running custom vulnerability scan...');
+            const customResults = await this.customScanner.scan(sanitizedTarget);
+            scanResults.custom = customResults;
+            
+            // Store custom scanner vulnerabilities
+            if (customResults.vulnerabilities && customResults.vulnerabilities.length > 0) {
+              for (const vuln of customResults.vulnerabilities) {
+                await this.vulnerabilityModel.create(
+                  scan.id,
+                  vuln.title.substring(0, 255),
+                  vuln.severity.toLowerCase(),
+                  vuln.description?.substring(0, 1000),
+                  sanitizedTarget.substring(0, 500),
+                  null,
+                  vuln.evidence?.substring(0, 1000),
+                  vuln.recommendation?.substring(0, 1000),
+                  null,
+                  null,
+                  'Custom Scanner'
+                );
+                vulnCount++;
+              }
+            }
+            currentProgress += progressPerScanner;
           }
 
-          let vulnCount = 0;
+          // Subfinder
+          if (allowedScanners.includes('subfinder')) {
+            updateProgress(currentProgress, 'Running Subfinder...');
+            scanResults.subfinder = await scannerService.runSubfinder(sanitizedTarget, scan.id);
+            
+            // Parse Subfinder results
+            if (scanResults.subfinder?.outputFile && scanResults.subfinder.success) {
+              try {
+                const output = await fs.readFile(scanResults.subfinder.outputFile, 'utf-8');
+                const subdomains = output.trim().split('\n').filter(line => line.trim());
+                
+                if (subdomains.length > 0) {
+                  await this.vulnerabilityModel.create(
+                    scan.id,
+                    `Subdomains Discovered: ${subdomains.length} found`,
+                    'info',
+                    `Subfinder discovered ${subdomains.length} subdomains for ${scanResults.subfinder.domain}. This information can be used to map the attack surface.`,
+                    sanitizedTarget.substring(0, 500),
+                    null,
+                    subdomains.slice(0, 10).join(', ') + (subdomains.length > 10 ? '...' : ''),
+                    'Review discovered subdomains for potential security issues.',
+                    null,
+                    null,
+                    'Subfinder'
+                  );
+                  vulnCount++;
+                }
+              } catch (fileError) {
+                console.error('Failed to read Subfinder results:', fileError.message);
+              }
+            }
+            currentProgress += progressPerScanner;
+          }
+
+          // Nikto
+          if (allowedScanners.includes('nikto')) {
+            updateProgress(currentProgress, 'Running Nikto scan...');
+            scanResults.nikto = await scannerService.runNikto(target, scan.id);
+            currentProgress += progressPerScanner;
+          }
+
+          // ZAP
+          if (allowedScanners.includes('zap')) {
+            updateProgress(currentProgress, 'Running ZAP scan...');
+            scanResults.zap = await scannerService.runZap(target, scan.id, updateProgress);
+            currentProgress += progressPerScanner;
+          }
+
+          updateProgress(85, 'Processing results...');
 
           // Parse ZAP results
           if (scanResults.zap?.alerts && scanResults.zap.success) {
@@ -214,8 +268,8 @@ class ScanController {
               );
               vulnCount++;
               
-              // Classify with AI (non-blocking)
-              if (this.aiClassifier) {
+              // Classify with AI only for Enterprise plan
+              if (hasAI && this.aiClassifier) {
                 this.aiClassifier.classifyVulnerability(
                   `${title}: ${alert.description || ''}`
                 ).then(aiResult => {
@@ -232,54 +286,33 @@ class ScanController {
             }
           }
 
-          // Parse Nuclei results
-          if (scanResults.nuclei?.outputFile && scanResults.nuclei.success) {
+          // Parse Nikto results
+          if (scanResults.nikto?.outputFile && scanResults.nikto.success) {
             try {
-              const output = await fs.readFile(scanResults.nuclei.outputFile, 'utf-8');
-              const lines = output.trim().split('\n').filter(l => l.trim());
+              const output = await fs.readFile(scanResults.nikto.outputFile, 'utf-8');
+              const niktoData = JSON.parse(output);
               
-              for (const line of lines) {
-                try {
-                  const vuln = JSON.parse(line);
-                  const title = (vuln.info?.name || vuln['template-id'] || 'Unknown').substring(0, 255);
-                  const severity = vuln.info?.severity || 'info';
-                  
-                  const vulnRecord = await this.vulnerabilityModel.create(
+              if (niktoData.vulnerabilities && Array.isArray(niktoData.vulnerabilities)) {
+                for (const vuln of niktoData.vulnerabilities) {
+                  const severity = vuln.OSVDB && vuln.OSVDB !== '0' ? 'medium' : 'low';
+                  await this.vulnerabilityModel.create(
                     scan.id,
-                    title,
+                    (vuln.msg || 'Nikto Finding').substring(0, 255),
                     severity,
-                    vuln.info?.description?.substring(0, 1000),
-                    vuln.matched_at?.substring(0, 500),
+                    vuln.msg?.substring(0, 1000),
+                    vuln.url?.substring(0, 500) || sanitizedTarget.substring(0, 500),
                     null,
-                    vuln.extracted_results?.join(', ')?.substring(0, 1000),
-                    vuln.info?.remediation?.substring(0, 1000),
-                    vuln.info?.cwe_id?.toString(),
-                    parseFloat(vuln.info?.cvss_score) || null,
-                    'Nuclei'
+                    vuln.method ? `Method: ${vuln.method}` : null,
+                    'Review and remediate the identified issue.',
+                    vuln.OSVDB && vuln.OSVDB !== '0' ? `OSVDB-${vuln.OSVDB}` : null,
+                    null,
+                    'Nikto'
                   );
                   vulnCount++;
-                  
-                  // Classify with AI (non-blocking)
-                  if (this.aiClassifier) {
-                    this.aiClassifier.classifyVulnerability(
-                      `${title}: ${vuln.info?.description || ''}`
-                    ).then(aiResult => {
-                      if (aiResult) {
-                        console.log(`✓ AI: ${title} → ${aiResult.type} (${Math.round(aiResult.confidence * 100)}%)`);
-                        return this.vulnerabilityModel.updateWithAI(vulnRecord.id, aiResult);
-                      }
-                    }).then(updated => {
-                      if (updated) {
-                        console.log(`✅ DB Updated: Vulnerability ${vulnRecord.id} with AI data`);
-                      }
-                    }).catch(err => console.error('❌ AI classification/update error:', err.message));
-                  }
-                } catch (parseError) {
-                  console.error('Failed to parse vulnerability:', parseError.message);
                 }
               }
             } catch (fileError) {
-              console.error('Failed to read scan results:', fileError.message);
+              console.error('Failed to read Nikto results:', fileError.message);
             }
           }
 
@@ -288,7 +321,7 @@ class ScanController {
 
           // Notify admins: scan completed
           await this.notificationModel.notifyAdmins(
-            `Scan #${scan.id} on ${target} completed. Found ${vulnCount} vulnerabilities.`,
+            `Scan #${scan.id} on ${target} completed. Found ${vulnCount} vulnerabilities. [Plan: ${subscription.plan_name}]`,
             'success',
             '✅ Scan Completed'
           );
@@ -329,7 +362,8 @@ class ScanController {
 
   async delete(request, reply) {
     try {
-      const result = await this.scanModel.delete(request.params.id, request.user.id);
+      const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+      const result = await this.scanModel.delete(request.params.id, scanUserId);
 
       if (!result) {
         return reply.code(404).send({ error: 'Scan not found' });
@@ -340,7 +374,7 @@ class ScanController {
 
       // Notify admins: scan deleted
       await this.notificationModel.notifyAdmins(
-        `User #${request.user.id} (${request.user.email}) deleted scan #${request.params.id}.`,
+        `User #${scanUserId} (${request.user.email}) deleted scan #${request.params.id}.`,
         'warning',
         '🗑️ Scan Deleted'
       );
@@ -355,7 +389,8 @@ class ScanController {
   async pause(request, reply) {
     try {
       const scanId = parseInt(request.params.id);
-      const scan = await this.scanModel.findById(scanId, request.user.id);
+      const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+      const scan = await this.scanModel.findById(scanId, scanUserId);
       
       if (!scan) {
         return reply.code(404).send({ error: 'Scan not found' });
@@ -381,7 +416,8 @@ class ScanController {
   async resume(request, reply) {
     try {
       const scanId = parseInt(request.params.id);
-      const scan = await this.scanModel.findById(scanId, request.user.id);
+      const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+      const scan = await this.scanModel.findById(scanId, scanUserId);
       
       if (!scan) {
         return reply.code(404).send({ error: 'Scan not found' });
@@ -407,7 +443,8 @@ class ScanController {
   async stop(request, reply) {
     try {
       const scanId = parseInt(request.params.id);
-      const scan = await this.scanModel.findById(scanId, request.user.id);
+      const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+      const scan = await this.scanModel.findById(scanId, scanUserId);
       
       if (!scan) {
         return reply.code(404).send({ error: 'Scan not found' });
@@ -431,14 +468,15 @@ class ScanController {
   async rerun(request, reply) {
     try {
       const scanId = parseInt(request.params.id);
-      const scan = await this.scanModel.findById(scanId, request.user.id);
+      const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+      const scan = await this.scanModel.findById(scanId, scanUserId);
       
       if (!scan) {
         return reply.code(404).send({ error: 'Scan not found' });
       }
       
       // Create new scan with same target
-      const newScan = await this.scanModel.create(request.user.id, scan.target);
+      const newScan = await this.scanModel.create(scanUserId, scan.target);
       
       // Initialize progress
       scanProgress.set(newScan.id, { progress: 0, message: 'Starting scan...' });

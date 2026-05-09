@@ -298,6 +298,8 @@ function LoginPage() {
         window.location.href = '/dashboard/admin';
       } else if (data.user.role === 'analyst') {
         window.location.href = '/dashboard/analyst';
+      } else if (data.user.role === 'team_member') {
+        window.location.href = '/dashboard/developer';
       } else {
         window.location.href = '/dashboard/developer';
       }

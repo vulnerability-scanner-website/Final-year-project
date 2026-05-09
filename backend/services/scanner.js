@@ -132,6 +132,30 @@ class ScannerService {
     }
   }
 
+  async runSubfinder(target, scanId) {
+    try {
+      // Extract domain from URL
+      let domain = target;
+      try {
+        const url = new URL(target);
+        domain = url.hostname;
+      } catch (e) {
+        // If not a valid URL, assume it's already a domain
+        domain = target.replace(/^https?:\/\//, '').split('/')[0];
+      }
+
+      const outputFile = `/scans/subfinder_${scanId}.json`;
+      const cmd = `docker exec ${this.scannerContainer} sh -c "subfinder -d '${domain}' -json -o ${outputFile} -silent -timeout 3"`;
+
+      console.log(`Running Subfinder on domain: ${domain}`);
+      await execAsync(cmd, { timeout: 60000 }); // 1 min max
+      return { success: true, outputFile, domain };
+    } catch (error) {
+      console.error('Subfinder error:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
   async runNikto(target, scanId) {
     let scanTarget = target;
     if (target.includes('localhost:8080'))  scanTarget = 'dvwa-target:80';

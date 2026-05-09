@@ -4,7 +4,7 @@ import DeveloperSideBar from "@/components/sidebar/DeveloperSideBar/Developer";
 import { useAuth } from "@/lib/useAuth";
 
 export default function DeveloperLayout({ children }) {
-  useAuth('developer');
+  useAuth(['developer', 'team_member']);
   return (
     <div className="flex min-h-screen w-full">
       <DeveloperSideBar />
