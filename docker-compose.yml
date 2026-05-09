@@ -33,6 +33,7 @@ services:
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/security_scanner
       NODE_ENV: development
       FRONTEND_URL: http://localhost:3000
+      COLAB_URL: https://phraseologic-featherly-celina.ngrok-free.dev
     volumes:
       - ./backend:/app
       - /app/node_modules

@@ -215,19 +215,29 @@ class ScanController {
               vulnCount++;
               
               // Classify with AI (non-blocking)
+              console.log(`🤖 Attempting AI classification for vulnerability: ${title}`);
               if (this.aiClassifier) {
+                console.log(`✅ AI Classifier exists, calling classifyVulnerability...`);
                 this.aiClassifier.classifyVulnerability(
                   `${title}: ${alert.description || ''}`
                 ).then(aiResult => {
+                  console.log(`📥 AI Result received:`, aiResult);
                   if (aiResult) {
                     console.log(`✓ AI: ${title} → ${aiResult.type} (${Math.round(aiResult.confidence * 100)}%)`);
                     return this.vulnerabilityModel.updateWithAI(vuln.id, aiResult);
+                  } else {
+                    console.log(`⚠️  AI returned null result for: ${title}`);
                   }
                 }).then(updated => {
                   if (updated) {
                     console.log(`✅ DB Updated: Vulnerability ${vuln.id} with AI data`);
                   }
-                }).catch(err => console.error('❌ AI classification/update error:', err.message));
+                }).catch(err => {
+                  console.error('❌ AI classification/update error:', err.message);
+                  console.error('Full error:', err);
+                });
+              } else {
+                console.log(`❌ AI Classifier not available`);
               }
             }
           }

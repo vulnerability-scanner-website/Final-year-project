@@ -1,6 +1,32 @@
 const bcrypt = require('bcrypt');
 
+// In-memory cache so we don't hit DB on every request
+let maintenanceCache = { enabled: false, lastChecked: 0 };
+
+const getMaintenanceMode = async (pg) => {
+  const now = Date.now();
+  if (now - maintenanceCache.lastChecked < 10000) return maintenanceCache.enabled;
+  const client = await pg.connect();
+  try {
+    const result = await client.query("SELECT data FROM settings WHERE user_id = 0");
+    const enabled = result.rows[0]?.data?.maintenanceMode === true;
+    maintenanceCache = { enabled, lastChecked: now };
+    return enabled;
+  } finally { client.release(); }
+};
+
 module.exports = async function (fastify, opts) {
+
+  // ── Public maintenance check (no auth needed) ──────────────────────────────
+  fastify.get('/admin/settings/maintenance', async (request, reply) => {
+    const enabled = await getMaintenanceMode(fastify.pg);
+    return { maintenanceMode: enabled };
+  });
+
+  // Invalidate cache when settings are saved (called internally)
+  fastify.decorate('invalidateMaintenanceCache', () => {
+    maintenanceCache.lastChecked = 0;
+  });
 
   // ── User Settings (all roles) ──────────────────────────────────────────────
 
@@ -84,6 +110,7 @@ module.exports = async function (fastify, opts) {
         'INSERT INTO settings (user_id, data) VALUES (0, $1) ON CONFLICT (user_id) DO UPDATE SET data = $1',
         [JSON.stringify(request.body)]
       );
+      fastify.invalidateMaintenanceCache();
       return { success: true, message: 'System settings saved' };
     } finally { client.release(); }
   });

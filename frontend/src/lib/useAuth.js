@@ -2,6 +2,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
 export function useAuth(requiredRole = null) {
   const router = useRouter();
 
@@ -16,6 +18,20 @@ export function useAuth(requiredRole = null) {
 
     if (requiredRole && user.role !== requiredRole) {
       router.replace(`/dashboard/${user.role}`);
+      return;
     }
+
+    // Admins bypass maintenance mode
+    if (user.role === 'admin') return;
+
+    // Check maintenance mode for non-admins
+    fetch(`${API}/api/admin/settings/maintenance`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.maintenanceMode) {
+          router.replace('/maintenance');
+        }
+      })
+      .catch(() => {}); // silently fail — don't block on network error
   }, [router, requiredRole]);
 }
