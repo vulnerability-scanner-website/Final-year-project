@@ -7,7 +7,7 @@ import {
   Activity, Bug, CreditCard, UserCheck
 } from "lucide-react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const token = () => localStorage.getItem("token");
 const headers = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${token()}` });

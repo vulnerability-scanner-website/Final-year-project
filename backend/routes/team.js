@@ -11,7 +11,11 @@ module.exports = async function (fastify, opts) {
     const client = await fastify.pg.connect();
     try {
       const subResult = await client.query(
-        `SELECT * FROM subscriptions WHERE user_id = $1 AND status = 'active' AND plan_name = 'Enterprise' ORDER BY created_at DESC LIMIT 1`,
+        `SELECT s.*, p.name as plan_name 
+         FROM subscriptions s 
+         JOIN pricing p ON s.plan_id = p.id 
+         WHERE s.user_id = $1 AND s.status = 'active' AND p.name = 'Enterprise' 
+         ORDER BY s.created_at DESC LIMIT 1`,
         [request.user.id]
       );
 
@@ -40,7 +44,11 @@ module.exports = async function (fastify, opts) {
     const client = await fastify.pg.connect();
     try {
       const subResult = await client.query(
-        `SELECT * FROM subscriptions WHERE user_id = $1 AND status = 'active' AND plan_name = 'Enterprise' ORDER BY created_at DESC LIMIT 1`,
+        `SELECT s.*, p.name as plan_name 
+         FROM subscriptions s 
+         JOIN pricing p ON s.plan_id = p.id 
+         WHERE s.user_id = $1 AND s.status = 'active' AND p.name = 'Enterprise' 
+         ORDER BY s.created_at DESC LIMIT 1`,
         [request.user.id]
       );
 

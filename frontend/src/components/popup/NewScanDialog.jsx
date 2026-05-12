@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
 import UpgradePlanModal from '@/components/popup/UpgradePlanModal';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const FormSchema = z.object({
   scanName:    z.string().min(1, 'Scan name is required').max(100),
@@ -36,13 +36,19 @@ export default function NewScanDialog({ open, onOpenChange, role }) {
       const token = localStorage.getItem('token');
       if (!token) { toast.error('Please login first'); return; }
 
+      const payload = { target: data.targetUrl, scanType: data.scanType };
+      console.log('Sending scan request:', payload);
+      
       const res = await fetch(`${API}/api/scans`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ target: data.targetUrl, scanType: data.scanType }),
+        body: JSON.stringify(payload),
       });
+      
+      console.log('Response status:', res.status);
 
       const result = await res.json();
+      console.log('Response data:', result);
 
       // Free plan limit reached
       if (!res.ok && result.upgrade_required) {
@@ -60,6 +66,7 @@ export default function NewScanDialog({ open, onOpenChange, role }) {
       form.reset();
       onOpenChange(false);
     } catch (error) {
+      console.error('Scan submission error:', error);
       toast.error('Failed to start scan: ' + error.message);
     } finally {
       setSubmitting(false);

@@ -376,19 +376,27 @@ class ScanController {
 
   async delete(request, reply) {
     try {
-      const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
-      const result = await this.scanModel.delete(request.params.id, scanUserId);
-
-      if (!result) {
-        return reply.code(404).send({ error: 'Scan not found' });
+      const scanId = parseInt(request.params.id);
+      
+      // Admin can delete any scan
+      if (request.user.role === 'admin') {
+        const result = await this.scanModel.delete(scanId, 'admin');
+        if (!result) {
+          return reply.code(404).send({ error: 'Scan not found' });
+        }
+      } else {
+        const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+        const result = await this.scanModel.delete(scanId, scanUserId);
+        if (!result) {
+          return reply.code(404).send({ error: 'Scan not found' });
+        }
       }
 
-      scanProgress.delete(parseInt(request.params.id));
-      scanControl.delete(parseInt(request.params.id));
+      scanProgress.delete(scanId);
+      scanControl.delete(scanId);
 
-      // Notify admins: scan deleted
       await this.notificationModel.notifyAdmins(
-        `User #${scanUserId} (${request.user.email}) deleted scan #${request.params.id}.`,
+        `User ${request.user.email} deleted scan #${scanId}.`,
         'warning',
         '🗑️ Scan Deleted'
       );
@@ -403,8 +411,15 @@ class ScanController {
   async pause(request, reply) {
     try {
       const scanId = parseInt(request.params.id);
-      const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
-      const scan = await this.scanModel.findById(scanId, scanUserId);
+      
+      // Admin can pause any scan, others need ownership check
+      let scan;
+      if (request.user.role === 'admin') {
+        scan = await this.scanModel.findById(scanId, 'admin');
+      } else {
+        const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+        scan = await this.scanModel.findById(scanId, scanUserId);
+      }
       
       if (!scan) {
         return reply.code(404).send({ error: 'Scan not found' });
@@ -430,8 +445,15 @@ class ScanController {
   async resume(request, reply) {
     try {
       const scanId = parseInt(request.params.id);
-      const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
-      const scan = await this.scanModel.findById(scanId, scanUserId);
+      
+      // Admin can resume any scan, others need ownership check
+      let scan;
+      if (request.user.role === 'admin') {
+        scan = await this.scanModel.findById(scanId, 'admin');
+      } else {
+        const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+        scan = await this.scanModel.findById(scanId, scanUserId);
+      }
       
       if (!scan) {
         return reply.code(404).send({ error: 'Scan not found' });
@@ -457,8 +479,15 @@ class ScanController {
   async stop(request, reply) {
     try {
       const scanId = parseInt(request.params.id);
-      const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
-      const scan = await this.scanModel.findById(scanId, scanUserId);
+      
+      // Admin can stop any scan, others need ownership check
+      let scan;
+      if (request.user.role === 'admin') {
+        scan = await this.scanModel.findById(scanId, 'admin');
+      } else {
+        const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+        scan = await this.scanModel.findById(scanId, scanUserId);
+      }
       
       if (!scan) {
         return reply.code(404).send({ error: 'Scan not found' });
@@ -482,15 +511,22 @@ class ScanController {
   async rerun(request, reply) {
     try {
       const scanId = parseInt(request.params.id);
-      const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
-      const scan = await this.scanModel.findById(scanId, scanUserId);
+      
+      // Admin can rerun any scan, others need ownership check
+      let scan;
+      if (request.user.role === 'admin') {
+        scan = await this.scanModel.findById(scanId, 'admin');
+      } else {
+        const scanUserId = request.user.role === 'team_member' ? request.user.owner_id : request.user.id;
+        scan = await this.scanModel.findById(scanId, scanUserId);
+      }
       
       if (!scan) {
         return reply.code(404).send({ error: 'Scan not found' });
       }
       
-      // Create new scan with same target
-      const newScan = await this.scanModel.create(scanUserId, scan.target);
+      // Use scan owner's ID for the new scan
+      const newScan = await this.scanModel.create(scan.user_id, scan.target);
       
       // Initialize progress
       scanProgress.set(newScan.id, { progress: 0, message: 'Starting scan...' });

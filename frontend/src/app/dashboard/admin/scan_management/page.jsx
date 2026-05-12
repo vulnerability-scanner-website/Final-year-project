@@ -8,7 +8,7 @@ import { ShieldCheck, Bug, MoreVertical, Eye, Pause, Play, StopCircle, RotateCcw
 import NewScanDialog from "@/components/popup/NewScanDialog";
 import { DashboardHeader } from "@/components/header/header";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const severityClass = (s) => {
   const v = (s || "").toLowerCase();

@@ -29,14 +29,14 @@ export default function PaymentSuccessPage() {
       try {
         const token = localStorage.getItem("token");
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/payments/verify/${tx_ref}`,
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/payments/verify/${tx_ref}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await res.json();
         if (data.success) {
           // Fetch subscription details
           const subRes = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/payments/subscription`,
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/payments/subscription`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           const subData = await subRes.json();

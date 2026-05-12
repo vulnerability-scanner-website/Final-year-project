@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Save, Key, Lock, Bell, User, Loader2 } from "lucide-react";
 import { DashboardHeader } from "@/components/header/header";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function DeveloperSettings() {
   const [user, setUser] = useState({ email: "", role: "" });
