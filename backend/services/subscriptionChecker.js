@@ -78,12 +78,23 @@ class SubscriptionChecker {
 
     const client = await this.pg.connect();
     try {
-      // Count scans this month
-      const scanCount = await client.query(`
-        SELECT COUNT(*) as count
-        FROM scans
-        WHERE user_id = $1 AND created_at >= DATE_TRUNC('month', CURRENT_DATE)
-      `, [userId]);
+      let scanCount;
+      
+      // For Free plan, count scans from the beginning of the month
+      if (subscription.plan_name === 'Free') {
+        scanCount = await client.query(`
+          SELECT COUNT(*) as count
+          FROM scans
+          WHERE user_id = $1 AND created_at >= DATE_TRUNC('month', CURRENT_DATE)
+        `, [userId]);
+      } else {
+        // For paid plans, count scans from subscription start date
+        scanCount = await client.query(`
+          SELECT COUNT(*) as count
+          FROM scans
+          WHERE user_id = $1 AND created_at >= $2
+        `, [userId, subscription.start_date]);
+      }
 
       const used = parseInt(scanCount.rows[0].count);
       const remaining = subscription.scan_limit - used;
@@ -91,7 +102,7 @@ class SubscriptionChecker {
       if (remaining <= 0) {
         return {
           allowed: false,
-          message: `You have reached your monthly scan limit of ${subscription.scan_limit}`,
+          message: `You have reached your scan limit of ${subscription.scan_limit}`,
           used,
           limit: subscription.scan_limit
         };

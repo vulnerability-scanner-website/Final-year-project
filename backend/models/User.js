@@ -81,9 +81,12 @@ class UserModel {
   async create(email, hashedPassword, role = 'user', authProvider = 'local', googleId = null) {
     const client = await this.pg.connect();
     try {
+      // For Google users, use a placeholder password since column is NOT NULL
+      const password = hashedPassword || (authProvider === 'google' ? 'GOOGLE_AUTH_NO_PASSWORD' : null);
+      
       const result = await client.query(
         'INSERT INTO users (email, password, role, status, auth_provider, google_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, role, status, auth_provider, google_id, created_at',
-        [email, hashedPassword, role, 'active', authProvider, googleId]
+        [email, password, role, 'active', authProvider, googleId]
       );
       return result.rows[0];
     } finally {
