@@ -76,6 +76,19 @@ module.exports = async function (fastify, opts) {
     return authController.resetPassword(request, reply);
   });
 
+  // Email verification routes
+  fastify.post('/verify-email', async (request, reply) => {
+    return authController.verifyEmail(request, reply);
+  });
+
+  fastify.get('/verify-email', async (request, reply) => {
+    return authController.verifyEmail(request, reply);
+  });
+
+  fastify.post('/resend-verification', async (request, reply) => {
+    return authController.resendVerification(request, reply);
+  });
+
   // Google OAuth routes
   fastify.get('/google', async (request, reply) => {
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
@@ -117,10 +130,11 @@ module.exports = async function (fastify, opts) {
         headers: { Authorization: `Bearer ${access_token}` }
       });
 
-      const { email, id: googleId } = userInfoResponse.data;
-      console.log('Got user info:', email, googleId);
+      const { email, id: googleId, verified_email } = userInfoResponse.data;
+      console.log('Got user info:', email, googleId, 'verified:', verified_email);
 
-      request.user = { email, googleId };
+      // Google already verifies emails, so we trust them
+      request.user = { email, googleId, verified_email };
       return authController.googleCallback(request, reply);
     } catch (error) {
       console.error('OAuth error:', error.response?.data || error.message);

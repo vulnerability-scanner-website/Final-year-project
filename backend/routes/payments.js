@@ -89,12 +89,44 @@ module.exports = async function (fastify, opts) {
 
     const client = await fastify.pg.connect();
     try {
-      const chapaResponse = await axios.get(
-        `${CHAPA_BASE_URL}/transaction/verify/${tx_ref}`,
-        { headers: { Authorization: `Bearer ${CHAPA_SECRET_KEY}` } }
+      // First check if subscription exists
+      const subCheckResult = await client.query(
+        `SELECT * FROM subscriptions WHERE chapa_tx_ref = $1`,
+        [tx_ref]
       );
 
-      const chapaData = chapaResponse.data.data;
+      if (subCheckResult.rows.length === 0) {
+        console.error('Subscription not found for tx_ref:', tx_ref);
+        return { success: false, error: 'Subscription record not found', status: 'not_found' };
+      }
+
+      // Verify with Chapa
+      let chapaResponse;
+      try {
+        chapaResponse = await axios.get(
+          `${CHAPA_BASE_URL}/transaction/verify/${tx_ref}`,
+          { 
+            headers: { Authorization: `Bearer ${CHAPA_SECRET_KEY}` },
+            timeout: 10000
+          }
+        );
+      } catch (chapaErr) {
+        console.error('Chapa API error:', chapaErr.response?.data || chapaErr.message);
+        // If Chapa API fails, check if subscription is already paid in DB
+        const paidSub = subCheckResult.rows[0];
+        if (paidSub.payment_status === 'paid' || paidSub.status === 'active') {
+          return { success: true, status: 'already_paid', auto_activated: true };
+        }
+        // Return error response instead of 500
+        return { success: false, error: 'Could not verify payment with gateway', status: 'verification_failed' };
+      }
+
+      const chapaData = chapaResponse.data?.data;
+      if (!chapaData) {
+        console.error('Invalid Chapa response format');
+        return { success: false, error: 'Invalid payment gateway response', status: 'invalid_response' };
+      }
+
       const isSuccess = chapaData.status === 'success';
 
       if (isSuccess) {
@@ -151,16 +183,95 @@ module.exports = async function (fastify, opts) {
           }
         }
       } else {
+        // Payment not successful - update subscription status
         await client.query(
           `UPDATE subscriptions SET payment_status = 'failed' WHERE chapa_tx_ref = $1`,
           [tx_ref]
         );
+        console.log('Payment failed. Chapa status:', chapaData.status);
       }
 
       return { success: isSuccess, status: chapaData.status, auto_activated: isSuccess };
     } catch (err) {
-      console.error('Chapa verify error:', err.response?.data || err.message);
-      return reply.code(500).send({ error: 'Payment verification failed' });
+      console.error('Chapa verify error:', err.message);
+      // Return proper error response instead of 500
+      return { success: false, error: 'Payment verification failed', status: 'error' };
+    } finally {
+      client.release();
+    }
+  });
+
+  // Also support POST method for payment verification
+  fastify.post('/payments/verify/:tx_ref', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+    const { tx_ref } = request.params;
+
+    const client = await fastify.pg.connect();
+    try {
+      // First check if subscription exists
+      const subCheckResult = await client.query(
+        `SELECT * FROM subscriptions WHERE chapa_tx_ref = $1`,
+        [tx_ref]
+      );
+
+      if (subCheckResult.rows.length === 0) {
+        console.error('Subscription not found for tx_ref:', tx_ref);
+        return { success: false, error: 'Subscription record not found', status: 'not_found' };
+      }
+
+      // Verify with Chapa
+      let chapaResponse;
+      try {
+        chapaResponse = await axios.get(
+          `${CHAPA_BASE_URL}/transaction/verify/${tx_ref}`,
+          { 
+            headers: { Authorization: `Bearer ${CHAPA_SECRET_KEY}` },
+            timeout: 10000
+          }
+        );
+      } catch (chapaErr) {
+        console.error('Chapa API error:', chapaErr.response?.data || chapaErr.message);
+        const paidSub = subCheckResult.rows[0];
+        if (paidSub.payment_status === 'paid' || paidSub.status === 'active') {
+          return { success: true, status: 'already_paid', auto_activated: true };
+        }
+        return { success: false, error: 'Could not verify payment with gateway', status: 'verification_failed' };
+      }
+
+      const chapaData = chapaResponse.data?.data;
+      if (!chapaData) {
+        console.error('Invalid Chapa response format');
+        return { success: false, error: 'Invalid payment gateway response', status: 'invalid_response' };
+      }
+
+      const isSuccess = chapaData.status === 'success';
+
+      if (isSuccess) {
+        await client.query(
+          `UPDATE subscriptions SET payment_status = 'paid', status = 'active' WHERE chapa_tx_ref = $1`,
+          [tx_ref]
+        );
+
+        const subResult = await client.query(
+          `SELECT s.*, u.id as uid, u.email FROM subscriptions s JOIN users u ON s.user_id = u.id WHERE s.chapa_tx_ref = $1`,
+          [tx_ref]
+        );
+
+        if (subResult.rows.length > 0) {
+          const sub = subResult.rows[0];
+          await client.query(`UPDATE users SET status = 'active' WHERE id = $1 AND status = 'pending'`, [sub.uid]);
+          await client.query(
+            `INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, $4)`,
+            [sub.uid, '✅ Subscription Activated', `Your ${sub.plan_name} plan has been activated!`, 'success']
+          );
+        }
+      } else {
+        await client.query(`UPDATE subscriptions SET payment_status = 'failed' WHERE chapa_tx_ref = $1`, [tx_ref]);
+      }
+
+      return { success: isSuccess, status: chapaData.status, auto_activated: isSuccess };
+    } catch (err) {
+      console.error('Payment verify POST error:', err.message);
+      return { success: false, error: 'Payment verification failed', status: 'error' };
     } finally {
       client.release();
     }
@@ -207,6 +318,38 @@ module.exports = async function (fastify, opts) {
     } catch (err) {
       console.error('Webhook error:', err.message);
       return { received: true };
+    } finally {
+      client.release();
+    }
+  });
+
+  // Get all transactions (admin only)
+  fastify.get('/payments/transactions', { onRequest: [fastify.authenticate] }, async (request, reply) => {
+    if (request.user.role !== 'admin') {
+      return reply.code(403).send({ error: 'Admin access required' });
+    }
+
+    const client = await fastify.pg.connect();
+    try {
+      const result = await client.query(
+        `SELECT s.id, s.user_id, s.plan_id, s.plan_name, s.amount, s.payment_status, s.chapa_tx_ref, s.created_at, u.email as user_email
+         FROM subscriptions s
+         JOIN users u ON s.user_id = u.id
+         ORDER BY s.created_at DESC`
+      );
+
+      const transactions = result.rows;
+
+      // Calculate summary
+      const summary = {
+        totalRevenue: transactions.reduce((sum, t) => sum + (t.payment_status === 'paid' ? parseFloat(t.amount) : 0), 0),
+        totalTransactions: transactions.length,
+        successfulPayments: transactions.filter(t => t.payment_status === 'paid').length,
+        pendingPayments: transactions.filter(t => t.payment_status === 'pending').length,
+        failedPayments: transactions.filter(t => t.payment_status === 'failed').length,
+      };
+
+      return { transactions, summary };
     } finally {
       client.release();
     }
