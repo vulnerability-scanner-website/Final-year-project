@@ -87,10 +87,9 @@ class ScanModel {
   async delete(id, userId) {
     const client = await this.pg.connect();
     try {
-      const result = await client.query(
-        'DELETE FROM scans WHERE id = $1 AND user_id = $2 RETURNING id',
-        [id, userId]
-      );
+      const result = userId === 'admin'
+        ? await client.query('DELETE FROM scans WHERE id = $1 RETURNING id', [id])
+        : await client.query('DELETE FROM scans WHERE id = $1 AND user_id = $2 RETURNING id', [id, userId]);
       return result.rows[0];
     } finally {
       client.release();

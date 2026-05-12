@@ -5,7 +5,7 @@ import { Bug, ShieldCheck, AlertTriangle, Info, RefreshCw, ExternalLink } from "
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/components/header/header";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const SEVERITY_STYLE = {
   critical: "bg-red-500/10 text-red-400 border border-red-500/20",

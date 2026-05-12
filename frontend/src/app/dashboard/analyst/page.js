@@ -9,7 +9,7 @@ import SubscriptionBanner from "@/components/SubscriptionBanner";
 import { DashboardHeader } from "@/components/header/header";
 import { EnterpriseTeamInviteDialog } from "@/components/ui/enterprise-team-invite-dialog";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const ScanItem = ({ icon, title, status, progress, issues, date }) => (
   <div className="mb-4 flex items-center gap-4 last:mb-0">

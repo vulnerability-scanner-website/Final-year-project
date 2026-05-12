@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Check, Zap, Shield, Star, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const PLAN_ICONS = {
   Free:         <Shield className="h-5 w-5 text-white/40" />,

@@ -103,7 +103,7 @@ export default function ReportsDownload() {
     const fetchReports = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/scans`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/scans`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
@@ -167,7 +167,7 @@ export default function ReportsDownload() {
   const handleDownload = async (file) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/scans/${file.scanId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/scans/${file.scanId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const scan = await response.json();

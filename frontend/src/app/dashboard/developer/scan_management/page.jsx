@@ -9,7 +9,7 @@ import NewScanDialog from "@/components/popup/NewScanDialog";
 import UpgradePlanModal from "@/components/popup/UpgradePlanModal";
 import { DashboardHeader } from "@/components/header/header";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const severityClass = (s) => {
   if (s === "critical") return "bg-red-500/10 text-red-400 border border-red-500/20";
@@ -54,7 +54,8 @@ export default function ScanManagement() {
 
   const handleAction = async (action, scanId) => {
     try {
-      const res = await fetch(`${API}/api/scans/${scanId}/${action}`, {
+      const url = action === "delete" ? `${API}/api/scans/${scanId}` : `${API}/api/scans/${scanId}/${action}`;
+      const res = await fetch(url, {
         method: action === "delete" ? "DELETE" : "POST",
         headers: headers(),
       });

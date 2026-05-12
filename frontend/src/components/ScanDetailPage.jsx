@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Download, Shield, Bug, ExternalLink, Loader2 } from "lucide-react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const severityColor = (s) => {
   const v = (s || '').toLowerCase();
